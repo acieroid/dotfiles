@@ -67,6 +67,7 @@
 (define-key *top-map* (kbd "s-n") "pull-hidden-next")
 
 ;;; Dynamic groups
+(load (data-dir-file "dynamic-groups" "lisp"))
 (defun defgroup (name go-key move-key)
   (define-key *top-map* (kbd (format nil "s-~a" go-key))
     (format nil "gswitch ~a" name))
@@ -85,10 +86,10 @@
 (defgroup "0" "*" "0")
 
 ;; Use group "1" as default group
-(add-group "1")
 (setf *default-group-name* "1")
-(kill-group "Default")
-;(gselect (find-group (current-screen) "1"))
+(add-group (current-screen) "1")
+(kill-group (find-group (current-screen) "Default")
+            (find-group (current-screen) "1"))
 
 
 ;; Programs
