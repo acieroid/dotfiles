@@ -1,0 +1,134 @@
+;;;; -*- mode: Lisp; -*-
+(in-package :stumpwm)
+
+(set-contrib-dir "/home/quentin/stumpwm/contrib")
+(load-module "mpd")
+(setf (getenv "SURFRAW_browser") "firefox")
+(load-module "surfraw")
+
+;;; General functions
+(defun multimedia-key (key action)
+  "Define a multimedia key (bind it directly on *top-map*"
+  (define-key *top-map* (kbd key) action))
+
+;;; Slime
+(load "/home/quentin/emacs/slime/swank-loader.lisp")
+(swank-loader:init)
+(defcommand swank () ()
+  (setf *top-level-error-action* :break)
+  (swank:create-server :port 4005
+                      :style swank:*communication-style*
+                      :dont-close t)
+  (echo-string (current-screen) "Starting swank."))
+(define-key *root-map* (kbd "C-s") "swank")
+
+;;; Appearance
+;; Input and message bar
+(setf *message-window-gravity* :center)
+(setf *input-window-gravity* :center)
+(setf *timeout-wait* 1)
+(set-bg-color "red")
+(set-fg-color "white")
+;(set-unfocus-color "gray30")
+(set-font "-*-terminus-*-*-*-*-12-*-*-*-*-*-*-*")
+
+;; Mode line
+(defun shell-to-mode-line (cmd)
+  `(:eval (run-shell-command
+           ,(format nil "~a | head -1 | tr -d [:cntrl:]" cmd) t)))
+
+(setf *screen-mode-line-format*
+      (list
+       (shell-to-mode-line "date")
+       " | [^B%n^b] %W | "
+       (shell-to-mode-line "mpc")))
+
+(setf *mode-line-border-width* 0)
+(setf *mode-line-background-color* "black")
+(setf *mode-line-foreground-color* "white")
+
+(when (not (head-mode-line (current-head)))
+  (toggle-mode-line (current-screen) (current-head)))
+
+;;; Key bindings
+;; Windows and frames
+(defun define-direction (key direction &optional (map *top-map*))
+  (define-key map (kbd (format nil "s-~a" key))
+    (format nil "move-focus ~a" direction))
+  (define-key map (kbd (format nil "s-~a" (string-upcase key)))
+    (format nil "move-window ~a" direction)))
+
+(define-direction "c" "left")
+(define-direction "r" "right")
+(define-direction "s" "up")
+(define-direction "t" "down")
+
+(define-key *top-map* (kbd "s-p") "pull-hidden-previous")
+(define-key *top-map* (kbd "s-n") "pull-hidden-next")
+
+;;; Groups
+(defun defgroup (name go-key move-key)
+  (unless (find name (screen-groups (current-screen))
+                :test (lambda (x y) (string= x (group-name y))))
+    (gnew name))
+  (define-key *top-map* (kbd (format nil "s-~a" go-key))
+    (format nil "gselect ~a" name))
+  (define-key *top-map* (kbd (format nil "s-~a" move-key))
+    (format nil "gmove ~a" name)))
+
+(setf *default-group-name* "1")
+(defgroup "1" "\"" "1")
+(defgroup "2" "guillemotleft" "2")
+(defgroup "3" "guillemotright" "3")
+(defgroup "4" "(" "4")
+(defgroup "5" ")" "5")
+(gselect (find-group (current-screen) "1"))
+
+;; Programs
+(defcommand screenshot (file whole-screen)
+    ((:string "Save image to: ")
+     (:y-or-n "Take the whole screen ? "))
+  (run-shell-command
+   (format nil "import ~:[~;-window root ~]~a" (first whole-screen) file)))
+
+(defcommand screenshot-window (file window-name)
+    ((:string "Save image to: ")
+     (:window-name "Window: "))
+  (let ((window (find window-name (group-windows (current-group))
+                  :test (lambda (x y) (string= x (window-name y))))))
+    (if window
+        (run-shell-command
+         (format nil "import -window 0x~x ~a" (window-id window) file))
+        (message "There's no window named ~a" window-name))))
+
+(defcommand firefox () ()
+  (run-or-raise "firefox" '(:class "Namoroka")))
+
+(define-key *top-map* (kbd "s-P") "exec")
+(define-key *top-map* (kbd "C-s-p") "colon")
+(define-key *top-map* (kbd "s-Return") "exec urxvtc")
+(define-key *root-map* (kbd "f") "firefox")
+(multimedia-key "Print" "screenshot")
+
+;; Audio
+(mpd-connect)
+
+(defcommand oss-volup (&optional (step 5))
+    ((:number "Increase volume by: "))
+  (run-shell-command (format nil "ossvol -i ~a" step)))
+(defcommand oss-voldown (&optional (step 5))
+    ((:number "Decrease volume by: "))
+  (run-shell-command (format nil "ossvol -d ~a" step)))
+(defcommand oss-toggle-mute () ()
+  (run-shell-command "ossvol -t"))
+
+(multimedia-key "XF86AudioPlay" "mpd-toggle-pause")
+(multimedia-key "XF86AudioNext" "mpd-next")
+(multimedia-key "XF86AudioPrev" "mpd-prev")
+(multimedia-key "XF86AudioRaiseVolume" "oss-volup 5")
+(multimedia-key "XF86AudioLowerVolume" "oss-voldown 5")
+(multimedia-key "XF86AudioMute" "oss-toggle-mute")
+
+;;; Debug
+(setf *debug-level* 100)
+(redirect-all-output (data-dir-file "debug-output" "txt"))
