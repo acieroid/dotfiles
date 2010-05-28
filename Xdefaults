@@ -1,7 +1,7 @@
 urxvt*.background: black
 urxvt*.foreground: white
 urxvt*.scrollBar: off
-urxvt*.font: xft:Deja Vu Sans Mono:pixelsize=12
+urxvt*.font: xft:Deja Vu Sans Mono:pixelsize=14
 urxvt*.underlineURLs: true
 urxvt*.perl-ext: selection,matcher
 urxvt*.urlLauncher: firefox

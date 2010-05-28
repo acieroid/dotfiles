@@ -15,7 +15,7 @@
 (set-background-color "black")
 
 ; Font
-(set-face-attribute 'default nil :height 120 :font "inconsolata")
+;(set-face-attribute 'default nil :height 120 :font "inconsolata")
 
 
 ; Show column number in modeline

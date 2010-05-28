@@ -66,23 +66,30 @@
 (define-key *top-map* (kbd "s-p") "pull-hidden-previous")
 (define-key *top-map* (kbd "s-n") "pull-hidden-next")
 
-;;; Groups
+;;; Dynamic groups
 (defun defgroup (name go-key move-key)
-  (unless (find name (screen-groups (current-screen))
-                :test (lambda (x y) (string= x (group-name y))))
-    (gnew name))
   (define-key *top-map* (kbd (format nil "s-~a" go-key))
-    (format nil "gselect ~a" name))
+    (format nil "gswitch ~a" name))
   (define-key *top-map* (kbd (format nil "s-~a" move-key))
-    (format nil "gmove ~a" name)))
+    (format nil "gmove-create ~a" name)))
 
-(setf *default-group-name* "1")
 (defgroup "1" "\"" "1")
 (defgroup "2" "guillemotleft" "2")
 (defgroup "3" "guillemotright" "3")
 (defgroup "4" "(" "4")
 (defgroup "5" ")" "5")
-(gselect (find-group (current-screen) "1"))
+(defgroup "6" "@" "6")
+(defgroup "7" "+" "7")
+(defgroup "8" "-" "8")
+(defgroup "9" "/" "9")
+(defgroup "0" "*" "0")
+
+;; Use group "1" as default group
+(add-group "1")
+(setf *default-group-name* "1")
+(kill-group "Default")
+;(gselect (find-group (current-screen) "1"))
+
 
 ;; Programs
 (defcommand screenshot (file whole-screen)
@@ -130,5 +137,5 @@
 (multimedia-key "XF86AudioMute" "oss-toggle-mute")
 
 ;;; Debug
-(setf *debug-level* 100)
-(redirect-all-output (data-dir-file "debug-output" "txt"))
+;(setf *debug-level* 100)
+;(redirect-all-output (data-dir-file "debug-output" "txt"))
