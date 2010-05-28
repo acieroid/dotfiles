@@ -1,0 +1,4 @@
+setkey "up" s
+setkey "down" t
+setkey "eob" G
+setkey "bob" g

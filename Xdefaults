@@ -1,0 +1,11 @@
+urxvt*.background: black
+urxvt*.foreground: white
+urxvt*.scrollBar: off
+urxvt*.font: xft:Deja Vu Sans Mono:pixelsize=12
+urxvt*.underlineURLs: true
+urxvt*.perl-ext: selection,matcher
+urxvt*.urlLauncher: firefox
+
+urxvt.keysym.Shift-Up: command:\033]720;5\007
+urxvt.keysym.Shift-Down: command:\033]721;5\007
+urxvt*.keysym.C-o: perl:matcher 

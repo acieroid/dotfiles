@@ -1,0 +1,84 @@
+# Police
+#deffont -*-terminus-*-*-*-*-*-*-*-*-*-*-*-*
+#set font -xos4-terminus-medium-r-normal-*-*-140-*-*-c-*-iso8859-1
+
+# Espaces
+set padding 0 14 0 0
+set border 0
+set barpadding 0 0 0 0
+#set fgcolor white
+#set bgcolor black
+
+# Pour éviter de killer des fenetre en se trompant
+unbind k
+
+# binding disparu ?
+bind semicolon colon exec 
+
+# Lancement de commandes
+definekey top s-Return exec urxvtc
+definekey top s-g exec uzbl 
+# TODO: demander l'url/recherche à ouvrir
+
+# Contrôle de mpd
+# Voir la gestion det touches multimédia
+definekey top s-b exec mpc toggle 
+# definekey top s-B exec mpc pause
+definekey top s-eacute exec mpc stop
+definekey top s-O exec mpc prev
+definekey top s-o exec mpc next
+# definekey top s-l exec mpc volume -10
+# definekey top s-j exec mpc volume +10
+# 
+# Gestion des bureaux
+exec rpws init 5 -k
+definekey top s-F1 exec rpws 1
+definekey top s-F2 exec rpws 2
+definekey top s-F3 exec rpws 3
+definekey top s-F4 exec rpws 4
+definekey top s-F5 exec rpws 5
+
+# Gestion des fenêtres
+definekey top s-c focusleft
+definekey top s-C exchangeleft
+definekey top s-t focusdown
+definekey top s-T exchangedown
+definekey top s-s focusup
+definekey top s-S exchangeup
+definekey top s-r focusright
+definekey top s-R exchangeright
+
+definekey top s-q delete
+definekey top s-Q kill
+
+definekey top s-n next
+definekey top s-p prev
+
+definekey top s-m vsplit
+definekey top s-M hsplit
+
+# Gérer le layout
+definekey top s-i only
+definekey top s-u undo
+
+
+# Les toucher multimédias 
+definekey top XF86AudioMute exec .ratpoison/togglemute.sh
+definekey top XF86AudioNext exec mpc next
+definekey top XF86AudioPrev exec mpc prev
+definekey top XF86AudioPlay exec mpc toggle
+definekey top XF86AudioRaiseVolume exec amixer set Master 2dB+
+definekey top XF86AudioLowerVolume exec amixer set Master 2dB-
+
+# Aliases
+alias loadrc exec ratpoison -c "modeline-stop" ; exec ratpoison -c "source /home/quentin/.ratpoisonrc" 
+alias cal exec ratpoison -d :0 -c "echo `cal`"
+alias screenshot colon exec import -window root 
+alias modeline-start exec ratpoison -c "set padding 0 16 0 0" ; exec /home/quentin/bin/statusbar
+alias modeline-stop exec ratpoison -c "set padding 0 0 0 0" ; exec killall statusbar
+
+# Commandes au démarrage
+exec urxvtd -q -f -o & # Le démon d'urxvt
+exec xset -b & # Désactive le bip de x
+modeline-start
+
