@@ -1,6 +1,5 @@
 (in-package :stumpwm)
 
-;;; TODO: destroy group when last window moved
 (defun spawn-group (name &key window
                               (screen (current-screen))
                               (background-p t))

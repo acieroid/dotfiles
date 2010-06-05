@@ -79,6 +79,14 @@
 	    (unless (slime-connected-p)
 	      (save-excursion (slime)))))
 
+(eval-after-load "slime"
+  '(progn
+     (define-key slime-repl-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
+     (define-key slime-repl-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)
+     (define-key slime-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
+     (define-key slime-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)))
+
+
 ; Auto-indent in some modes
 (defun set-newline-and-indent ()
   (local-set-key (kbd "RET") 'newline-and-indent))
