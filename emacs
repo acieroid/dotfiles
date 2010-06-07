@@ -1,4 +1,4 @@
-;;;; -*- mode: emacs-lisp -*-
+y;;;; -*- mode: emacs-lisp -*-
 ;;;; vim: ft=lisp
 ;;;; Useful functions
 (defcustom emacs-personal-dir (concat (getenv "HOME") "/emacs/")
@@ -116,7 +116,6 @@
 
 (add-to-list 'load-path (in-personal-dir "tuareg/"))
 (add-to-list 'auto-mode-alist '("\\.ml\\w?" . tuareg-mode))
-;(setq auto-mode-alist (cons '("\\.ml\\w?" . tuareg-mode) auto-mode-alist))
 (autoload 'tuareg-mode "tuareg" "Major mode for editing Caml code" t)
 (autoload 'camldebug "camldebug" "Run the Caml debugger" t)
 
@@ -148,9 +147,14 @@
          (backward-list 1))
         (t (self-insert-command (or arg 1)))))
 ; Disable transient-mark
-(when (transient-mark-mode)
-  (transient-mark-mode))
+;(when (transient-mark-mode)
+;  (transient-mark-mode))
 
 
 (require 'mercurial)
 
+;;; Org mode
+(add-to-list 'load-path (in-personal-dir "org-mode/"))
+(require 'org-install)
+(add-to-list 'auto-mode-alist '("\\.org" . tuareg-mode))
+(global-font-lock-mode t)
