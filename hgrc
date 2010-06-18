@@ -1,0 +1,8 @@
+[extensions]
+hgext.bookmarks =
+hggit =
+pager =
+color =
+
+[ui]
+username = acieroid

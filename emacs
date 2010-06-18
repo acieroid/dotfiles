@@ -1,4 +1,4 @@
-y;;;; -*- mode: emacs-lisp -*-
+;;;; -*- mode: emacs-lisp -*-
 ;;;; vim: ft=lisp
 ;;;; Useful functions
 (defcustom emacs-personal-dir (concat (getenv "HOME") "/emacs/")
@@ -15,7 +15,7 @@ y;;;; -*- mode: emacs-lisp -*-
 (set-background-color "black")
 
 ; Font
-;(set-face-attribute 'default nil :height 120 :font "inconsolata")
+(set-face-attribute 'default nil :height 90); :font "inconsolata")
 
 
 ; Show column number in modeline
@@ -146,15 +146,15 @@ y;;;; -*- mode: emacs-lisp -*-
         ((looking-at "\\s\)") (forward-char 1)
          (backward-list 1))
         (t (self-insert-command (or arg 1)))))
-; Disable transient-mark
-;(when (transient-mark-mode)
-;  (transient-mark-mode))
 
 
+
+;;; Some practical plugins
 (require 'mercurial)
+(require 'org)
 
-;;; Org mode
-(add-to-list 'load-path (in-personal-dir "org-mode/"))
-(require 'org-install)
-(add-to-list 'auto-mode-alist '("\\.org" . tuareg-mode))
-(global-font-lock-mode t)
+;;; Paredit in lisp, elisp and scheme mode
+(require 'paredit)
+(add-hook 'lisp-mode-common-hook 'paredit-mode)
+(add-hook 'emacs-lisp-mode-hook 'paredit-mode)
+(add-hook 'scheme-mode-hook 'paredit-mode)
