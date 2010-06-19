@@ -22,6 +22,12 @@
   (echo-string (current-screen) "Starting swank."))
 (define-key *root-map* (kbd "C-s") "swank")
 
+;;; Use emacsclient as editor, launch emacs --daemon at startup
+(run-shell-command "emacs --daemon") ; It'll do nothing if it's already running
+(defcommand emacs () ()
+  "Start emacs unless it is already running, in which case focus it."
+  (run-or-raise "emacs" '(:class "Emacs")))
+
 ;;; Appearance
 ;; Input and message bar
 (setf *message-window-gravity* :center)
