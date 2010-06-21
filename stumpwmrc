@@ -36,7 +36,7 @@
 (set-bg-color "red")
 (set-fg-color "white")
 ;(set-unfocus-color "gray30")
-(set-font "-*-terminus-*-*-*-*-12-*-*-*-*-*-*-*")
+(set-font "-*-erusfont-medium-*-*-*-*-*-*-*-*-*-*-*")
 
 ;; Mode line
 (defun shell-to-mode-line (cmd)
