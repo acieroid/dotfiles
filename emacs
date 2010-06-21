@@ -141,6 +141,16 @@
 (require 'mercurial)
 (require 'org)
 
+;;; Paredit in lisp, elisp and scheme mode
+(require 'paredit)
+(add-hook 'lisp-mode-common-hook 'paredit-mode)
+(add-hook 'emacs-lisp-mode-hook 'paredit-mode)
+(add-hook 'scheme-mode-hook 'paredit-mode)
+
+;;; iswitchb
+(require 'iswitchb)
+(iswitchb-default-keybindings)
+
 ;;; Copy the region
 (defun x-copy-region ()
   (interactive)
