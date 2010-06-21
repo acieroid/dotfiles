@@ -26,7 +26,7 @@
 (run-shell-command "emacs --daemon") ; It'll do nothing if it's already running
 (defcommand emacs () ()
   "Start emacs unless it is already running, in which case focus it."
-  (run-or-raise "emacs" '(:class "Emacs")))
+  (run-or-raise "emacsclient -c" '(:class "Emacs")))
 
 ;;; Appearance
 ;; Input and message bar
@@ -96,7 +96,6 @@
 (add-group (current-screen) "1")
 (kill-group (find-group (current-screen) "Default")
             (find-group (current-screen) "1"))
-
 
 ;; Programs
 (defcommand screenshot (file whole-screen)

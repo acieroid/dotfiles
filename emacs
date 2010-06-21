@@ -19,6 +19,7 @@
         (set-foreground-color "white")
         (set-background-color "black"))))
 (add-hook 'after-make-frame-functions 'my-set-display-for-windowed-frames)
+(my-set-display-for-windowed-frames (selected-frame))
 
 ;;; Font
 (set-face-attribute 'default nil :height 90)
