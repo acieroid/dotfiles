@@ -158,3 +158,7 @@
 (add-hook 'lisp-mode-common-hook 'paredit-mode)
 (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
 (add-hook 'scheme-mode-hook 'paredit-mode)
+
+;;; iswitchb
+(require 'iswitchb)
+(iswitchb-default-keybindings)
