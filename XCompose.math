@@ -1,0 +1,13 @@
+<Multi_key> <8> : U221E # oo
+<Multi_key> <b> <c> : U2102 # |C
+<Multi_key> <b> <d> : U210D # |H
+<Multi_key> <b> <n> : U2115 # |N
+<Multi_key> <b> <p> : U2119 # |P
+<Multi_key> <b> <q> : U211A # |Q
+<Multi_key> <b> <r> : U211D # |R
+<Multi_key> <b> <z> : U2114 # |Z
+<Multi_key> <d> <e> <l> : U2202 # del
+<Multi_key> <v> <a> : U2200 # pour tout
+<Multi_key> <v> <e> : U2203 # il existe
+<Multi_key> <v> <v> : U221A # racine
+<Multi_key> <e> <q> : U2248 # approx
