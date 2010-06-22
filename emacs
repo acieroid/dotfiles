@@ -7,19 +7,14 @@
   "Give the path of a file/directory in the EMACS-PERSONAL-DIR"
   (concat emacs-personal-dir dir))
 
+;;; Directory where all single .el files will be placed
+(add-to-list 'load-path (in-personal-dir "elisp/"))
+
 ;;;; Appearence
-;;; Colors
-(defun my-set-display-for-windowed-frames (frame)
-  "Set display parameters for the current frame the way I like them."
-  (select-frame frame)
-  (if (window-system frame)
-      (progn
-        (set-mouse-color "white")
-        (set-cursor-color "white")
-        (set-foreground-color "white")
-        (set-background-color "black"))))
-(add-hook 'after-make-frame-functions 'my-set-display-for-windowed-frames)
-(my-set-display-for-windowed-frames (selected-frame))
+;;; Zenburn as color theme
+(require 'color-theme)
+(require 'zenburn)
+(color-theme-zenburn)
 
 ;;; Font
 (set-face-attribute 'default nil :height 90)
@@ -97,7 +92,6 @@
 (add-hook 'lisp-mode-hook 'set-newline-and-indent)
 
 ;;; Scheme
-(add-to-list 'load-path (in-personal-dir "elisp/"))
 (require 'quack)
 
 ;;; Ocaml
@@ -158,3 +152,4 @@
          (proc (start-process "xsel" nil "xsel" "-i")))
     (send-region proc (region-beginning) (region-end))
     (process-send-eof proc)))
+
