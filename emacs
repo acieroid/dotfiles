@@ -87,9 +87,8 @@
      (define-key slime-repl-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
      (define-key slime-repl-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)
      (define-key slime-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
-     (define-key slime-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)))
-
-(add-hook 'lisp-mode-hook 'set-newline-and-indent)
+     (define-key slime-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)
+     (paredit-mode)))
 
 ;;; Scheme
 (require 'quack)
@@ -118,6 +117,7 @@
 (add-hook 'lisp-mode-common-hook 'paredit-mode)
 (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
 (add-hook 'scheme-mode-hook 'paredit-mode)
+
 (require 'paren)
 (unless (show-paren-mode)
   (show-paren-mode))
