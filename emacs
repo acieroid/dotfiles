@@ -112,9 +112,9 @@
 (add-hook 'c-mode-common-hook 'set-newline-and-indent)
 
 ;;; arc
-(add-to-list 'load-path (in-personal-dir "arc/"))
-(add-to-list 'auto-mode-alist '("\\.arc" . arc-mode))
-(autoload 'arc-mode "inferior-arc" "Major mode for editing arc code" t)
+;(add-to-list 'load-path (in-personal-dir "arc/"))
+;(add-to-list 'auto-mode-alist '("\\.arc" . arc-mode))
+;(autoload 'arc-mode "inferior-arc" "Major mode for editing arc code" t)
 
 ;;; emacs lisp
 (add-hook 'emacs-lisp-mode-hook 'set-newline-and-indent)
@@ -138,7 +138,7 @@
         (t (self-insert-command (or arg 1)))))
 
 ;;; Some practical plugins
-(require 'mercurial)
+;(require 'mercurial)
 (require 'org)
 
 ;;; Paredit in lisp, elisp and scheme mode

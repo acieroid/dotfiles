@@ -5,9 +5,7 @@ syn on
 set number
 
 " Indentation
-set cindent
 set expandtab
-set ai
 set ts=2
 set sw=2
 "autocmd BufRead,BufNewFile *.c set cindent

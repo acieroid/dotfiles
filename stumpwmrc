@@ -6,6 +6,11 @@
 (setf (getenv "SURFRAW_browser") "firefox")
 (load-module "surfraw")
 
+(defun seq-butlast (seq &optional (n 1))
+  (subseq seq 0 (- (length seq) n)))
+
+(defvar *os* (intern (seq-butlast (run-shell-command "uname -s" t))))
+
 ;;; General functions
 (defun multimedia-key (key action)
   "Define a multimedia key (bind it directly on *top-map*"
@@ -128,10 +133,23 @@
 
 (defcommand oss-volup (&optional (step 5))
     ((:number "Increase volume by: "))
-  (run-shell-command (format nil "ossvol -i ~a" step)))
+  (run-shell-command
+   (format nil
+	   (case *os*
+	     ('|Linux| "ossvol -i ~a")
+	     ('|FreeBSD| "mixer vol +~a"))
+	   step)))
+
 (defcommand oss-voldown (&optional (step 5))
     ((:number "Decrease volume by: "))
-  (run-shell-command (format nil "ossvol -d ~a" step)))
+  (run-shell-command
+   (format nil
+	   (case *os*
+	     ('|Linux| "ossvol -d ~a")
+	     ('|FreeBSD| "mixer vol -~a"))
+	   step)))
+
+;; TODO: FreeBSD
 (defcommand oss-toggle-mute () ()
   (run-shell-command "ossvol -t"))
 

@@ -1,7 +1,8 @@
 " vim: ft=vim
 source ~/.vimrc.bepo
 map bb :emenu Delicious.Save a new Bookmark...<CR>
-map ^R :forward<CR>
+map c :forward<CR>
+unmap <F1> 
 
 "http://vimperator.org/trac/ticket/343
 :set editor="urxvt -e vim"

@@ -1,0 +1,25 @@
+# vim: ft=sh
+cd # To avoid being in /usr/$HOME
+
+set -o emacs
+
+export PS1='${PWD/#$HOME/\~} $ '
+
+alias rm='rm -I'
+alias mv='mv -i'
+alias cp='cp -i'
+alias ls='ls -FG'
+alias ll='ls -lh'
+
+bind -m '^L'="clear^M"
+
+alias irc='ssh -C acieroid@foobar -p 42022 -t screen -Udr'
+
+export PAGER=most
+export EMAIL=acieroid@awesom.eu
+export PATH=$PATH:/usr/sbin:/sbin/:~/bin
+
+if [ $TERM = "rxvt-unicode" ]
+then
+  export TERM=rxvt
+fi
