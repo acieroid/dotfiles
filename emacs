@@ -81,14 +81,15 @@
 	  (lambda ()
 	    (unless (slime-connected-p)
 	      (save-excursion (slime)))))
+(add-hook 'slime-mode-hook 'paredit-mode)
+(add-hook 'slime-repl-mode-hook 'paredit-mode)
 
 (eval-after-load "slime"
   '(progn
      (define-key slime-repl-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
      (define-key slime-repl-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)
      (define-key slime-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
-     (define-key slime-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)
-     (paredit-mode)))
+     (define-key slime-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)))
 
 ;;; Scheme
 (require 'quack)
@@ -135,16 +136,6 @@
 ;(require 'mercurial)
 (require 'org)
 
-;;; Paredit in lisp, elisp and scheme mode
-(require 'paredit)
-(add-hook 'lisp-mode-common-hook 'paredit-mode)
-(add-hook 'emacs-lisp-mode-hook 'paredit-mode)
-(add-hook 'scheme-mode-hook 'paredit-mode)
-
-;;; iswitchb
-(require 'iswitchb)
-(iswitchb-default-keybindings)
-
 ;;; Copy the region
 (defun x-copy-region ()
   (interactive)
@@ -153,3 +144,7 @@
     (send-region proc (region-beginning) (region-end))
     (process-send-eof proc)))
 
+;;; ido
+(require 'ido)
+(ido-mode t)
+(setq ido-enable-flex-matching t)

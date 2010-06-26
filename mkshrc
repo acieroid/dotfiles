@@ -10,6 +10,7 @@ alias mv='mv -i'
 alias cp='cp -i'
 alias ls='ls -FG'
 alias ll='ls -lh'
+alias grep='grep --color=auto'
 
 bind -m '^L'="clear^M"
 
