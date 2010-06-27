@@ -8,4 +8,4 @@ urxvt*.urlLauncher: firefox
 
 urxvt.keysym.Shift-Up: command:\033]720;5\007
 urxvt.keysym.Shift-Down: command:\033]721;5\007
-urxvt*.keysym.C-o: perl:matcher 
+urxvt*.keysym.C-o: perl:matcher

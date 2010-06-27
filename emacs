@@ -54,6 +54,20 @@
 (auto-fill-mode)
 (setq fill-colum 80)
 
+;;; Parenthese stuff
+(require 'paredit)
+
+(require 'paren)
+(show-paren-mode t)
+(setq blink-matching-paren nil)
+
+(defun goto-match-paren (arg)
+  (interactive "p")
+  (cond ((looking-at "\\s\(") (forward-list 1) (backward-char
+                                                1))
+        ((looking-at "\\s\)") (forward-char 1)
+         (backward-list 1))
+        (t (self-insert-command (or arg 1)))))
 
 ;;; Auto-indent
 (defun set-newline-and-indent ()
@@ -82,7 +96,11 @@
 	    (unless (slime-connected-p)
 	      (save-excursion (slime)))))
 (add-hook 'slime-mode-hook 'paredit-mode)
+(add-hook 'slime-mode-hook
+          (lambda () (local-set-key (kbd "RET") 'paredit-newline)))
 (add-hook 'slime-repl-mode-hook 'paredit-mode)
+(add-hook 'slime-repl-mode-hook
+          (lambda () (local-set-key (kbd "RET") 'paredit-newline)))
 
 (eval-after-load "slime"
   '(progn
@@ -112,26 +130,7 @@
 
 ;;; emacs lisp
 (add-hook 'emacs-lisp-mode-hook 'set-newline-and-indent)
-
-;;; Parenthese stuff
-(require 'paredit)
-(add-hook 'lisp-mode-common-hook 'paredit-mode)
 (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
-(add-hook 'scheme-mode-hook 'paredit-mode)
-
-(require 'paren)
-(unless (show-paren-mode)
-  (show-paren-mode))
-(setq blink-matching-paren nil)
-
-(defun goto-match-paren (arg)
-  (interactive "p")
-  (cond ((looking-at "\\s\(") (forward-list 1) (backward-char
-                                                1))
-        ((looking-at "\\s\)") (forward-char 1)
-         (backward-list 1))
-        (t (self-insert-command (or arg 1)))))
-
 ;;; Some practical plugins
 ;(require 'mercurial)
 (require 'org)
