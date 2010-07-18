@@ -28,10 +28,9 @@
 (define-key *root-map* (kbd "C-s") "swank")
 
 ;;; Use emacsclient as editor, launch emacs --daemon at startup
-(run-shell-command "emacs --daemon") ; It'll do nothing if it's already running
 (defcommand emacs () ()
   "Start emacs unless it is already running, in which case focus it."
-  (run-or-raise "emacsclient -c" '(:class "Emacs")))
+  (run-or-raise "emacs" '(:class "Emacs")))
 
 ;;; Appearance
 ;; Input and message bar
@@ -46,7 +45,7 @@
 ;; Mode line
 (defun shell-to-mode-line (cmd)
   `(:eval (run-shell-command
-           ,(format nil "~a | head -1 | tr -d [:cntrl:]" cmd) t)))
+           ,(format nil "~a | head -1 | tr -d '[:cntrl:]'" cmd) t)))
 
 (setf *screen-mode-line-format*
       (list

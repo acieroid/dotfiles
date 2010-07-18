@@ -85,7 +85,8 @@
 (setq inferior-lisp-program "sbcl")
 (setq slime-lisp-implementations
       `((sbcl ("sbcl"))
-        (clisp ("clisp"))))
+        (clisp ("clisp"))
+        (ecl ("ecl"))))
 (add-to-list 'load-path (in-personal-dir "slime/"))
 (require 'slime-autoloads)
 (slime-setup '(slime-repl slime-c-p-c slime-editing-commands slime-asdf))
@@ -95,10 +96,10 @@
 	  (lambda ()
 	    (unless (slime-connected-p)
 	      (save-excursion (slime)))))
-(add-hook 'slime-mode-hook 'paredit-mode)
+(add-hook 'slime-mode-hook (lambda () (paredit-mode t)))
 (add-hook 'slime-mode-hook
           (lambda () (local-set-key (kbd "RET") 'paredit-newline)))
-(add-hook 'slime-repl-mode-hook 'paredit-mode)
+(add-hook 'slime-repl-mode-hook (lambda () (paredit-mode t)))
 (add-hook 'slime-repl-mode-hook
           (lambda () (local-set-key (kbd "RET") 'paredit-newline)))
 
