@@ -85,7 +85,8 @@
 (setq inferior-lisp-program "sbcl")
 (setq slime-lisp-implementations
       `((sbcl ("sbcl"))
-        (clisp ("clisp"))))
+        (clisp ("clisp"))
+        (ecl ("ecl"))))
 (add-to-list 'load-path (in-personal-dir "slime/"))
 (require 'slime-autoloads)
 (slime-setup '(slime-repl slime-c-p-c slime-editing-commands slime-asdf))
@@ -131,9 +132,6 @@
 ;;; emacs lisp
 (add-hook 'emacs-lisp-mode-hook 'set-newline-and-indent)
 (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
-;;; Some practical plugins
-;(require 'mercurial)
-(require 'org)
 
 ;;; Copy the region
 (defun x-copy-region ()
@@ -147,3 +145,45 @@
 (require 'ido)
 (ido-mode t)
 (setq ido-enable-flex-matching t)
+
+;;; Org mode
+(require 'org)
+(setq org-export-html-style-include-default nil)
+(setq org-export-html-style
+"<style type=\"text/css\">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  body { width: 75%; margin-left: auto; margin-right: auto; }
+  .title  { text-align: center; font-weight: normal; margin-top: 2.8em; font-size: 200%;}
+  a { text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .author, .date, .creator { color: gray; font-style: italic; text-align: right; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+  border: 1pt solid #AEBDCC;
+  background-color: #F3F5F7;
+  padding: 5pt;
+  font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>")

@@ -28,10 +28,9 @@
 (define-key *root-map* (kbd "C-s") "swank")
 
 ;;; Use emacsclient as editor, launch emacs --daemon at startup
-(run-shell-command "emacs --daemon") ; It'll do nothing if it's already running
 (defcommand emacs () ()
   "Start emacs unless it is already running, in which case focus it."
-  (run-or-raise "emacsclient -c" '(:class "Emacs")))
+  (run-or-raise "emacs" '(:class "Emacs")))
 
 ;;; Appearance
 ;; Input and message bar
@@ -69,6 +68,13 @@
   (define-key map (kbd (format nil "s-~a" (string-upcase key)))
     (format nil "move-window ~a" direction)))
 
+(defcommand fullscreen () ()
+  (if (null (cdr (head-frames (current-group) (current-head))))
+      (restore-from-file "/tmp/stumpwm-group")
+      (progn
+        (dump-group-to-file "/tmp/stumpwm-group")
+        (only))))
+
 (define-direction "c" "left")
 (define-direction "r" "right")
 (define-direction "s" "up")
@@ -76,6 +82,8 @@
 
 (define-key *top-map* (kbd "s-p") "pull-hidden-previous")
 (define-key *top-map* (kbd "s-n") "pull-hidden-next")
+
+(define-key *top-map* (kbd "s-o") "fullscreen")
 
 ;;; Dynamic groups
 (load (data-dir-file "dynamic-groups" "lisp"))
@@ -120,7 +128,7 @@
         (message "There's no window named ~a" window-name))))
 
 (defcommand firefox () ()
-  (run-or-raise "firefox" '(:class "Namoroka")))
+  (run-or-raise "firefox" '(:class "Firefox")))
 
 (define-key *top-map* (kbd "s-P") "exec")
 (define-key *top-map* (kbd "C-s-p") "colon")
@@ -136,8 +144,8 @@
   (run-shell-command
    (format nil
 	   (case *os*
-	     ('|Linux| "ossvol -i ~a")
-	     ('|FreeBSD| "mixer vol +~a"))
+	     (|Linux| "ossvol -i ~a")
+	     (|FreeBSD| "mixer vol +~a"))
 	   step)))
 
 (defcommand oss-voldown (&optional (step 5))
@@ -145,20 +153,36 @@
   (run-shell-command
    (format nil
 	   (case *os*
-	     ('|Linux| "ossvol -d ~a")
-	     ('|FreeBSD| "mixer vol -~a"))
+	     (|Linux| "ossvol -d ~a")
+	     (|FreeBSD| "mixer vol -~a"))
 	   step)))
 
-;; TODO: FreeBSD
-(defcommand oss-toggle-mute () ()
-  (run-shell-command "ossvol -t"))
+(let ((last-volume 0))
+  (defcommand oss-toggle-mute () ()
+    (case *os*
+      (|Linux| (run-shell-command "ossvol -t"))
+      (|FreeBSD| (let ((volume 
+                          (parse-integer 
+                           (run-shell-command 
+                            "mixer vol | cut -d: -f2" t))))
+                     (run-shell-command 
+                      (format nil "mixer vol ~a" last-volume))
+                     (setf last-volume volume))))))
 
 (multimedia-key "XF86AudioPlay" "mpd-toggle-pause")
+(multimedia-key "XF86AudioPause" "mpd-toggle-pause")
 (multimedia-key "XF86AudioNext" "mpd-next")
 (multimedia-key "XF86AudioPrev" "mpd-prev")
 (multimedia-key "XF86AudioRaiseVolume" "oss-volup 5")
 (multimedia-key "XF86AudioLowerVolume" "oss-voldown 5")
 (multimedia-key "XF86AudioMute" "oss-toggle-mute")
+(multimedia-key "s-b" "mpd-toggle-pause")
+(multimedia-key "s-B" "mpd-stop")
+(multimedia-key "s-eacute" "mpd-next")
+(multimedia-key "s-Eacute" "mpd-prev")
+(multimedia-key "s-DEL" "oss-volup 5")
+(multimedia-key "S-s-DEL" "oss-voldown 5")
+(multimedia-key "s-SPC" "oss-toggle-mute")
 
 ;;; Debug
 ;(setf *debug-level* 100)
