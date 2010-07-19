@@ -96,10 +96,10 @@
 	  (lambda ()
 	    (unless (slime-connected-p)
 	      (save-excursion (slime)))))
-(add-hook 'slime-mode-hook 'paredit-mode)
+(add-hook 'slime-mode-hook (lambda () (paredit-mode t)))
 (add-hook 'slime-mode-hook
           (lambda () (local-set-key (kbd "RET") 'paredit-newline)))
-(add-hook 'slime-repl-mode-hook 'paredit-mode)
+(add-hook 'slime-repl-mode-hook (lambda () (paredit-mode t)))
 (add-hook 'slime-repl-mode-hook
           (lambda () (local-set-key (kbd "RET") 'paredit-newline)))
 

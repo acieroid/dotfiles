@@ -1,78 +1,66 @@
-# Some useful modules
-autoload -U compinit promptinit
-
 # completion
+autoload -U compinit
 compinit
-zstyle ':completion:*:descriptions' format '%U%B%d%b%u'
-zstyle ':completion:*:warnings' format 'No results for: %d%b'
-zstyle ':completion:*' menu select=2
-zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
-
-zstyle ':completion:*:rm:*' ignore-line yes
-zstyle ':completion:*:mv:*' ignore-line yes
-zstyle ':completion:*:cp:*' ignore-line yes
-
 autoload -U bashcompinit
 bashcompinit
 
-# commands corrections 
-# really annoying -> deactivate
-#setopt correctall
+zstyle ':completion:*:descriptions' format '%B%d%b%u'
+zstyle ':completion:*:warnings' format '%BNo results for %d%b'
+zstyle ':completion:*' menu select=2
+zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
+zstyle ':completion:*:rm:*' ignore-line yes
+zstyle ':completion:*:mv:*' ignore-line yes
+zstyle ':completion:*:cp:*' ignore-line yes
+zstyle ':completion:*:processes' command 'ps aux | grep $USER'
+zstyle ':completion:*:*:kill:*:processes' menu yes select
+zstyle ':completion:*:kill:*' force-list always
+zstyle ':completion:*:cd:*' ignore-parents parent pwd
 
-# prompt
-autoload colors ; colors
-promptinit
-export RPROMPT=""
-export PS1="%{${fg[green]%}%}%~%{${fg[white]%}%} %% "
-export PS2="... "
-
-# some useful aliases
-alias ls='ls --color=auto -F -G'
-alias ec='emacsclient'
-alias irc='ssh -D 1080 -C acieroid@foobar -p 443 -t screen -Udr'
+# aliases
+case `uname -s` in
+  FreeBSD) alias ls='ls -FG';;
+  Linux) alias ls='ls -F --color=auto';;
+esac
 alias grep='grep --color=auto'
-alias jamendo='mpc listall | grep Jamendo | cut -d - -f 1 | uniq'
-alias mpca='mpc --format "[%artist% - %title% - %album%]|[%file%]"'
 alias rm='rm -I'
+alias mv='mv -i'
+alias cp='cp -i'
+alias irc='ssh -C acieroid@foobar -p 42022 -t screen -Udr'
 
-# History
-export HISTSIZE=1000 
-export HISTFILE="$HOME/.history"
-export SAVEHIST=$HISTSIZE
-setopt hist_ignore_all_dups # Avoid same commands
-setopt hist_ignore_space # Don't save if the first char is space
-
-# extended globs
-setopt extendedglob
-
-# turn of the beep
-setopt nobeep
-
-# emacs like keybindings
-bindkey -e
-
-# Turn off line editor in emacs (uses emacs shell mode's instead)
-[[ $EMACS = t ]] && unsetopt zle
-
-# download a album from jamendo (doesn't seem to work anymore)
-function jamendl {
-  wget "http://www.jamendo.com/get/album/id/album/archiverestricted/redirect/$1/?p2pnet=bittorrent&are=ogg3"
-}
-
-# some variables more or less usefull
-export EDITOR=vim
+# variables
 export PAGER=most
 export EMAIL=acieroid@awesom.eu
-export PATH=$PATH:/usr/sbin/:/sbin/:~/bin:/usr/pkg/bin:/usr/pkg/sbin:/usr/local/bin
-export LANG="en_US.UTF-8"
-export LC_ALL=$LANG
-export TERM=rxvt
-export GDFONTPATH=/usr/share/fonts/TTF/
-export BROWSER="elinks"
+export PATH=$PATH:/usr/sbin:/sbin:$HOME/bin
+export HISTFILE=~/.history
+export HISTSIZE=10000
+export SAVEHIST=$HISTSIZE
 
-export CLOJURE_HOME=/var/abs/local/clj/clojure
-export CLJ_CLASSPATH=.:/var/abs/local/clj/clojure/clojure.jar:/usr/share/clojure/clojure-contrib.jar
-export ERLANG_HOME=/home/quentin/pkg/erlang
-export PATH=$PATH:/home/quentin/pkg/erlang/nitrogen/support
+# terminal name
+if [ $TERM = "rxvt-unicode" ]; then
+  export TERM="rxvt"
+fi
 
-sudo() { su -c "$*" }
+# settings
+setopt hist_ignore_space
+setopt hist_reduce_blanks
+setopt hist_ignore_all_dups
+setopt nohup
+setopt transient_rprompt
+setopt append_history
+
+# prompt
+autoload colors
+colors
+
+function precmd {
+
+if [ `id -u` -eq 0 ]; then
+  local dircol="%{${fg_no_bold[red]}%}"
+else
+  local dircol="%{${fg_no_bold[green]}%}"
+fi
+
+export PS1="${dircol}%}%~%{${reset_color}%} %% "
+export PS2="... "
+export RPS1=`date +"%H:%M:%S"`
+}

@@ -45,7 +45,7 @@
 ;; Mode line
 (defun shell-to-mode-line (cmd)
   `(:eval (run-shell-command
-           ,(format nil "~a | head -1 | tr -d [:cntrl:]" cmd) t)))
+           ,(format nil "~a | head -1 | tr -d '[:cntrl:]'" cmd) t)))
 
 (setf *screen-mode-line-format*
       (list
