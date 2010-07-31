@@ -141,10 +141,10 @@
     (send-region proc (region-beginning) (region-end))
     (process-send-eof proc)))
 
-;;; ido
-(require 'ido)
-(ido-mode t)
-(setq ido-enable-flex-matching t)
+;;; lusty-explorer
+(require 'lusty-explorer)
+(global-set-key (kbd "C-x C-f") 'lusty-file-explorer)
+(global-set-key (kbd "C-x b") 'lusty-buffer-explorer)
 
 ;;; Org mode
 (require 'org)

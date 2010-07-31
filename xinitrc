@@ -1,7 +1,7 @@
 #!/bin/sh
 DEFAULTWM="/home/quentin/stumpwm/stumpwm"
 urxvtd -q -f -o &
-#setxkbmap -option compose:menu
+setxkbmap -option compose:menu
 xset -b
 xset r on
 xmodmap ~/.xmodmaprc
