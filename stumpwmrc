@@ -69,11 +69,12 @@
     (format nil "move-window ~a" direction)))
 
 (defcommand fullscreen () ()
-  (if (null (cdr (head-frames (current-group) (current-head))))
-      (restore-from-file "/tmp/stumpwm-group")
-      (progn
-        (dump-group-to-file "/tmp/stumpwm-group")
-        (only))))
+  (let ((group-file (format nil "/tmp/stumpwm-group-~a" (group-name (current-group)))))
+    (if (null (cdr (head-frames (current-group) (current-head))))
+        (restore-from-file group-file)
+        (progn
+          (dump-group-to-file group-file)
+          (only)))))
 
 (define-direction "c" "left")
 (define-direction "r" "right")
@@ -128,7 +129,10 @@
         (message "There's no window named ~a" window-name))))
 
 (defcommand firefox () ()
-  (run-or-raise "firefox" '(:class "Firefox")))
+  (run-or-raise "firefox" `(:class
+                            ,(case *os*
+                              (|FreeBSD| "Firefox")
+                              (|Linux| "Namoroka")))))
 
 (define-key *top-map* (kbd "s-P") "exec")
 (define-key *top-map* (kbd "C-s-p") "colon")
