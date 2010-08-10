@@ -56,11 +56,13 @@ function precmd {
 
 if [ `id -u` -eq 0 ]; then
   local dircol="%{${fg_no_bold[red]}%}"
+  local sign="#"
 else
   local dircol="%{${fg_no_bold[green]}%}"
+  local sign="$"
 fi
 
-export PS1="${dircol}%}%~%{${reset_color}%} %% "
+export PS1="${dircol}%}%~%{${reset_color}%} ${sign} "
 export PS2="... "
-export RPS1=`date +"%H:%M:%S"`
+export RPS1="`hostname`"
 }
