@@ -10,6 +10,12 @@
 ;;; Directory where all single .el files will be placed
 (add-to-list 'load-path (in-personal-dir "elisp/"))
 
+;;; Save session on exit
+(desktop-save-mode 1)
+
+;;; Initial scratch message
+(setq initial-scratch-message nil)
+
 ;;;; Appearence
 ;;; Zenburn as color theme
 (require 'color-theme)
@@ -40,6 +46,9 @@
 
 ;;; Non-blinking cursor
 (blink-cursor-mode -1)
+
+;;; Don't show the mark
+(transient-mark-mode -1)
 
 ;;; Replace "yes-or-no" by "y-or-n"
 (fset 'yes-or-no-p 'y-or-n-p)
