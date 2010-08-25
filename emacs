@@ -10,9 +10,6 @@
 ;;; Directory where all single .el files will be placed
 (add-to-list 'load-path (in-personal-dir "elisp/"))
 
-;;; Initial scratch message
-(setq initial-scratch-message nil)
-
 ;;;; Appearence
 ;;; Zenburn as color theme
 (require 'color-theme)
@@ -44,9 +41,6 @@
 ;;; Non-blinking cursor
 (blink-cursor-mode -1)
 
-;;; Don't show the mark
-(transient-mark-mode -1)
-
 ;;; Replace "yes-or-no" by "y-or-n"
 (fset 'yes-or-no-p 'y-or-n-p)
 
@@ -74,6 +68,8 @@
         ((looking-at "\\s\)") (forward-char 1)
          (backward-list 1))
         (t (self-insert-command (or arg 1)))))
+
+(global-set-key (kbd "C-%") 'goto-match-paren)
 
 ;;; Auto-indent
 (defun set-newline-and-indent ()
@@ -139,13 +135,6 @@
 (add-hook 'emacs-lisp-mode-hook 'set-newline-and-indent)
 (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
 
-;; haskell mode
-(add-to-list 'load-path (in-personal-dir "haskellmode-emacs/"))
-(add-to-list 'auto-mode-alist '("\\.hs" . haskell-mode))
-(autoload 'haskell-mode "haskell-site-file" "Haskell mode" t)
-(add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
-(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-
 ;;; Copy the region
 (defun x-copy-region ()
   (interactive)
@@ -161,7 +150,9 @@
 
 ;;; Org mode
 (require 'org)
+(require 'htmlize)                      ; For syntax highlighting
 (setq org-export-html-style-include-default nil)
+(add-hook 'org-mode-hook (lambda () (auto-fill-mode t)))
 (setq org-export-html-style
 "<style type=\"text/css\">
  <!--/*--><![CDATA[/*><!--*/
@@ -179,8 +170,8 @@
   .timestamp-kwd { color: #5f9ea0; }
   p.verse { margin-left: 3% }
   pre {
-  border: 1pt solid #AEBDCC;
-  background-color: #F3F5F7;
+  background-color: #000000;
+  color: #ffffff;
   padding: 5pt;
   font-family: courier, monospace;
         font-size: 90%;
@@ -200,4 +191,3 @@
                                  font-weight:bold; }
   /*]]>*/-->
 </style>")
-

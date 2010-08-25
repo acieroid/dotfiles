@@ -1,6 +1,6 @@
 [extensions]
 hgext.bookmarks =
-#hggit =
+hggit =
 pager =
 color =
 
