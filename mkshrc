@@ -4,6 +4,7 @@ cd # To avoid being in /usr/$HOME
 set -o emacs
 
 export PS1='${PWD/#$HOME/\~} $ '
+export HISTFILE='~/.mksh-history'
 
 alias rm='rm -I'
 alias mv='mv -i'

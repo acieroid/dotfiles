@@ -37,14 +37,6 @@ map! ii <Esc>
 " F1 is really annoying when pressed accidentally instead of escape
 map! <F1> <Esc>
 
-" for slimv
-let g:slimv_repl_split = 0
-let g:slimv_repl_open = 0
-let g:slimv_impl = 'sbcl-rlwrapped'
-let g:slimv_client = 'python ~/.vim/ftplugin/slimv.py -l sbcl-rlwrapped' 
-let g:slimv_clhs_root = 'file:/usr/share/doc/HyperSpec/'
-let g:lisp_rainbow = 1
-
 " Other stuff
 au BufRead,BufNewFile *.arc setf arc 
 au BufRead,BufNewFile Makefile set noexpandtab

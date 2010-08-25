@@ -34,6 +34,7 @@ export PATH=$PATH:/usr/sbin:/sbin:$HOME/bin
 export HISTFILE=~/.history
 export HISTSIZE=10000
 export SAVEHIST=$HISTSIZE
+export WORDCHARS=${WORDCHARS:s,/,,} # to have an emacs-like backward-kill-word
 
 # terminal name
 if [ $TERM = "rxvt-unicode" ]; then
