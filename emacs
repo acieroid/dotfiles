@@ -10,6 +10,9 @@
 ;;; Directory where all single .el files will be placed
 (add-to-list 'load-path (in-personal-dir "elisp/"))
 
+;;; Initial scratch mesage
+(setq initial-scratch-message nil)
+
 ;;;; Appearence
 ;;; Zenburn as color theme
 (require 'color-theme)
@@ -40,6 +43,9 @@
 
 ;;; Non-blinking cursor
 (blink-cursor-mode -1)
+
+;;; Don't show the region (C-SPC-SPC to see it)
+(transiant-mark-mode -1)
 
 ;;; Replace "yes-or-no" by "y-or-n"
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -134,6 +140,13 @@
 ;;; emacs lisp
 (add-hook 'emacs-lisp-mode-hook 'set-newline-and-indent)
 (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
+
+;;; haskell mode
+(add-to-list 'load-path (in-personal-dir "haskellmode-emacs/"))
+(add-to-list 'auto-mode-alist '("\\.hs" . haskell-mode))
+(autoload 'haskell-mode "haskell-site-file" "Haskell mode" t)
+(add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
+(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
 
 ;;; Copy the region
 (defun x-copy-region ()
