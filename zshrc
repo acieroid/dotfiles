@@ -25,7 +25,10 @@ alias grep='grep --color=auto'
 alias rm='rm -I'
 alias mv='mv -i'
 alias cp='cp -i'
-alias irc='ssh -C acieroid@foobar -p 42022 -t screen -Udr'
+alias i='ssh -C acieroid@awesom.eu -p 42022 -t screen -Udr'
+alias s='ssh -C admin@awesom.eu -p 25022'
+alias h='ssh -C acieroid@ks -p 21022'
+alias m='ssh -C acieroid@foo.awesom.eu -p 42022 -t screen -Udr'
 
 # variables
 export PAGER=most

@@ -47,11 +47,17 @@
   `(:eval (run-shell-command
            ,(format nil "~a | head -1 | tr -d '[:cntrl:]'" cmd) t)))
 
+(defun sysctl-value (name)
+  (shell-to-mode-line (format nil "sysctl ~a | cut -d' ' -f2" name)))
+
 (setf *screen-mode-line-format*
       (list
-       (shell-to-mode-line "date")
-       " | [^B%n^b] %W | "
-       (shell-to-mode-line "mpc")))
+       "^B^2*" (shell-to-mode-line "date +%H:%M:%S") "^n | "
+       "^B^3*[%n]^n | "
+       "^B^4*" (shell-to-mode-line "uptime") "^n |"
+       "^B^5* " (sysctl-value "dev.amdtemp.0.sensor0.core0") "^n |"
+       "^B^1* ♪ " (shell-to-mode-line "mpc -f '%artist% - %title% - %album%'") "^n | "
+       ))
 
 (setf *mode-line-border-width* 0)
 (setf *mode-line-background-color* "black")
@@ -68,7 +74,7 @@
   (define-key map (kbd (format nil "s-~a" (string-upcase key)))
     (format nil "move-window ~a" direction)))
 
-(defcommand fullscreen () ()
+(defcommand my-fullscreen () ()
   (let ((group-file (format nil "/tmp/stumpwm-group-~a" (group-name (current-group)))))
     (if (null (cdr (head-frames (current-group) (current-head))))
         (restore-from-file group-file)
@@ -84,7 +90,7 @@
 (define-key *top-map* (kbd "s-p") "pull-hidden-previous")
 (define-key *top-map* (kbd "s-n") "pull-hidden-next")
 
-(define-key *top-map* (kbd "s-o") "fullscreen")
+(define-key *top-map* (kbd "s-o") "my-fullscreen")
 
 ;;; Dynamic groups
 (load (data-dir-file "dynamic-groups" "lisp"))
