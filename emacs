@@ -45,7 +45,7 @@
 (blink-cursor-mode -1)
 
 ;;; Don't show the region (C-SPC-SPC to see it)
-(transiant-mark-mode -1)
+(transient-mark-mode -1)
 
 ;;; Replace "yes-or-no" by "y-or-n"
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -139,14 +139,14 @@
 
 ;;; emacs lisp
 (add-hook 'emacs-lisp-mode-hook 'set-newline-and-indent)
-(add-hook 'emacs-lisp-mode-hook 'paredit-mode)
+;(add-hook 'emacs-lisp-mode-hook 'paredit-mode)
 
 ;;; haskell mode
 (add-to-list 'load-path (in-personal-dir "haskellmode-emacs/"))
 (add-to-list 'auto-mode-alist '("\\.hs" . haskell-mode))
 (autoload 'haskell-mode "haskell-site-file" "Haskell mode" t)
 (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
-(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+(add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
 
 ;;; Copy the region
 (defun x-copy-region ()
@@ -204,3 +204,15 @@
                                  font-weight:bold; }
   /*]]>*/-->
 </style>")
+(custom-set-variables
+  ;; custom-set-variables was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+ '(quack-programs (quote ("racket" "bigloo" "csi" "csi -hygienic" "gosh" "gsi" "gsi ~~/syntax-case.scm -" "guile" "kawa" "mit-scheme" "mred -z" "mzscheme" "mzscheme -il r6rs" "mzscheme -il typed-scheme" "mzscheme -M errortrace" "mzscheme3m" "mzschemecgc" "rs" "scheme" "scheme48" "scsh" "sisc" "stklos" "sxi"))))
+(custom-set-faces
+  ;; custom-set-faces was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+ )
