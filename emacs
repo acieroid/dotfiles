@@ -139,14 +139,14 @@
 
 ;;; emacs lisp
 (add-hook 'emacs-lisp-mode-hook 'set-newline-and-indent)
-(add-hook 'emacs-lisp-mode-hook 'paredit-mode)
+;(add-hook 'emacs-lisp-mode-hook 'paredit-mode)
 
 ;;; haskell mode
 (add-to-list 'load-path (in-personal-dir "haskellmode-emacs/"))
 (add-to-list 'auto-mode-alist '("\\.hs" . haskell-mode))
 (autoload 'haskell-mode "haskell-site-file" "Haskell mode" t)
 (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
-(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+(add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
 
 ;;; Copy the region
 (defun x-copy-region ()
@@ -208,4 +208,4 @@
 ;;; URLs
 (setq browse-url-browser-function 'browse-url-firefox
       browse-url-new-window-flag  t
-      browse-url-firefox-new-window-is-tab t)
+      browse-url-firefox-new-window-is-tab t)=======
