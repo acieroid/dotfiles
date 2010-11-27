@@ -45,7 +45,7 @@
 (blink-cursor-mode -1)
 
 ;;; Don't show the region (C-SPC-SPC to see it)
-(transiant-mark-mode -1)
+(transient-mark-mode -1)
 
 ;;; Replace "yes-or-no" by "y-or-n"
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -97,7 +97,7 @@
         (ecl ("ecl"))))
 (add-to-list 'load-path (in-personal-dir "slime/"))
 (require 'slime-autoloads)
-(slime-setup '(slime-repl slime-c-p-c slime-editing-commands slime-asdf))
+(slime-setup '(slime-repl slime-c-p-c slime-editing-commands slime-asdf slime-scratch))
 
 (setq slime-complete-symbol-function 'slime-complete-symbol*)
 (add-hook 'slime-mode-hook
@@ -204,3 +204,8 @@
                                  font-weight:bold; }
   /*]]>*/-->
 </style>")
+
+;;; URLs
+(setq browse-url-browser-function 'browse-url-firefox
+      browse-url-new-window-flag  t
+      browse-url-firefox-new-window-is-tab t)

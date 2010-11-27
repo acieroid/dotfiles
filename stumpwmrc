@@ -194,6 +194,8 @@
 (multimedia-key "S-s-DEL" "oss-voldown 5")
 (multimedia-key "s-SPC" "oss-toggle-mute")
 
+;;; Yakuake-like terminal, define show-term and hide-term
+(load (data-dir-file "sliding-terminal" "lisp"))
 ;;; Debug
 ;(setf *debug-level* 100)
 ;(redirect-all-output (data-dir-file "debug-output" "txt"))
