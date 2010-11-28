@@ -196,6 +196,16 @@
 
 ;;; Yakuake-like terminal, define show-term and hide-term
 (load (data-dir-file "sliding-terminal" "lisp"))
+
 ;;; Debug
 ;(setf *debug-level* 100)
 ;(redirect-all-output (data-dir-file "debug-output" "txt"))
+
+;;; Run or raise matlab
+(defcommand matlab () ()
+  (let ((matlab-group (find-group (current-screen) "matlab")))
+    (if matlab-group
+        (gselect matlab-group)
+      (progn
+        (gnew-float "matlab")
+        (run-shell-command "/home/quentin/matlab/bin/matlab -desktop")))))
