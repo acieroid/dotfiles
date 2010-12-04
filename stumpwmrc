@@ -134,11 +134,11 @@
          (format nil "import -window 0x~x ~a" (window-id window) file))
         (message "There's no window named ~a" window-name))))
 
+(defvar *firefox-class* `(:class ,(case *os*
+                                        (|FreeBSD| "Firefox")
+                                        (|Linux| "Namoroka"))))
 (defcommand firefox () ()
-  (run-or-raise "firefox" `(:class
-                            ,(case *os*
-                              (|FreeBSD| "Firefox")
-                              (|Linux| "Namoroka")))))
+  (run-or-raise "firefox" *firefox-class*))
 
 (define-key *top-map* (kbd "s-P") "exec")
 (define-key *top-map* (kbd "C-s-p") "colon")
@@ -199,3 +199,15 @@
 ;;; Debug
 ;(setf *debug-level* 100)
 ;(redirect-all-output (data-dir-file "debug-output" "txt"))
+
+;;; Open a man page
+(defcommand man (name)
+    ((:string "Which man page do you want to consult ? "))
+  (run-shell-command (concat "urxvt -e man " name)))
+
+;;; Fill in the *deny-raise-request* with firefox and octave's windows
+(push '(:title "Figure 1") *deny-raise-request*)
+(push *firefox-class* *deny-raise-request*)
+
+;;; Fill in the *deny-map-request* with firefox
+(push *firefox-class* *deny-map-request*)
