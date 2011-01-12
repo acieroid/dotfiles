@@ -63,8 +63,9 @@
 (setf *mode-line-background-color* "black")
 (setf *mode-line-foreground-color* "white")
 
-(when (not (head-mode-line (current-head)))
-  (toggle-mode-line (current-screen) (current-head)))
+;; Not using the modeline anymore, see below
+#|(when (not (head-mode-line (current-head)))
+  (toggle-mode-line (current-screen) (current-head)))|#
 
 ;;; Key bindings
 ;; Windows and frames
@@ -80,7 +81,9 @@
         (restore-from-file group-file)
         (progn
           (dump-group-to-file group-file)
-          (only)))))
+          (only)))
+    ;; don't get into dzen's window
+    (resize-head 0 0 15 1280 1004)))
 
 (define-direction "c" "left")
 (define-direction "r" "right")
@@ -137,8 +140,9 @@
 (defvar *firefox-class* `(:class ,(case *os*
                                         (|FreeBSD| "Firefox")
                                         (|Linux| "Namoroka"))))
+(defvar *firefox-role* '(:role "browser"))
 (defcommand firefox () ()
-  (run-or-raise "firefox" *firefox-class*))
+  (run-or-raise "firefox" *firefox-role*))
 
 (define-key *top-map* (kbd "s-P") "exec")
 (define-key *top-map* (kbd "C-s-p") "colon")
@@ -207,7 +211,113 @@
 
 ;;; Fill in the *deny-raise-request* with firefox and octave's windows
 (push '(:title "Figure 1") *deny-raise-request*)
-(push *firefox-class* *deny-raise-request*)
+(push *firefox-role* *deny-raise-request*)
 
 ;;; Fill in the *deny-map-request* with firefox
-(push *firefox-class* *deny-map-request*)
+(push *firefox-role* *deny-map-request*)
+
+;;; dzen2 as a modeline
+(defvar *dzen-bg* "#000")
+(defvar *dzen-fg* "#fff")
+(defvar *dzen-height* "15")
+(defvar *dzen-font* "fixed")
+(defvar *dzen-alignment* "l") ;; l for left, r for right, c for center
+(defvar *dzen-separator* " | ")
+
+(defparameter *dzen-format*
+  `((:group
+     (:color "#3FF") (:string "[")
+     (:fun ,#'(lambda () (group-name (current-group))))
+     (:string "]"))
+    (:group
+     (:color "#F99")
+     (:exec "date"))
+    (:group
+     (:color "#9F9")
+     (:icon "/home/quentin/.stumpwm.d/xbm/wifi_02.xbm")
+     (:exec "ifconfig wlan0 | sed -n 's/.*inet \\(.*\\) netmask.*/\\1/p'"))
+    (:group
+     (:color "#F22")
+     (:icon "/home/quentin/.stumpwm.d/xbm/cpu.xbm")
+     (:sysctl "dev.amdtemp.0.sensor0.core0"))
+    (:group
+     (:color "#AAF")
+     (:icon "/home/quentin/.stumpwm.d/xbm/note.xbm")
+     (:exec "mpc -f '[%artist% - %title% - %album% - %date% - %time%]|[%file%]'"))))
+
+(defun interpret-dzen-format (fmt)
+  (case (first fmt)
+    (:group (let ((res (mapcar #'interpret-dzen-format (rest fmt))))
+              (format nil "~{~a~}^fg(white)" res)))
+    (:exec (let* ((res (run-shell-command (second fmt) t))
+                  (newline-pos (position #\Newline res)))
+             (if newline-pos
+                 (subseq res 0 newline-pos)
+                 res)))
+    (:color (format nil "^fg(~a)" (second fmt)))
+    (:fun (apply (second fmt) (cddr fmt)))
+    (:string (second fmt))
+    (:icon (format nil "^i(~a) " (second fmt)))
+    (:sysctl
+     (interpret-dzen-format
+      `(:exec ,(format nil "sysctl ~a | cut -d' ' -f2"
+                       (second fmt)))))))
+
+(defun get-mode-line-str ()
+  (format nil (concat "~{~a~#[~:;" *dzen-separator* "~]~}")
+          (mapcar #'interpret-dzen-format *dzen-format*)))
+
+(defvar *dzen-process* nil)
+(defun launch-dzen2 ()
+  (sb-thread:make-thread
+   (lambda ()
+     (resize-head 0 0 15 1280 (- 1024 15)) ;; TODO: something more adapted
+     (let ((process (sb-ext:run-program "dzen2"
+                                        (list "-bg" *dzen-bg* "-fg" *dzen-fg*
+                                              "-h" *dzen-height* "-fn" *dzen-font*
+                                              "-ta" *dzen-alignment*)
+                                        :input :stream
+                                        :wait nil
+                                        :search t
+                                        :output *standard-output*)))
+       (setf *dzen-process* process)
+       ;; TODO: when dzen get killed, stop the loop
+       (with-open-stream (input (sb-ext:process-input process))
+         (handler-case
+             (loop while (sb-ext:process-alive-p process) do
+                  (princ (get-mode-line-str) input)
+                  (terpri input)
+                  (force-output input)
+                  (sleep 1))
+           (sb-int:simple-stream-error () (message "foo"))))))))
+
+(defun kill-dzen2 ()
+  (when *dzen-process*
+    ;; Send the TERM signal
+    (sb-ext:process-kill *dzen-process* 15)
+    (setf *dzen-process* nil)
+    (resize-head 0 0 0 1280 1024)))
+
+(defun toggle-dzen2 ()
+  (if *dzen-process*
+      (kill-dzen2)
+      (launch-dzen2)))
+
+(defcommand dzen () ()
+  (toggle-dzen2))
+
+(defun resize-head (number x y width height)
+  "Resize head number `number' to given dimension."
+  (let* ((screen (current-screen))
+        (oh (find number (screen-heads screen) :key 'head-number))
+        (nh (make-head :number number
+                       :x x :y y
+                       :width width
+                       :height height
+                       :window nil)))
+    (scale-head screen oh nh)
+    (mapc 'group-add-head (screen-groups screen))
+    (update-mode-lines screen)))
+
+
+(launch-dzen2)

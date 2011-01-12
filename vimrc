@@ -8,11 +8,12 @@ set number
 set expandtab
 set ts=2
 set sw=2
+
 "autocmd BufRead,BufNewFile *.c set cindent
 "autocmd BufRead,BufNewFile *.h set cindent
 
 " Status Line :
-set statusline=%F%m%r%h%w\ %{&ff}\ %Y\ hex:0x\%02.2B\ pos:%0l,%0v\ [%p%%] 
+set statusline=%F%m%r%h%w\ %{&ff}\ %Y\ hex:0x\%02.2B\ pos:%0l,%0v\ [%p%%]
 set laststatus=2
 
 " aspell with .text files
@@ -43,3 +44,8 @@ au BufRead,BufNewFile Makefile set noexpandtab
 set mouse=
 set nocompatible
 set ttyfast
+set listchars=eol:↵,tab:⇥␣
+set list!
+set backspace=2
+map <F1> :set number!<CR>
+
