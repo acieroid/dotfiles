@@ -1,4 +1,5 @@
 ;;;; -*- mode: Lisp; -*-
+;;;; vim: ft=lisp
 (in-package :stumpwm)
 
 (set-contrib-dir "/home/quentin/stumpwm/contrib")
@@ -238,3 +239,13 @@
 
 (when (not (dzen-process))
   (dzen))
+
+;;; Matlab
+(defcommand matlab () ()
+  "Run or raise matlab"
+  (let ((matlab-group (find-group (current-screen) "matlab")))
+    (if matlab-group
+        (gselect matlab-group)
+      (progn
+        (gnew-float "matlab")
+        (run-shell-command "/home/quentin/matlab/bin/matlab -desktop")))))>>>>>>> other
