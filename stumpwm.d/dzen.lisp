@@ -40,7 +40,7 @@
                     (- (head-height (current-head)) *dzen-height*))
        (let ((process (sb-ext:run-program "dzen2"
                                           (list "-bg" *dzen-bg* "-fg" *dzen-fg*
-                                                "-h" (format nil *dzen-height*)
+                                                "-h" (format nil "~d" *dzen-height*)
                                                 "-fn" *dzen-font*
                                                 "-ta" *dzen-alignment*)
                                           :input :stream

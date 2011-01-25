@@ -55,7 +55,7 @@
 
 ;;; Saves all backup files in one dir
 (setq backup-by-copying t
-      backup-directory-alist '(("." (in-personal-dir "backups/")))
+      backup-directory-alist `(("." . ,(in-personal-dir "backups/")))
       delete-old-versions t)
 
 ;;; Auto-fill set to 80 columns
