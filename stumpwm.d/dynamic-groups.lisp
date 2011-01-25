@@ -27,3 +27,11 @@ exist yet"
   "Move the current window to the group TO-GROUP, creating it if it
 doesn't exist yet"
   (spawn-group to-group :window (current-window)))
+
+(defun defgroup (name go-key move-key)
+  "Define a group named NAME, bind the key GO-KEY to switch to this
+group, bind the key MOVE-KEY to send the current window to this group"
+  (define-key *top-map* (kbd (format nil "s-~a" go-key))
+    (format nil "gswitch ~a" name))
+  (define-key *top-map* (kbd (format nil "s-~a" move-key))
+    (format nil "gmove-create ~a" name)))

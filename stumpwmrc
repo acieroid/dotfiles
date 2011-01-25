@@ -7,6 +7,7 @@
 (load-module "surfraw")
 
 (defun seq-butlast (seq &optional (n 1))
+  "Equivalent to BUTLAST, but for a sequence"
   (subseq seq 0 (- (length seq) n)))
 
 (defvar *os* (intern (seq-butlast (run-shell-command "uname -s" t))))
@@ -28,9 +29,9 @@
 (define-key *root-map* (kbd "C-s") "swank")
 
 ;;; Use emacsclient as editor, launch emacs --daemon at startup
-(defcommand emacs () ()
+#|(defcommand emacs () ()
   "Start emacs unless it is already running, in which case focus it."
-  (run-or-raise "emacs" '(:class "Emacs")))
+  (run-or-raise "emacsclient" '(:class "Emacs")))|#
 
 ;;; Appearance
 ;; Input and message bar
@@ -43,25 +44,25 @@
 (set-font "-*-erusfont-medium-*-*-*-*-*-*-*-*-*-*-*")
 
 ;; Mode line
-(defun shell-to-mode-line (cmd)
+#|(defun shell-to-mode-line (cmd)
   `(:eval (run-shell-command
-           ,(format nil "~a | head -1 | tr -d '[:cntrl:]'" cmd) t)))
+           ,(format nil "~a | head -1 | tr -d '[:cntrl:]'" cmd) t)))|#
 
-(defun sysctl-value (name)
-  (shell-to-mode-line (format nil "sysctl ~a | cut -d' ' -f2" name)))
+#|(defun sysctl-value (name)
+  (shell-to-mode-line (format nil "sysctl ~a | cut -d' ' -f2" name)))|#
 
-(setf *screen-mode-line-format*
+#|(setf *screen-mode-line-format*
       (list
        "^B^2*" (shell-to-mode-line "date +%H:%M:%S") "^n | "
        "^B^3*[%n]^n | "
        "^B^4*" (shell-to-mode-line "uptime") "^n |"
        "^B^5* " (sysctl-value "dev.amdtemp.0.sensor0.core0") "^n |"
        "^B^1* ♪ " (shell-to-mode-line "mpc -f '%artist% - %title% - %album%'") "^n | "
-       ))
+       ))|#
 
-(setf *mode-line-border-width* 0)
-(setf *mode-line-background-color* "black")
-(setf *mode-line-foreground-color* "white")
+#|(setf *mode-line-border-width* 0)|#
+#|(setf *mode-line-background-color* "black")|#
+#|(setf *mode-line-foreground-color* "white")|#
 
 ;; Not using the modeline anymore, see below
 #|(when (not (head-mode-line (current-head)))
@@ -97,11 +98,6 @@
 
 ;;; Dynamic groups
 (load (data-dir-file "dynamic-groups" "lisp"))
-(defun defgroup (name go-key move-key)
-  (define-key *top-map* (kbd (format nil "s-~a" go-key))
-    (format nil "gswitch ~a" name))
-  (define-key *top-map* (kbd (format nil "s-~a" move-key))
-    (format nil "gmove-create ~a" name)))
 
 (defgroup "1" "\"" "1")
 (defgroup "2" "guillemotleft" "2")
@@ -137,9 +133,6 @@
          (format nil "import -window 0x~x ~a" (window-id window) file))
         (message "There's no window named ~a" window-name))))
 
-(defvar *firefox-class* `(:class ,(case *os*
-                                        (|FreeBSD| "Firefox")
-                                        (|Linux| "Namoroka"))))
 (defvar *firefox-role* '(:role "browser"))
 (defcommand firefox () ()
   (run-or-raise "firefox" *firefox-role*))
@@ -200,6 +193,7 @@
 
 ;;; Yakuake-like terminal, define show-term and hide-term
 (load (data-dir-file "sliding-terminal" "lisp"))
+
 ;;; Debug
 ;(setf *debug-level* 100)
 ;(redirect-all-output (data-dir-file "debug-output" "txt"))
@@ -217,12 +211,7 @@
 (push *firefox-role* *deny-map-request*)
 
 ;;; dzen2 as a modeline
-(defvar *dzen-bg* "#000")
-(defvar *dzen-fg* "#fff")
-(defvar *dzen-height* "15")
-(defvar *dzen-font* "fixed")
-(defvar *dzen-alignment* "l") ;; l for left, r for right, c for center
-(defvar *dzen-separator* " | ")
+(load (data-dir-file "dzen" "lisp"))
 
 (defparameter *dzen-format*
   `((:group
@@ -239,85 +228,13 @@
     (:group
      (:color "#F22")
      (:icon "/home/quentin/.stumpwm.d/xbm/cpu.xbm")
-     (:sysctl "dev.amdtemp.0.sensor0.core0"))
+     ,(case *os*
+            (|Linux| '(:exec "sensors")) ;; TODO: adapt
+            (|FreeBSD| '(:sysctl "dev.amdtemp.0.sensor0.core0"))))
     (:group
      (:color "#AAF")
      (:icon "/home/quentin/.stumpwm.d/xbm/note.xbm")
-     (:exec "mpc -f '[%artist% - %title% - %album% - %date% - %time%]|[%file%]'"))))
+     (:exec "mpc -f '[%artist% - %title% - %album%]|[%file%] [- %date%][] - %time%'"))))
 
-(defun interpret-dzen-format (fmt)
-  (case (first fmt)
-    (:group (let ((res (mapcar #'interpret-dzen-format (rest fmt))))
-              (format nil "~{~a~}^fg(white)" res)))
-    (:exec (let* ((res (run-shell-command (second fmt) t))
-                  (newline-pos (position #\Newline res)))
-             (if newline-pos
-                 (subseq res 0 newline-pos)
-                 res)))
-    (:color (format nil "^fg(~a)" (second fmt)))
-    (:fun (apply (second fmt) (cddr fmt)))
-    (:string (second fmt))
-    (:icon (format nil "^i(~a) " (second fmt)))
-    (:sysctl
-     (interpret-dzen-format
-      `(:exec ,(format nil "sysctl ~a | cut -d' ' -f2"
-                       (second fmt)))))))
-
-(defun get-mode-line-str ()
-  (format nil (concat "~{~a~#[~:;" *dzen-separator* "~]~}")
-          (mapcar #'interpret-dzen-format *dzen-format*)))
-
-(defvar *dzen-process* nil)
-(defun launch-dzen2 ()
-  (sb-thread:make-thread
-   (lambda ()
-     (resize-head 0 0 15 1280 (- 1024 15)) ;; TODO: something more adapted
-     (let ((process (sb-ext:run-program "dzen2"
-                                        (list "-bg" *dzen-bg* "-fg" *dzen-fg*
-                                              "-h" *dzen-height* "-fn" *dzen-font*
-                                              "-ta" *dzen-alignment*)
-                                        :input :stream
-                                        :wait nil
-                                        :search t
-                                        :output *standard-output*)))
-       (setf *dzen-process* process)
-       ;; TODO: when dzen get killed, stop the loop
-       (with-open-stream (input (sb-ext:process-input process))
-         (handler-case
-             (loop while (sb-ext:process-alive-p process) do
-                  (princ (get-mode-line-str) input)
-                  (terpri input)
-                  (force-output input)
-                  (sleep 1))
-           (sb-int:simple-stream-error () (message "foo"))))))))
-
-(defun kill-dzen2 ()
-  (when *dzen-process*
-    ;; Send the TERM signal
-    (sb-ext:process-kill *dzen-process* 15)
-    (setf *dzen-process* nil)
-    (resize-head 0 0 0 1280 1024)))
-
-(defun toggle-dzen2 ()
-  (if *dzen-process*
-      (kill-dzen2)
-      (launch-dzen2)))
-
-(defcommand dzen () ()
-  (toggle-dzen2))
-
-(defun resize-head (number x y width height)
-  "Resize head number `number' to given dimension."
-  (let* ((screen (current-screen))
-        (oh (find number (screen-heads screen) :key 'head-number))
-        (nh (make-head :number number
-                       :x x :y y
-                       :width width
-                       :height height
-                       :window nil)))
-    (scale-head screen oh nh)
-    (mapc 'group-add-head (screen-groups screen))
-    (update-mode-lines screen)))
-
-
-(launch-dzen2)
+(when (not (dzen-process))
+  (dzen))

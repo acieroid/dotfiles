@@ -15,8 +15,8 @@
 
 ;;;; Appearence
 ;;; Zenburn as color theme
-(require 'color-theme)
-(require 'zenburn)
+(autoload 'color-theme "color-theme" "Color Theme")
+(autoload 'color-theme-zenburn "zenburn" "Zenburn Color Theme")
 (color-theme-zenburn)
 
 ;;; Font
@@ -26,8 +26,8 @@
 ;;; and line number on the left
 (column-number-mode t)
 (line-number-mode -1)
-(require 'linum)
-(setq linum-format "%2d ")
+(setq linum-format "%2d")
+(autoload 'global-linum-mode "linum" "Linum mode")
 (global-linum-mode t)
 
 ;;; UTF-8
@@ -42,10 +42,10 @@
 (scroll-bar-mode 0)
 
 ;;; Non-blinking cursor
-(blink-cursor-mode -1)
+(blink-cursor-mode 0)
 
 ;;; Don't show the region (C-SPC-SPC to see it)
-(transient-mark-mode -1)
+(transient-mark-mode 0)
 
 ;;; Replace "yes-or-no" by "y-or-n"
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -54,16 +54,21 @@
 (setq inhibit-startup-message t)
 
 ;;; Saves all backup files in one dir
-(add-to-list 'backup-directory-alist (cons ".*" (in-personal-dir "backups/")))
+(setq backup-by-copying t
+      backup-directory-alist '(("." (in-personal-dir "backups/")))
+      delete-old-versions t)
 
 ;;; Auto-fill set to 80 columns
 (auto-fill-mode)
 (setq fill-colum 80)
 
-;;; Parenthese stuff
-(require 'paredit)
+;;; Follow symlinks
+(setq vc-follow-symlinks t)
 
-(require 'paren)
+;;; Parenthese stuff
+(autoload 'paredit-mode "paredit" "Paredit mode")
+
+(autoload 'show-paren-mode "paren" "Show-paren mode")
 (show-paren-mode t)
 (setq blink-matching-paren nil)
 
@@ -96,7 +101,7 @@
         (clisp ("clisp"))
         (ecl ("ecl"))))
 (add-to-list 'load-path (in-personal-dir "slime/"))
-(require 'slime-autoloads)
+(autoload 'slime-setup "slime" "Slime")
 (slime-setup '(slime-repl slime-c-p-c slime-editing-commands slime-asdf slime-scratch))
 
 (setq slime-complete-symbol-function 'slime-complete-symbol*)
@@ -119,11 +124,10 @@
      (define-key slime-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)))
 
 ;;; Scheme
-(require 'quack)
+(autoload 'scheme-mode "quack" "Scheme Mode")
 
 ;;; Ocaml
 (add-to-list 'load-path (in-personal-dir "tuareg/"))
-(add-to-list 'auto-mode-alist '("\\.ml\\w?" . tuareg-mode))
 (autoload 'tuareg-mode "tuareg" "Major mode for editing Caml code" t)
 (autoload 'camldebug "camldebug" "Run the Caml debugger" t)
 
@@ -133,17 +137,16 @@
 (add-hook 'c-mode-common-hook 'set-newline-and-indent)
 
 ;;; arc
-;(add-to-list 'load-path (in-personal-dir "arc/"))
-;(add-to-list 'auto-mode-alist '("\\.arc" . arc-mode))
-;(autoload 'arc-mode "inferior-arc" "Major mode for editing arc code" t)
+(add-to-list 'load-path (in-personal-dir "arc/"))
+(add-to-list 'auto-mode-alist '("\\.arc" . arc-mode))
+(autoload 'arc-mode "inferior-arc" "Major mode for editing arc code" t)
 
 ;;; emacs lisp
 (add-hook 'emacs-lisp-mode-hook 'set-newline-and-indent)
-;(add-hook 'emacs-lisp-mode-hook 'paredit-mode)
+(add-hook 'emacs-lisp-mode-hook 'paredit-mode)
 
 ;;; haskell mode
 (add-to-list 'load-path (in-personal-dir "haskellmode-emacs/"))
-(add-to-list 'auto-mode-alist '("\\.hs" . haskell-mode))
 (autoload 'haskell-mode "haskell-site-file" "Haskell mode" t)
 (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
 (add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
@@ -157,19 +160,20 @@
     (process-send-eof proc)))
 
 ;;; lusty-explorer
+(add-to-list 'load-path (in-personal-dir "lusty-emacs"))
 (require 'lusty-explorer)
 (global-set-key (kbd "C-x C-f") 'lusty-file-explorer)
 (global-set-key (kbd "C-x b") 'lusty-buffer-explorer)
 
 ;;; Org mode
-(require 'org)
-(require 'htmlize)                      ; For syntax highlighting
+(autoload 'org-mode "org" "Org Mode")
+;(require 'htmlize) ; For syntax highlighting TODO
 (setq org-export-html-style-include-default nil)
 (add-hook 'org-mode-hook (lambda () (auto-fill-mode t)))
 (setq org-export-html-style
 "<style type=\"text/css\">
  <!--/*--><![CDATA[/*><!--*/
-  html { font-family: Times, serif; font-size: 12pt; }
+  html { font-family: serif; font-size: 12pt; }
   body { width: 75%; margin-left: auto; margin-right: auto; }
   .title  { text-align: center; font-weight: normal; margin-top: 2.8em; font-size: 200%;}
   a { text-decoration: none; }
@@ -209,3 +213,34 @@
 (setq browse-url-browser-function 'browse-url-firefox
       browse-url-new-window-flag  t
       browse-url-firefox-new-window-is-tab t)
+
+;;; Factor
+(add-to-list 'load-path (in-personal-dir "fuel/"))
+(setq fuel-factor-root-dir (in-personal-dir "fuel/"))
+(autoload 'factor-mode "factor-mode" "Factor mode")
+
+;;; Hideshow (folding)
+(global-unset-key (kbd "C-c h"))
+(global-set-key (kbd "C-c h") (lambda ()
+                                (interactive)
+                                (hs-minor-mode 1)
+                                (hs-hide-block)))
+(global-set-key (kbd "C-c s") (lambda ()
+                                (interactive)
+                                (hs-minor-mode 1)
+                                (hs-show-block)))
+
+;;; Highlight some keywords
+(font-lock-add-keywords
+ nil '(("\\<\\(FIXME\\|TODO\\|BUG\\)" 1 font-lock-warning-face t)))
+
+;;; Modes
+(setq auto-mode-alist
+      (append
+       '(("\\.arc" . arc-mode)
+         ("\\.ml[iylp]?" . tuareg-mode)
+         ("\\.hs" . haskell-mode)
+         ("\\.scm" . scheme-mode)
+         ("\\.factor" . factor-mode)
+         (".stumpwmrc" . lisp-mode))
+       auto-mode-alist))
