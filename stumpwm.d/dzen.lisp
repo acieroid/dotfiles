@@ -63,8 +63,9 @@
       ;; Send the TERM signal
       (sb-ext:process-kill dzen-process 15)
       (setf dzen-process nil)
-      ;; TODO: do something cleaner ?
-      (resize-head 0 0 0 1280 1024)))
+      (resize-head 0 0 0
+                   (screen-width (current-screen))
+                   (screen-height (current-screen)))))
 
   (defun toggle-dzen2 ()
     (if dzen-process

@@ -85,7 +85,7 @@
           (dump-group-to-file group-file)
           (only)))
     ;; don't get into dzen's window
-    (resize-head 0 0 15 1280 1004)))
+    #|(resize-head 0 0 15 1280 1004)|#))
 
 (define-direction "c" "left")
 (define-direction "r" "right")
@@ -225,12 +225,12 @@
     (:group
      (:color "#9F9")
      (:icon "/home/quentin/.stumpwm.d/xbm/wifi_02.xbm")
-     (:exec "ifconfig wlan0 | sed -n 's/.*inet \\(.*\\) netmask.*/\\1/p'"))
+     (:exec " ifconfig wlan0 | sed -n 's/.*inet \\(addr:\\)\\?\\([0-9\\.]\\+\\) \\(Bcast|netmask\\)\\?.*/\\2/p'"))
     (:group
      (:color "#F22")
      (:icon "/home/quentin/.stumpwm.d/xbm/cpu.xbm")
      ,(case *os*
-            (|Linux| '(:exec "sensors")) ;; TODO: adapt
+            (|Linux| '(:exec "sensors | sed -n 's/.*+\\(.*°C\\).*/\\1/p'"))
             (|FreeBSD| '(:sysctl "dev.amdtemp.0.sensor0.core0"))))
     (:group
      (:color "#AAF")

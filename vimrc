@@ -18,7 +18,7 @@ set laststatus=2
 
 " aspell with .text files
 set spelllang=fr,en
-autocmd BufRead,BufNewFile *.tex set spell
+"autocmd BufRead,BufNewFile *.tex set spell
 
 " bépo configuration
 source ~/.vimrc.bepo

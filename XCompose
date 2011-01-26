@@ -31,7 +31,8 @@ include "%H/.XCompose.math"
 <Multi_key> <l> <o> <o> <p> : U21BA # &#8634;
 <Multi_key> <m> <e> <l> : U2709 # &#9993;
 <Multi_key> <r> <o> <i> : U2654 # &#9812;
-<Multi_key> <h> <a> <c> <k> : U282C U2844
+<Multi_key> <h> <a> <c> <k> : "⠠⠵"
+#<Multi_key> <h> <a> <c> <k> : U282C U2844
 
 # Un peu de musique
 <Multi_key> <m> <b> : U266D # &#9837;

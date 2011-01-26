@@ -72,6 +72,9 @@
 (show-paren-mode t)
 (setq blink-matching-paren nil)
 
+(require 'rainbow-delimiters)
+(rainbow-delimiters-mode t)
+
 (defun goto-match-paren (arg)
   (interactive "p")
   (cond ((looking-at "\\s\(") (forward-list 1) (backward-char
@@ -100,6 +103,7 @@
       `((sbcl ("sbcl"))
         (clisp ("clisp"))
         (ecl ("ecl"))))
+(setq slime-net-coding-system 'utf-8-unix)
 (add-to-list 'load-path (in-personal-dir "slime/"))
 (autoload 'slime-setup "slime" "Slime")
 (slime-setup '(slime-repl slime-c-p-c slime-editing-commands slime-asdf slime-scratch))
@@ -110,11 +114,13 @@
 	    (unless (slime-connected-p)
 	      (save-excursion (slime)))))
 (add-hook 'slime-mode-hook (lambda () (paredit-mode t)))
+(add-hook 'slime-mode-hook (lambda () (rainbow-delimiters-mode t)))
 (add-hook 'slime-mode-hook
           (lambda () (local-set-key (kbd "RET") 'paredit-newline)))
 (add-hook 'slime-repl-mode-hook (lambda () (paredit-mode t)))
 (add-hook 'slime-repl-mode-hook
           (lambda () (local-set-key (kbd "RET") 'paredit-newline)))
+
 
 (eval-after-load "slime"
   '(progn

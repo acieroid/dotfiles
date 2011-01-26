@@ -70,3 +70,4 @@ export PS1="${dircol}%}%~%{${reset_color}%} ${sign} "
 export PS2="... "
 export RPS1="`hostname`"
 }
+export TERM=rxvt
