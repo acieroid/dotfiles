@@ -76,16 +76,3 @@
 (defcommand dzen () ()
   "Launch or kill dzen"
   (toggle-dzen2))
-
-(defun resize-head (number x y width height)
-  "Resize head number `number' to given dimension."
-  (let* ((screen (current-screen))
-         (oh (find number (screen-heads screen) :key 'head-number))
-         (nh (make-head :number number
-                        :x x :y y
-                        :width width
-                        :height height
-                        :window nil)))
-    (scale-head screen oh nh)
-    (mapc 'group-add-head (screen-groups screen))
-    (update-mode-lines screen)))

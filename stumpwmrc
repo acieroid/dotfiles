@@ -248,4 +248,4 @@
         (gselect matlab-group)
       (progn
         (gnew-float "matlab")
-        (run-shell-command "/home/quentin/matlab/bin/matlab -desktop")))))>>>>>>> other
+        (run-shell-command "/home/quentin/matlab/bin/matlab -desktop")))))

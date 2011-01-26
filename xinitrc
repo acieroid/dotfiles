@@ -7,6 +7,7 @@ setxkbmap fr bepo
 xset -b
 xset r on
 xmodmap ~/.xmodmaprc
+redshift -l 50.833:4.333 -m vidmode&
 if [ -n "$2" ]
 then
   echo "Executing $2"
