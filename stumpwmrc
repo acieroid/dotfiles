@@ -225,7 +225,7 @@
     (:group
      (:color "#9F9")
      (:icon "/home/quentin/.stumpwm.d/xbm/wifi_02.xbm")
-     (:exec " ifconfig wlan0 | sed -n 's/.*inet \\(addr:\\)\\?\\([0-9\\.]\\+\\) \\(Bcast|netmask\\)\\?.*/\\2/p'"))
+     (:exec " ifconfig wlan0 | sed -En 's/.*inet (addr:)?([0-9\\.]+) (Bcast|netmask)?.*/\\2/p'"))
     (:group
      (:color "#F22")
      (:icon "/home/quentin/.stumpwm.d/xbm/cpu.xbm")
@@ -237,9 +237,6 @@
      (:icon "/home/quentin/.stumpwm.d/xbm/note.xbm")
      (:exec "mpc -f '[%artist% - %title% - %album%]|[%file%] [- %date%][] - %time%'"))))
 
-(when (not (dzen-process))
-  (dzen))
-
 ;;; Matlab
 (defcommand matlab () ()
   "Run or raise matlab"
@@ -249,3 +246,14 @@
       (progn
         (gnew-float "matlab")
         (run-shell-command "/home/quentin/matlab/bin/matlab -desktop")))))
+
+;;; Redshift
+(defcommand redshift () ()
+  "Launch redshift"
+  ;;; TODO: check if it's already launched
+  (run-shell-command "redshift -l 50.833:4.333 -m vidmode"))
+
+;;;; Things launched
+(redshift)
+(when (not (dzen-process))
+  (dzen))

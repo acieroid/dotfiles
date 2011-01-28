@@ -73,6 +73,11 @@
 (setq blink-matching-paren nil)
 
 (require 'rainbow-delimiters)
+(setq *rainbow-delimiters-faces*
+  `[,@(mapcar #'rainbow-delimiters-face-from-colour
+	      '("brown" "darkblue" "darkgray" "darkgreen" "darkcyan" "darkred"
+	        "darkmagenta" "brown" "gray" "black" "darkmagenta" "darkblue"
+	        "darkgreen" "darkcyan" "darkred" "red"))])
 (rainbow-delimiters-mode t)
 
 (defun goto-match-paren (arg)
@@ -100,9 +105,9 @@
 ;;; Common Lisp
 (setq inferior-lisp-program "sbcl")
 (setq slime-lisp-implementations
-      `((sbcl ("sbcl"))
-        (clisp ("clisp"))
-        (ecl ("ecl"))))
+      `((sbcl ("sbcl") :coding-system utf-8-unix)
+        (clisp ("clisp") :coding-system utf-8-unix)
+        (ecl ("ecl") :coding-system utf-8-unix)))
 (setq slime-net-coding-system 'utf-8-unix)
 (add-to-list 'load-path (in-personal-dir "slime/"))
 (autoload 'slime-setup "slime" "Slime")
