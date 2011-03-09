@@ -230,7 +230,7 @@
      (:color "#F22")
      (:icon "/home/quentin/.stumpwm.d/xbm/cpu.xbm")
      ,(case *os*
-            (|Linux| '(:exec "sensors | sed -n 's/.*+\\(.*°C\\).*/\\1/p'"))
+            (|Linux| '(:exec "sensors | sed -n 's/temp1:[ \\t]*+\\([0-9\.]*°C\\).*/\\1/p'"))
             (|FreeBSD| '(:sysctl "dev.amdtemp.0.sensor0.core0"))))
     (:group
      (:color "#AAF")

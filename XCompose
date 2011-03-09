@@ -94,4 +94,4 @@ include "%H/.XCompose.math"
 <Multi_key> <space> <y> : "ψ"  Greek_psi
 <Multi_key> <space> <Y> : "Ψ"  Greek_PSI
 <Multi_key> <space> <w> : "ω"  Greek_omega
-<Multi_key> <space> <W> : "Ω" Greek_OMEGA_
+<Multi_key> <space> <W> : "Ω" Greek_OMEGA

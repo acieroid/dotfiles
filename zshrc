@@ -25,7 +25,7 @@ alias grep='grep --color=auto'
 alias rm='rm -I'
 alias mv='mv -i'
 alias cp='cp -i'
-alias i='ssh -C acieroid@awesom.eu -p 42022 -t screen -Udr'
+alias i='ssh -C acieroid@awesom.eu -p 443 -t screen -Udr'
 alias s='ssh -C admin@awesom.eu -p 25022'
 alias h='ssh -C acieroid@ks -p 21022'
 alias m='ssh -C acieroid@foo.awesom.eu -p 42022 -t screen -Udr'
@@ -71,3 +71,4 @@ export PS2="... "
 export RPS1="`hostname`"
 }
 export TERM=rxvt
+export GTK_IM_MODULE="xim"

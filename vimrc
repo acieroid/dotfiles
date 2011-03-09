@@ -44,7 +44,7 @@ au BufRead,BufNewFile Makefile set noexpandtab
 set mouse=
 set nocompatible
 set ttyfast
-set listchars=eol:↵,tab:⇥␣
+set listchars=tab:⇥␣
 set list!
 set backspace=2
 map <F1> :set number!<CR>
