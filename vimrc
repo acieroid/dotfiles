@@ -46,8 +46,8 @@ au BufRead,BufNewFile *.ws set noexpandtab
 set mouse=
 set nocompatible
 set ttyfast
-"set listchars=eol:↵,tab:⇥␣
-"set list!
+set listchars=tab:⇥␣
+set list!
 set backspace=2
 map <F1> :set number!<CR>
 

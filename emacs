@@ -142,9 +142,16 @@
 (autoload 'tuareg-mode "tuareg" "Major mode for editing Caml code" t)
 (autoload 'camldebug "camldebug" "Run the Caml debugger" t)
 
-;;; C
-(add-hook 'c-mode-common-hook
-          (lambda () (local-set-key "\C-c \C-c" 'compile)))
+;;; C and C++
+(defun bind-compile-program ()
+  (interactive)
+  (local-set-key (kbd "C-c C-c")
+                 (lambda ()
+                   (interactive)
+                   (compile "make -k"))))
+(add-hook 'c-mode-hook 'bind-compile-program)
+(add-hook 'c++-mode-hook 'bind-compile-program)
+
 (add-hook 'c-mode-common-hook 'set-newline-and-indent)
 
 ;;; arc
@@ -234,6 +241,9 @@
 (setq fuel-factor-root-dir (in-personal-dir "fuel/"))
 (autoload 'factor-mode "factor-mode" "Factor mode")
 
+;;; Python
+(setq python-python-command "python2")
+
 ;;; Hideshow (folding)
 (global-unset-key (kbd "C-c h"))
 (global-set-key (kbd "C-c h") (lambda ()
@@ -249,6 +259,10 @@
 (font-lock-add-keywords
  nil '(("\\<\\(FIXME\\|TODO\\|BUG\\)" 1 font-lock-warning-face t)))
 
+;;; Pretty-mode
+(require 'pretty-mode)
+(global-pretty-mode t)
+
 ;;; Modes
 (setq auto-mode-alist
       (append
@@ -256,6 +270,7 @@
          ("\\.ml[iylp]?" . tuareg-mode)
          ("\\.hs" . haskell-mode)
          ("\\.scm" . scheme-mode)
+         ("\\.py" . python-mode)
          ("\\.factor" . factor-mode)
          (".stumpwmrc" . lisp-mode))
        auto-mode-alist))
