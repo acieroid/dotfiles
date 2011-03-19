@@ -3,9 +3,7 @@
 (in-package :stumpwm)
 
 (set-contrib-dir "/home/quentin/stumpwm/contrib")
-(load-module "mpd")
-(setf (getenv "SURFRAW_browser") "firefox")
-(load-module "surfraw")
+;(load-module "mpd")
 
 (defun seq-butlast (seq &optional (n 1))
   "Equivalent to BUTLAST, but for a sequence"
@@ -22,6 +20,7 @@
 (load "/home/quentin/emacs/slime/swank-loader.lisp")
 (swank-loader:init)
 (defcommand swank () ()
+  "Start swank"
   (setf *top-level-error-action* :break)
   (swank:create-server :port 4005
                       :style swank:*communication-style*
@@ -78,6 +77,7 @@
     (format nil "move-window ~a" direction)))
 
 (defcommand my-fullscreen () ()
+  "Fullscreen command"
   (let ((group-file (format nil "/tmp/stumpwm-group-~a" (group-name (current-group)))))
     (if (null (cdr (head-frames (current-group) (current-head))))
         (restore-from-file group-file)
@@ -114,17 +114,19 @@
 ;; Use group "1" as default group
 (setf *default-group-name* "1")
 (add-group (current-screen) "1")
-(kill-group (find-group (current-screen) "Default")
-            (find-group (current-screen) "1"))
+;(kill-group (find-group (current-screen) "Default")
+;            (find-group (current-screen) "1"))
 
 ;; Programs
 (defcommand screenshot (file whole-screen)
     ((:string "Save image to: ")
      (:y-or-n "Take the whole screen ? "))
+  "Take a screenshot of the screen or a part of the screen"
   (run-shell-command
-   (format nil "import ~:[~;-window root ~]~a" (first whole-screen) file)))
+   (format nil "scrot ~:[--select ~; ~]~a" (first whole-screen) file)))
 
-(defcommand screenshot-window (file window-name)
+;; TODO: not working
+#|(defcommand screenshot-window (file window-name)
     ((:string "Save image to: ")
      (:window-name "Window: "))
   (let ((window (find window-name (group-windows (current-group))
@@ -132,10 +134,11 @@
     (if window
         (run-shell-command
          (format nil "import -window 0x~x ~a" (window-id window) file))
-        (message "There's no window named ~a" window-name))))
+        (message "There's no window named ~a" window-name))))|#
 
 (defvar *firefox-role* '(:role "browser"))
 (defcommand firefox () ()
+  "Launch firefox"
   (run-or-raise "firefox" *firefox-role*))
 
 (define-key *top-map* (kbd "s-P") "exec")
@@ -144,11 +147,23 @@
 (define-key *root-map* (kbd "f") "firefox")
 (multimedia-key "Print" "screenshot")
 
-;; Audio
-(mpd-connect)
+;;; Audio
+;(mpd-connect)
+
+;;; XMMS2
+(defcommand xmms2-toggle () ()
+  "Toggle XMMS2 status"
+  (run-shell-command "nyxmms2 toggle"))
+(defcommand xmms2-next () ()
+  "Next song in XMMS2"
+  (run-shell-command "nyxmms2 next"))
+(defcommand xmms2-prev () ()
+  "Previous song in XMMS2"
+  (run-shell-command "nyxmms2 prev"))
 
 (defcommand oss-volup (&optional (step 5))
     ((:number "Increase volume by: "))
+  "Increase the volume"
   (run-shell-command
    (format nil
 	   (case *os*
@@ -158,6 +173,7 @@
 
 (defcommand oss-voldown (&optional (step 5))
     ((:number "Decrease volume by: "))
+  "Decrease the volume"
   (run-shell-command
    (format nil
 	   (case *os*
@@ -167,6 +183,7 @@
 
 (let ((last-volume 0))
   (defcommand oss-toggle-mute () ()
+    "Mute or demute the volume"
     (case *os*
       (|Linux| (run-shell-command "ossvol -t"))
       (|FreeBSD| (let ((volume 
@@ -177,17 +194,17 @@
                       (format nil "mixer vol ~a" last-volume))
                      (setf last-volume volume))))))
 
-(multimedia-key "XF86AudioPlay" "mpd-toggle-pause")
-(multimedia-key "XF86AudioPause" "mpd-toggle-pause")
-(multimedia-key "XF86AudioNext" "mpd-next")
-(multimedia-key "XF86AudioPrev" "mpd-prev")
+(multimedia-key "XF86AudioPlay" "xmms2-toggle")
+(multimedia-key "XF86AudioPause" "xmms2-toggle")
+(multimedia-key "XF86AudioNext" "xmms2-next")
+(multimedia-key "XF86AudioPrev" "xmms2-prev")
 (multimedia-key "XF86AudioRaiseVolume" "oss-volup 5")
 (multimedia-key "XF86AudioLowerVolume" "oss-voldown 5")
 (multimedia-key "XF86AudioMute" "oss-toggle-mute")
-(multimedia-key "s-b" "mpd-toggle-pause")
-(multimedia-key "s-B" "mpd-stop")
-(multimedia-key "s-eacute" "mpd-next")
-(multimedia-key "s-Eacute" "mpd-prev")
+(multimedia-key "s-b" "xmms2-toggle")
+;(multimedia-key "s-B" "mpd-stop")
+(multimedia-key "s-eacute" "xmms2-next")
+(multimedia-key "s-Eacute" "xmms2-prev")
 (multimedia-key "s-DEL" "oss-volup 5")
 (multimedia-key "S-s-DEL" "oss-voldown 5")
 (multimedia-key "s-SPC" "oss-toggle-mute")
@@ -235,7 +252,8 @@
     (:group
      (:color "#AAF")
      (:icon "/home/quentin/.stumpwm.d/xbm/note.xbm")
-     (:exec "mpc -f '[%artist% - %title% - %album%]|[%file%] [- %date%][] - %time%'"))))
+     (:exec "pgrep xmms2d > /dev/null && nyxmms2 status"))))
+     ;(:exec "mpc -f '[%artist% - %title% - %album%]|[%file%] [- %date%][] - %time%'"))))
 
 ;;; Matlab
 (defcommand matlab () ()
@@ -252,6 +270,11 @@
   "Launch redshift"
   ;;; TODO: check if it's already launched
   (run-shell-command "redshift -l 50.833:4.333 -m vidmode"))
+
+;;; Lock screen
+(defcommand lock () ()
+  "Lock the screen"
+  (run-shell-command "xlock -mode blank -use3d -font \"-*-erusfont-*-*-*-*-*-*-*-*-*-*-*-*\" +description -info \" \" -fg grey55 -echokeys -echokey \"*\" +usefirst -icongeometry 0x0"))
 
 ;;;; Things launched
 (redshift)

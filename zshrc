@@ -71,3 +71,4 @@ export PS2="... "
 export RPS1="`hostname`"
 }
 export TERM=rxvt
+export XDG_CONFIG_HOME=~/.config/

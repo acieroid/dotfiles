@@ -1,9 +1,14 @@
-upload_rate = 0
-#download_rate = 500
+# vim: set ft=conf:
+upload_rate = 500
+download_rate = 500
 
 directory = /home/quentin/torrents
-
 session = /home/quentin/.session
+
+min_peers = 1
+max_peers = 512
+min_peers_seed = 1
+max_peers_seed = 512
 
 schedule = watch_directory,5,5,load_start=/home/quentin/torrents/watch/*.torrent
 schedule = low_diskspace,5,60,close_low_diskspace=100M
@@ -11,7 +16,7 @@ check_hash = yes
 
 #encryption = allow_incoming,try_outgoing,enable_retry
 
-#dht = no
-#dht_port = 6881
+dht = off
+use_udp_trackers = no
 #peer_exchange = yes
 

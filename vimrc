@@ -41,11 +41,13 @@ map! <F1> <Esc>
 " Other stuff
 au BufRead,BufNewFile *.arc setf arc 
 au BufRead,BufNewFile Makefile set noexpandtab
+au BufRead,BufNewFile *.ws setf whitespace
+au BufRead,BufNewFile *.ws set noexpandtab
 set mouse=
 set nocompatible
 set ttyfast
-set listchars=eol:↵,tab:⇥␣
-set list!
+"set listchars=eol:↵,tab:⇥␣
+"set list!
 set backspace=2
 map <F1> :set number!<CR>
 

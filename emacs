@@ -181,6 +181,10 @@
 ;(require 'htmlize) ; For syntax highlighting TODO
 (setq org-export-html-style-include-default nil)
 (add-hook 'org-mode-hook (lambda () (auto-fill-mode t)))
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cb" 'org-iswitchb)
 (setq org-export-html-style
 "<style type=\"text/css\">
  <!--/*--><![CDATA[/*><!--*/

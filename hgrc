@@ -3,6 +3,8 @@ hgext.bookmarks =
 hggit =
 pager =
 color =
+bookmarks =
 
 [ui]
 username = acieroid
+
