@@ -73,3 +73,4 @@ export RPS1="`hostname`"
 export TERM=rxvt
 export XDG_CONFIG_HOME=~/.config/
 export GTK_IM_MODULE="xim"
+export GDFONTPATH=/usr/local/lib/X11/fonts/dejavu:/usr/local/lib/X11/fonts/Droid/

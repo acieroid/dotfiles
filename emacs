@@ -260,8 +260,8 @@
  nil '(("\\<\\(FIXME\\|TODO\\|BUG\\)" 1 font-lock-warning-face t)))
 
 ;;; Pretty-mode
-(require 'pretty-mode)
-(global-pretty-mode t)
+;(require 'pretty-mode)
+;(global-pretty-mode t)
 
 ;;; Modes
 (setq auto-mode-alist

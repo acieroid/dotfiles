@@ -13,10 +13,7 @@ URxvt*.keysym.C-o: perl:matcher
 
 ! terminal colors ------------------------------------------------------------
 
-! tangoesque scheme
-!*background: #111111
-!*foreground: #babdb6
-! Black (not tango) + DarkGrey
+! Black + DarkGrey
 *color0:  #000000
 *color8:  #555753
 ! DarkRed + Red
@@ -34,7 +31,7 @@ URxvt*.keysym.C-o: perl:matcher
 ! DarkMangenta + Mangenta
 *color5:  #ce5c00
 *color13: #f57900
-!DarkCyan + Cyan (both not tango)
+!DarkCyan + Cyan
 *color6:  #89b6e2
 *color14: #46a4ff
 ! LightGrey + White
