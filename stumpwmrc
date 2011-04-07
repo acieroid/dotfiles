@@ -114,8 +114,10 @@
 ;; Use group "1" as default group
 (setf *default-group-name* "1")
 (add-group (current-screen) "1")
-;(kill-group (find-group (current-screen) "Default")
-;            (find-group (current-screen) "1"))
+(let ((default-group (find-group (current-screen) "Default")))
+  (when default-group
+    (kill-group (find-group (current-screen) "Default")
+                (find-group (current-screen) "1"))))
 
 ;; Programs
 (defcommand screenshot (file whole-screen)
