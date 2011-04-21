@@ -1,0 +1,10 @@
+" vim: set ft=vim:
+map n navigate next
+map p navigate previous
+
+map c scroll left
+map t scroll down
+map s scroll up
+map r scroll right
+
+map u adjust_window width
