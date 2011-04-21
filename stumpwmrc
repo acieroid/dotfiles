@@ -254,7 +254,7 @@
     (:group
      (:color "#AAF")
      (:icon "/home/quentin/.stumpwm.d/xbm/note.xbm")
-     (:exec "pgrep xmms2d > /dev/null && nyxmms2 status"))))
+     (:exec "pgrep xmms2d > /dev/null && nyxmms2 status -f \"\\${artist} - \\${title} (\\${album} - \\${date}) \\${playtime}/\\${duration}\""))))
      ;(:exec "mpc -f '[%artist% - %title% - %album%]|[%file%] [- %date%][] - %time%'"))))
 
 ;;; Matlab
