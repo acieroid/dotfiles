@@ -11,8 +11,6 @@ URxvt.keysym.Shift-Up: command:\033]720;5\007
 URxvt.keysym.Shift-Down: command:\033]721;5\007
 URxvt*.keysym.C-o: perl:matcher
 
-! terminal colors ------------------------------------------------------------
-
 ! Black + DarkGrey
 *color0:  #000000
 *color8:  #555753
@@ -37,4 +35,3 @@ URxvt*.keysym.C-o: perl:matcher
 ! LightGrey + White
 *color7:  #cccccc
 *color15: #ffffff
-
