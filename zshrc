@@ -28,7 +28,7 @@ alias cp='cp -i'
 alias i='ssh -C acieroid@awesom.eu -p 443 -t screen -Udr'
 alias s='ssh -C admin@awesom.eu -p 25022'
 alias h='ssh -C acieroid@ks -p 21022'
-alias m='ssh -C acieroid@foo.awesom.eu -p 42022 -t screen -Udr'
+alias m='ssh -C acieroid@foo.awesom.eu -p 42022'
 
 # variables
 export PAGER=most
@@ -74,3 +74,7 @@ export TERM=rxvt
 export XDG_CONFIG_HOME=~/.config/
 export GTK_IM_MODULE="xim"
 export GDFONTPATH=/usr/local/lib/X11/fonts/dejavu:/usr/local/lib/X11/fonts/Droid/
+
+if [ -z "$DISPLAY" ]; then
+  export DISPLAY=:0.0
+fi

@@ -7,6 +7,7 @@ setxkbmap fr bepo
 xset -b
 xset r on
 xmodmap ~/.xmodmaprc
+xhost +
 if [ -n "$2" ]
 then
   echo "Executing $2"

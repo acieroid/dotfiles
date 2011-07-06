@@ -50,4 +50,12 @@ set listchars=tab:⇥␣
 set list!
 set backspace=2
 map <F1> :set number!<CR>
+map <F3> :set list!<CR>
+
+" NERDTree
+map <F2> :NERDTreeToggle<CR>
+let NERDTreeMapJumpNextSibling='t'
+let NERDTreeMapJumpPrevSibling='s'
+let NERDTreeMapOpenInTab='<C-t>'
+let NERDTreeMapOpenInTabSilent='<C-T>'
 

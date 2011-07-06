@@ -16,7 +16,8 @@ check_hash = yes
 
 #encryption = allow_incoming,try_outgoing,enable_retry
 
-dht = off
+dht = on
+dht_port = 6880
 use_udp_trackers = no
 #peer_exchange = yes
 

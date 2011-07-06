@@ -7,6 +7,13 @@
   "Give the path of a file/directory in the EMACS-PERSONAL-DIR"
   (concat emacs-personal-dir dir))
 
+(defun add-paredit-hook (hook)
+  "Add cool paren stuff to a mode"
+  (add-hook hook (lambda () (paredit-mode t)))
+  (add-hook hook (lambda () (rainbow-delimiters-mode t)))
+  (add-hook hook
+            (lambda () (local-set-key (kbd "RET") 'paredit-newline))))
+
 ;;; Directory where all single .el files will be placed
 (add-to-list 'load-path (in-personal-dir "elisp/"))
 
@@ -75,9 +82,9 @@
 (require 'rainbow-delimiters)
 (setq *rainbow-delimiters-faces*
   `[,@(mapcar #'rainbow-delimiters-face-from-colour
-	      '("brown" "darkblue" "darkgray" "darkgreen" "darkcyan" "darkred"
-	        "darkmagenta" "brown" "gray" "black" "darkmagenta" "darkblue"
-	        "darkgreen" "darkcyan" "darkred" "red"))])
+       '("brown" "darkblue" "darkgray" "darkgreen" "darkcyan" "darkred"
+         "darkmagenta" "brown" "gray" "black" "darkmagenta" "darkblue"
+         "darkgreen" "darkcyan" "darkred" "red"))])
 (rainbow-delimiters-mode t)
 
 (defun goto-match-paren (arg)
@@ -118,10 +125,7 @@
 	  (lambda ()
 	    (unless (slime-connected-p)
 	      (save-excursion (slime)))))
-(add-hook 'slime-mode-hook (lambda () (paredit-mode t)))
-(add-hook 'slime-mode-hook (lambda () (rainbow-delimiters-mode t)))
-(add-hook 'slime-mode-hook
-          (lambda () (local-set-key (kbd "RET") 'paredit-newline)))
+(add-paredit-hook 'slime-mode-hook)
 (add-hook 'slime-repl-mode-hook (lambda () (paredit-mode t)))
 (add-hook 'slime-repl-mode-hook
           (lambda () (local-set-key (kbd "RET") 'paredit-newline)))
@@ -136,6 +140,10 @@
 
 ;;; Scheme
 (autoload 'scheme-mode "quack" "Scheme Mode")
+(add-paredit-hook 'quack-mode-hook)
+(custom-set-faces ;; Some quack default colors are awful
+ '(quack-pltish-defn-face ((t (:foreground "green" :weight bold)))))
+
 
 ;;; Ocaml
 (add-to-list 'load-path (in-personal-dir "tuareg/"))
@@ -230,6 +238,25 @@
                                  font-weight:bold; }
   /*]]>*/-->
 </style>")
+(require 'org-publish)
+(setq org-publish-project-alist
+      '(("cours-notes"
+         :base-directory "~/cours/"
+         :base-extension "org"
+         :publishing-directory "~/cours-html/"
+         :recursive t
+         :publishing-function org-publish-org-to-html
+         :headline-levels 4
+         :auto-preamble t
+         )
+        ("cours-static"
+         :base-directory "~/cours/"
+         :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|tar.bz2\\|tar.gz\\|m\\|cpp"
+         :publishing-directory "~/cours-html/"
+         :recursive t
+         :publishing-function org-publish-attachment
+         )
+        ("cours" :components ("cours-notes" "cours-static"))))
 
 ;;; URLs
 (setq browse-url-browser-function 'browse-url-firefox
@@ -263,6 +290,10 @@
 ;(require 'pretty-mode)
 ;(global-pretty-mode t)
 
+;;; Flyspell
+(setq ispell-dictionary "francais")
+(setq flyspell-default-dictionary "francais")
+
 ;;; Modes
 (setq auto-mode-alist
       (append
@@ -274,3 +305,5 @@
          ("\\.factor" . factor-mode)
          (".stumpwmrc" . lisp-mode))
        auto-mode-alist))
+
+
