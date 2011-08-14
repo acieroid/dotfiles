@@ -1,0 +1,8 @@
+[user]
+  name = Quentin Stievenart
+  email = quentin.stievenart@gmail.com
+
+[color]
+  diff = auto
+  status = auto
+  branch = auto

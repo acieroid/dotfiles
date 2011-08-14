@@ -130,13 +130,20 @@
 (add-hook 'slime-repl-mode-hook
           (lambda () (local-set-key (kbd "RET") 'paredit-newline)))
 
-
 (eval-after-load "slime"
   '(progn
      (define-key slime-repl-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
      (define-key slime-repl-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)
      (define-key slime-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
      (define-key slime-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)))
+
+;; Parenscript
+(add-to-list 'load-path (in-personal-dir "slime-proxy"))
+(add-to-list 'load-path (in-personal-dir "slime-proxy/contrib/slime-parenscript"))
+
+(defun slime-proxy-setup ()
+  (interactive)
+  (slime-setup '(slime-proxy slime-parenscript)))
 
 ;;; Scheme
 (autoload 'scheme-mode "quack" "Scheme Mode")
@@ -294,6 +301,9 @@
 (setq ispell-dictionary "francais")
 (setq flyspell-default-dictionary "francais")
 
+;;; Lua
+(autoload 'lua-mode "lua-mode" "Lua mode")
+
 ;;; Modes
 (setq auto-mode-alist
       (append
@@ -303,7 +313,16 @@
          ("\\.scm" . scheme-mode)
          ("\\.py" . python-mode)
          ("\\.factor" . factor-mode)
-         (".stumpwmrc" . lisp-mode))
+         ("\\.lua$" . lua-mode)
+         (".stumpwmrc" . lisp-mode)
+         ("SConstruct" . python-mode)
+         ("SConscript" . python-mode))
        auto-mode-alist))
 
+;;; Some custom faces
+(custom-set-faces
+ '(diff-added ((t (:foreground "PaleGreen"))) 'now)
+ '(diff-removed ((t (:foreground "IndianRed"))) 'now)
+ '(diff-context ((t (:foreground "DimGray"))) 'now)
+ )
 

@@ -21,3 +21,7 @@ dht_port = 6880
 use_udp_trackers = no
 #peer_exchange = yes
 
+# improve hash performance on *BSD
+hash_read_ahead = 8
+hash_max_tries = 5
+hash_interval = 10

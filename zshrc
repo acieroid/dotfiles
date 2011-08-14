@@ -32,7 +32,8 @@ alias m='ssh -C acieroid@foo.awesom.eu -p 42022'
 
 # variables
 export PAGER=most
-export EMAIL=acieroid@awesom.eu
+export EDITOR=vim
+export EMAIL=quentin.stievenart@gmail.com
 export PATH=$PATH:/usr/sbin:/sbin:$HOME/bin
 export HISTFILE=~/.history
 export HISTSIZE=10000
