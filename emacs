@@ -80,12 +80,6 @@
 (setq blink-matching-paren nil)
 
 (require 'rainbow-delimiters)
-(setq *rainbow-delimiters-faces*
-  `[,@(mapcar #'rainbow-delimiters-face-from-colour
-       '("brown" "darkblue" "darkgray" "darkgreen" "darkcyan" "darkred"
-         "darkmagenta" "brown" "gray" "black" "darkmagenta" "darkblue"
-         "darkgreen" "darkcyan" "darkred" "red"))])
-(rainbow-delimiters-mode t)
 
 (defun goto-match-paren (arg)
   (interactive "p")
