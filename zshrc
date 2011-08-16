@@ -1,3 +1,4 @@
+
 # completion
 autoload -U compinit
 compinit
@@ -39,6 +40,15 @@ export HISTFILE=~/.history
 export HISTSIZE=10000
 export SAVEHIST=$HISTSIZE
 export WORDCHARS=${WORDCHARS:s,/,,} # to have an emacs-like backward-kill-word
+export TERM=rxvt
+export XDG_CONFIG_HOME=~/.config/
+export GTK_IM_MODULE="xim"
+export GDFONTPATH=/usr/local/lib/X11/fonts/dejavu:/usr/local/lib/X11/fonts/Droid/
+
+if [ -z "$DISPLAY" ]; then
+  export DISPLAY=:0.0
+fi
+
 
 # terminal name
 if [ $TERM = "rxvt-unicode" ]; then
@@ -71,11 +81,6 @@ export PS1="${dircol}%}%~%{${reset_color}%} ${sign} "
 export PS2="... "
 export RPS1="`hostname`"
 }
-export TERM=rxvt
-export XDG_CONFIG_HOME=~/.config/
-export GTK_IM_MODULE="xim"
-export GDFONTPATH=/usr/local/lib/X11/fonts/dejavu:/usr/local/lib/X11/fonts/Droid/
 
-if [ -z "$DISPLAY" ]; then
-  export DISPLAY=:0.0
-fi
+# emacs-like keybindings
+bindkey -e
