@@ -1,4 +1,4 @@
-" vim: set ft=vim:
+# vim: set ft=vim:
 map n navigate next
 map p navigate previous
 
@@ -6,5 +6,9 @@ map c scroll left
 map t scroll down
 map s scroll up
 map r scroll right
+map x rotate right
+map <Button8> navigate next
+map <Button9> navigate prev
 
 map u adjust_window width
+#unmap m

@@ -25,6 +25,8 @@
 (autoload 'color-theme "color-theme" "Color Theme")
 (autoload 'color-theme-zenburn "zenburn" "Zenburn Color Theme")
 (color-theme-zenburn)
+;(load-theme 'wombat)
+;(require 'zenburn-theme)
 
 ;;; Font
 (set-face-attribute 'default nil :height 90)
@@ -67,7 +69,7 @@
 
 ;;; Auto-fill set to 80 columns
 (auto-fill-mode)
-(setq fill-colum 80)
+(setq fill-column 80)
 
 ;;; Follow symlinks
 (setq vc-follow-symlinks t)
@@ -97,6 +99,7 @@
 
 ;;; Some keybindings
 (global-set-key "\C-h" 'delete-backward-char)
+(global-set-key (kbd "<f1>") 'search-forward-regexp)
 (global-unset-key "\C-z")
 (global-unset-key "\C-x \C-z")
 
@@ -173,7 +176,7 @@
 (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
 
 ;;; haskell mode
-(add-to-list 'load-path (in-personal-dir "haskellmode-emacs/"))
+(add-to-list 'load-path (in-personal-dir "haskell-mode"))
 (autoload 'haskell-mode "haskell-site-file" "Haskell mode" t)
 (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
 (add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
@@ -193,7 +196,23 @@
 (global-set-key (kbd "C-x b") 'lusty-buffer-explorer)
 
 ;;; Org mode
-(autoload 'org-mode "org" "Org Mode")
+;(autoload 'org-mode "org" "Org Mode")
+(require 'org)
+
+;; See http://thread.gmane.org/gmane.emacs.orgmode/29347
+(add-to-list 'org-modules 'org-timer)
+(setq org-timer-default-timer 25)
+(add-hook 'org-clock-in-hook '(lambda () 
+                                (org-timer-set-timer '(16))))
+
+
+(setq org-todo-keywords '((sequence "TODO" "STARTED"
+                                    "REREAD" "SUMMARIZED"
+                                    "|" "DONE" "CANCELLED")))
+(setq org-todo-keyword-faces
+      '(("STARTED" . (:foreground "yellow" :weight bold))
+        ("CANCELLED" . org-archived)))
+
 ;(require 'htmlize) ; For syntax highlighting TODO
 (setq org-export-html-style-include-default nil)
 (add-hook 'org-mode-hook (lambda () (auto-fill-mode t)))
@@ -298,6 +317,9 @@
 ;;; Lua
 (autoload 'lua-mode "lua-mode" "Lua mode")
 
+;;; Go
+(autoload 'go-mode "go-mode" "Go mode")
+
 ;;; Modes
 (setq auto-mode-alist
       (append
@@ -308,9 +330,13 @@
          ("\\.py" . python-mode)
          ("\\.factor" . factor-mode)
          ("\\.lua$" . lua-mode)
+         ("\\.m$" . octave-mode)
+         ("\\.go$" . go-mode)
          (".stumpwmrc" . lisp-mode)
          ("SConstruct" . python-mode)
-         ("SConscript" . python-mode))
+         ("SConscript" . python-mode)
+         ("CMakeLists.txt" . cmake-mode)
+         ("\\.scala" . scala-mode))
        auto-mode-alist))
 
 ;;; Some custom faces
@@ -320,3 +346,26 @@
  '(diff-context ((t (:foreground "DimGray"))) 'now)
  )
 
+;(load-file "/usr/share/emacs/site-lisp/cedet/common/cedet.el")
+;(global-ede-mode 1)
+;(semantic-load-enable-code-helpers)
+;(global-srecode-minor-mode 1)
+
+;;; cscope
+(autoload 'xcscope "xcscope" "cscope")
+(setq cscope-do-not-update-database nil)
+
+;;; cmake
+(autoload 'cmake-mode "cmake-mode" "CMake mode")
+
+;;; Scala
+(add-to-list 'load-path (in-personal-dir "scala-mode/"))
+(autoload 'scala-mode "scala-mode" "Scala mode")
+
+;;; ProofGeneral
+(load-file (in-personal-dir "ProofGeneral/generic/proof-site.el"))
+
+;;; X selection
+(setq x-select-enable-clipboard nil)
+(setq x-select-enable-primary t)
+(setq mouse-drag-copy-region t)

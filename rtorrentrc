@@ -1,16 +1,16 @@
 # vim: set ft=conf:
-upload_rate = 500
+upload_rate = 5
 download_rate = 500
 
-directory = /home/quentin/torrents
-session = /home/quentin/.session
+directory = /data/torrents
+session = /data/.session
 
 min_peers = 1
 max_peers = 512
 min_peers_seed = 1
 max_peers_seed = 512
 
-schedule = watch_directory,5,5,load_start=/home/quentin/torrents/watch/*.torrent
+schedule = watch_directory,5,5,load_start=/data/torrents/watch/*.torrent
 schedule = low_diskspace,5,60,close_low_diskspace=100M
 check_hash = yes
 
@@ -18,10 +18,10 @@ check_hash = yes
 
 dht = on
 dht_port = 6880
-use_udp_trackers = no
-#peer_exchange = yes
+#use_udp_trackers = no
+peer_exchange = yes
 
 # improve hash performance on *BSD
-hash_read_ahead = 8
-hash_max_tries = 5
-hash_interval = 10
+#hash_read_ahead = 8
+#hash_max_tries = 5
+#hash_interval = 10

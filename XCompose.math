@@ -11,3 +11,5 @@
 <Multi_key> <v> <e> : U2203 # il existe
 <Multi_key> <v> <v> : U221A # racine
 <Multi_key> <e> <q> : U2248 # approx
+<Multi_key> <a> <n> <d> : U2227 # and
+<Multi_key> <o> <r> : U2228 # or

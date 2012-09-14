@@ -6,8 +6,9 @@ set number
 
 " Indentation
 set expandtab
-set ts=2
-set sw=2
+set tabstop=8
+set shiftwidth=2
+set softtabstop=2
 
 "autocmd BufRead,BufNewFile *.c set cindent
 "autocmd BufRead,BufNewFile *.h set cindent
@@ -49,13 +50,15 @@ set ttyfast
 set listchars=tab:⇥␣
 set list!
 set backspace=2
+set tabstop=8
 map <F1> :set number!<CR>
+map <F2> :set expandtab!<CR>
 map <F3> :set list!<CR>
 
 " NERDTree
-map <F2> :NERDTreeToggle<CR>
-let NERDTreeMapJumpNextSibling='t'
-let NERDTreeMapJumpPrevSibling='s'
-let NERDTreeMapOpenInTab='<C-t>'
-let NERDTreeMapOpenInTabSilent='<C-T>'
+"map <F2> :NERDTreeToggle<CR>
+"let NERDTreeMapJumpNextSibling='t'
+"let NERDTreeMapJumpPrevSibling='s'
+"let NERDTreeMapOpenInTab='<C-t>'
+"let NERDTreeMapOpenInTabSilent='<C-T>'
 

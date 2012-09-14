@@ -45,8 +45,7 @@
                                                 "-ta" *dzen-alignment*)
                                           :input :stream
                                           :wait nil
-                                          :search t
-                                          :output *standard-output*)))
+                                          :search t)))
          (setf dzen-process process)
          ;; TODO: when dzen get killed, stop the loop
          (with-open-stream (input (sb-ext:process-input process))
@@ -62,6 +61,7 @@
     (when dzen-process
       ;; Send the TERM signal
       (sb-ext:process-kill dzen-process 15)
+      (close (sb-ext:process-input dzen-process))
       (setf dzen-process nil)
       (resize-head 0 0 0
                    (screen-width (current-screen))
