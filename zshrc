@@ -32,6 +32,7 @@ alias h='ssh -C acieroid@ks -p 21022'
 alias m='ssh -C acieroid@foo.awesom.eu -p 42022'
 
 # variables
+export LANG=en_US.UTF-8
 export PAGER=most
 export EDITOR=vim
 export EMAIL=quentin.stievenart@gmail.com
@@ -44,6 +45,7 @@ export TERM=rxvt
 export XDG_CONFIG_HOME=~/.config/
 export GTK_IM_MODULE="xim"
 export GDFONTPATH=/usr/local/lib/X11/fonts/dejavu:/usr/local/lib/X11/fonts/Droid/
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
 
 if [ -z "$DISPLAY" ]; then
   export DISPLAY=:0.0
@@ -84,3 +86,15 @@ export RPS1="`hostname`"
 
 # emacs-like keybindings
 bindkey -e
+
+# bind the nbsp on a normal space
+function space {
+  LBUFFER+=" "
+  zle self-insert
+}
+zle -N space
+bindkey " " space
+
+# bind the delete key to delete-char
+bindkey    "^[[3~"          delete-char
+bindkey    "^[3;5~"         delete-char

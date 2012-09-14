@@ -3,7 +3,8 @@
 (in-package :stumpwm)
 
 (set-contrib-dir "/home/quentin/stumpwm/contrib")
-;(load-module "mpd")
+(load-module "mpd")
+(mpd-connect)
 
 (defun seq-butlast (seq &optional (n 1))
   "Equivalent to BUTLAST, but for a sequence"
@@ -196,17 +197,17 @@
                       (format nil "mixer vol ~a" last-volume))
                      (setf last-volume volume))))))
 
-(multimedia-key "XF86AudioPlay" "xmms2-toggle")
-(multimedia-key "XF86AudioPause" "xmms2-toggle")
-(multimedia-key "XF86AudioNext" "xmms2-next")
-(multimedia-key "XF86AudioPrev" "xmms2-prev")
+(multimedia-key "XF86AudioPlay" "mpd-toggle-pause")
+(multimedia-key "XF86AudioPause" "mpd-toggle-pause")
+(multimedia-key "XF86AudioNext" "mpd-next")
+(multimedia-key "XF86AudioPrev" "mpd-prev")
 (multimedia-key "XF86AudioRaiseVolume" "oss-volup 5")
 (multimedia-key "XF86AudioLowerVolume" "oss-voldown 5")
 (multimedia-key "XF86AudioMute" "oss-toggle-mute")
-(multimedia-key "s-b" "xmms2-toggle")
+(multimedia-key "s-b" "mpd-toggle-pause")
 ;(multimedia-key "s-B" "mpd-stop")
-(multimedia-key "s-eacute" "xmms2-next")
-(multimedia-key "s-Eacute" "xmms2-prev")
+(multimedia-key "s-eacute" "mpd-next")
+(multimedia-key "s-Eacute" "mpd-prev")
 (multimedia-key "s-DEL" "oss-volup 5")
 (multimedia-key "S-s-DEL" "oss-voldown 5")
 (multimedia-key "s-SPC" "oss-toggle-mute")
@@ -249,13 +250,13 @@
      (:color "#F22")
      (:icon "/home/quentin/.stumpwm.d/xbm/cpu.xbm")
      ,(case *os*
-            (|Linux| '(:exec "sensors | sed -n 's/temp1:[ \\t]*+\\([0-9\.]*°C\\).*/\\1/p'"))
+            (|Linux| '(:exec "sensors | sed -n 's/Core0 Temp:[ \\t]*+\\([0-9\.]*°C\\).*/\\1/p'"))
             (|FreeBSD| '(:sysctl "dev.amdtemp.0.sensor0.core0"))))
     (:group
      (:color "#AAF")
      (:icon "/home/quentin/.stumpwm.d/xbm/note.xbm")
-     (:exec "pgrep xmms2d > /dev/null && nyxmms2 status -f \"\\${artist} - \\${title} (\\${album} - \\${date}) \\${playtime}/\\${duration}\""))))
-     ;(:exec "mpc -f '[%artist% - %title% - %album%]|[%file%] [- %date%][] - %time%'"))))
+     ;(:exec "pgrep xmms2d > /dev/null && nyxmms2 status -f \"\\${artist} - \\${title} (\\${album} - \\${date}) \\${playtime}/\\${duration}\""))))
+     (:exec "mpc -f '[%artist% - %title% - %album%]|[%file%] [- %date%][] - %time%'"))))
 
 ;;; Matlab
 (defcommand matlab () ()
@@ -279,6 +280,9 @@
   (run-shell-command "xlock -mode blank -use3d -font \"-*-erusfont-*-*-*-*-*-*-*-*-*-*-*-*\" +description -info \" \" -fg grey55 -echokeys -echokey \"*\" +usefirst -icongeometry 0x0"))
 
 ;;;; Things launched
-(redshift)
+;(redshift)
 (when (not (dzen-process))
   (dzen))
+
+
+(setf *mouse-focus-policy* :click)
