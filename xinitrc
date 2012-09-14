@@ -1,13 +1,14 @@
 #!/bin/sh
-DEFAULTWM="/home/quentin/stumpwm/stumpwm"
-#DEFAULTWM="twm"
+DEFAULTWM="/home/quentin/p/dwm/dwm"
 urxvtd -q -f -o &
-setxkbmap -option compose:menu
-setxkbmap fr bepo
 xset -b
 xset r on
-xmodmap ~/.xmodmaprc
 xhost +
+setxkbmap -option compose:menu
+setxkbmap fr bepo
+xmodmap ~/.xmodmaprc
+redshift -l 50.833:4.333 -m vidmode&
+~/p/dwmstatus/dwmstatus&
 if [ -n "$2" ]
 then
   echo "Executing $2"
