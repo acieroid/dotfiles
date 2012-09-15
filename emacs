@@ -380,6 +380,8 @@
          ("\\.scala" . scala-mode))
        auto-mode-alist))
 
-
-
-;;;;;;;;;;;;;;; TODO
+;;; On a fresh installation, uncomment those lines and comment the (load-theme
+;;; ...) line in this file. Launch emacs, recomment those lines and uncomment the
+;;; (load-theme ...) one and it's done.
+;(package-refresh-contents)
+;(install-all-packages)
