@@ -59,7 +59,7 @@ noremap gé gt
 noremap gB :exe "silent! tabfirst"<CR>
 noremap gÉ :exe "silent! tablast"<CR>
 " optionnel : {g"} pour aller au début de la ligne écran
-noremap g" g0
+"noremap g" g0
 
 " <> en direct
 " ————————————
