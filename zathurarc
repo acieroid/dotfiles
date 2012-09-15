@@ -11,4 +11,4 @@ map <Button8> navigate next
 map <Button9> navigate prev
 
 map u adjust_window width
-#unmap m
+unmap m
