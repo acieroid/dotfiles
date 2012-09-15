@@ -26,7 +26,7 @@ alias grep='grep --color=auto'
 alias rm='rm -I'
 alias mv='mv -i'
 alias cp='cp -i'
-alias i='ssh -C acieroid@awesom.eu -p 443 -t screen -Udr'
+alias i='mosh --ssh="ssh -p 443 -t" acieroid@awesom.eu -- screen -Udr'
 alias s='ssh -C admin@awesom.eu -p 25022'
 alias h='ssh -C acieroid@ks -p 21022'
 alias m='ssh -C acieroid@foo.awesom.eu -p 42022'
@@ -41,7 +41,6 @@ export HISTFILE=~/.history
 export HISTSIZE=10000
 export SAVEHIST=$HISTSIZE
 export WORDCHARS=${WORDCHARS:s,/,,} # to have an emacs-like backward-kill-word
-export TERM=rxvt
 export XDG_CONFIG_HOME=~/.config/
 export GTK_IM_MODULE="xim"
 export GDFONTPATH=/usr/local/lib/X11/fonts/dejavu:/usr/local/lib/X11/fonts/Droid/
