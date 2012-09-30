@@ -291,7 +291,7 @@
 (autoload 'scala-mode "scala-mode" "Scala mode")
 
 ;;; ProofGeneral
-;(load-file (in-personal-dir "ProofGeneral/generic/proof-site.el"))
+(load-file "/usr/share/emacs/site-lisp/ProofGeneral/generic/proof-site.el")
 
 ;;; cmake
 (add-to-list 'packages-to-install 'cmake-mode)
