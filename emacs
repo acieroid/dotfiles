@@ -185,7 +185,7 @@
 (defun add-paredit-hook (hook)
   "Add cool paren stuff to a mode"
   (add-hook hook (lambda () (paredit-mode t)))
-  (add-hook hook (lambda () (rainbow-delimiters-mode t)))
+  ;(add-hook hook (lambda () (rainbow-delimiters-mode t)))
   (add-hook hook
             (lambda () (local-set-key (kbd "RET") 'paredit-newline))))
 
@@ -219,6 +219,12 @@
      (define-key slime-repl-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)
      (define-key slime-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
      (define-key slime-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)))
+
+;;; Clojure
+(add-to-list 'packages-to-install 'clojure-mode)
+(setq clojure-swank-command "lein2 jack-in %s")
+(add-paredit-hook 'clojure-mode-hook)
+(add-to-list 'packages-to-install 'nrepl)
 
 ;;; Parenscript
 ;(add-to-list 'load-path (in-personal-dir "slime-proxy"))
