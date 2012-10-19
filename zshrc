@@ -26,7 +26,7 @@ alias grep='grep --color=auto'
 alias rm='rm -I'
 alias mv='mv -i'
 alias cp='cp -i'
-alias i='mosh --ssh="ssh -p 443 -t" acieroid@awesom.eu -- screen -Udr'
+alias i='ssh -p 443 -t acieroid@awesom.eu screen -Udr'
 alias s='ssh -C admin@awesom.eu -p 25022'
 alias h='ssh -C acieroid@ks -p 21022'
 alias m='ssh -C acieroid@foo.awesom.eu -p 42022'
@@ -37,7 +37,7 @@ export PAGER=most
 export EDITOR=vim
 export EMAIL=quentin.stievenart@gmail.com
 export PATH=$PATH:/usr/sbin:/sbin:$HOME/bin
-export HISTFILE=~/.history
+export HISTFILE=~/.zsh_history
 export HISTSIZE=10000
 export SAVEHIST=$HISTSIZE
 export WORDCHARS=${WORDCHARS:s,/,,} # to have an emacs-like backward-kill-word
@@ -52,7 +52,7 @@ fi
 
 
 # terminal name
-if [ $TERM = "rxvt-unicode" ]; then
+if [ `echo $TERM | wc -c` -gt 8 ]; then
   export TERM="rxvt"
 fi
 
