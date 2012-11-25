@@ -152,7 +152,8 @@
 (defun install-all-packages ()
   (interactive)
   (dolist (package packages-to-install)
-    (package-install package)))
+    (unless (package-installed-p package)
+      (package-install package))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;; From here, almost everything is not "vanilla"-emacs ;;;;;
