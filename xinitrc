@@ -1,14 +1,12 @@
 #!/bin/sh
-DEFAULTWM="/home/quentin/p/dwm/dwm"
+DEFAULTWM="/home/quentin/p/stumpwm/stumpwm"
+#DEFAULTWM="openbox-session"
 urxvtd -q -f -o &
 xset -b
 xset r on
 xhost +
-setxkbmap -option compose:menu
-setxkbmap fr bepo
-xmodmap ~/.xmodmaprc
-redshift -l 50.833:4.333 -m vidmode&
-~/p/dwmstatus/dwmstatus&
+redshift -l 50.833:4.333 -m randr&
+xmodmap /home/quentin/.Xmodmap
 if [ -n "$2" ]
 then
   echo "Executing $2"

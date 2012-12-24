@@ -2,24 +2,19 @@
 ;;;; vim: ft=lisp
 (in-package :stumpwm)
 
-(set-contrib-dir "/home/quentin/stumpwm/contrib")
-(load-module "mpd")
-(mpd-connect)
-
+;;; General functions
 (defun seq-butlast (seq &optional (n 1))
   "Equivalent to BUTLAST, but for a sequence"
   (subseq seq 0 (- (length seq) n)))
 
-(defvar *os* (intern (seq-butlast (run-shell-command "uname -s" t))))
-
-;;; General functions
 (defun multimedia-key (key action)
   "Define a multimedia key (bind it directly on *top-map*"
   (define-key *top-map* (kbd key) action))
 
+(defvar *os* (intern (seq-butlast (run-shell-command "uname -s" t))))
+
 ;;; Slime
-(load "/home/quentin/emacs/slime/swank-loader.lisp")
-(swank-loader:init)
+(require 'swank)
 (defcommand swank () ()
   "Start swank"
   (setf *top-level-error-action* :break)
@@ -29,64 +24,22 @@
   (echo-string (current-screen) "Starting swank."))
 (define-key *root-map* (kbd "C-s") "swank")
 
-;;; Use emacsclient as editor, launch emacs --daemon at startup
-#|(defcommand emacs () ()
-  "Start emacs unless it is already running, in which case focus it."
-  (run-or-raise "emacsclient" '(:class "Emacs")))|#
-
 ;;; Appearance
 ;; Input and message bar
-(setf *message-window-gravity* :center)
-(setf *input-window-gravity* :center)
+(setf *message-window-gravity* :top-right)
+(setf *input-window-gravity* :top-right)
 (setf *timeout-wait* 1)
 (set-bg-color "red")
 (set-fg-color "white")
-;(set-unfocus-color "gray30")
+(set-unfocus-color "gray30")
 (set-font "-*-erusfont-medium-*-*-*-*-*-*-*-*-*-*-*")
 
-;; Mode line
-#|(defun shell-to-mode-line (cmd)
-  `(:eval (run-shell-command
-           ,(format nil "~a | head -1 | tr -d '[:cntrl:]'" cmd) t)))|#
-
-#|(defun sysctl-value (name)
-  (shell-to-mode-line (format nil "sysctl ~a | cut -d' ' -f2" name)))|#
-
-#|(setf *screen-mode-line-format*
-      (list
-       "^B^2*" (shell-to-mode-line "date +%H:%M:%S") "^n | "
-       "^B^3*[%n]^n | "
-       "^B^4*" (shell-to-mode-line "uptime") "^n |"
-       "^B^5* " (sysctl-value "dev.amdtemp.0.sensor0.core0") "^n |"
-       "^B^1* ♪ " (shell-to-mode-line "mpc -f '%artist% - %title% - %album%'") "^n | "
-       ))|#
-
-#|(setf *mode-line-border-width* 0)|#
-#|(setf *mode-line-background-color* "black")|#
-#|(setf *mode-line-foreground-color* "white")|#
-
-;; Not using the modeline anymore, see below
-#|(when (not (head-mode-line (current-head)))
-  (toggle-mode-line (current-screen) (current-head)))|#
-
-;;; Key bindings
-;; Windows and frames
+;;; Navigation key bindings
 (defun define-direction (key direction &optional (map *top-map*))
   (define-key map (kbd (format nil "s-~a" key))
     (format nil "move-focus ~a" direction))
   (define-key map (kbd (format nil "s-~a" (string-upcase key)))
     (format nil "move-window ~a" direction)))
-
-(defcommand my-fullscreen () ()
-  "Fullscreen command"
-  (let ((group-file (format nil "/tmp/stumpwm-group-~a" (group-name (current-group)))))
-    (if (null (cdr (head-frames (current-group) (current-head))))
-        (restore-from-file group-file)
-        (progn
-          (dump-group-to-file group-file)
-          (only)))
-    ;; don't get into dzen's window
-    #|(resize-head 0 0 15 1280 1004)|#))
 
 (define-direction "c" "left")
 (define-direction "r" "right")
@@ -95,8 +48,7 @@
 
 (define-key *top-map* (kbd "s-p") "pull-hidden-previous")
 (define-key *top-map* (kbd "s-n") "pull-hidden-next")
-
-(define-key *top-map* (kbd "s-o") "my-fullscreen")
+(define-key *top-map* (kbd "s-o") "fullscreen")
 
 ;;; Dynamic groups
 (load (data-dir-file "dynamic-groups" "lisp"))
@@ -120,7 +72,7 @@
     (kill-group (find-group (current-screen) "Default")
                 (find-group (current-screen) "1"))))
 
-;; Programs
+;;; Programs and keybindings
 (defcommand screenshot (file whole-screen)
     ((:string "Save image to: ")
      (:y-or-n "Take the whole screen ? "))
@@ -128,161 +80,54 @@
   (run-shell-command
    (format nil "scrot ~:[--select ~; ~]~a" (first whole-screen) file)))
 
-;; TODO: not working
-#|(defcommand screenshot-window (file window-name)
-    ((:string "Save image to: ")
-     (:window-name "Window: "))
-  (let ((window (find window-name (group-windows (current-group))
-                  :test (lambda (x y) (string= x (window-name y))))))
-    (if window
-        (run-shell-command
-         (format nil "import -window 0x~x ~a" (window-id window) file))
-        (message "There's no window named ~a" window-name))))|#
+(defcommand mpd-status () ()
+  "Display the current song"
+  (message (run-shell-command "mpc status | head -1" t)))
 
-(defvar *firefox-role* '(:role "browser"))
-(defcommand firefox () ()
-  "Launch firefox"
-  (run-or-raise "firefox" *firefox-role*))
-
-(define-key *top-map* (kbd "s-P") "exec")
-(define-key *top-map* (kbd "C-s-p") "colon")
-(define-key *top-map* (kbd "s-Return") "exec urxvtc")
-(define-key *root-map* (kbd "f") "firefox")
-(multimedia-key "Print" "screenshot")
-
-;;; Audio
-;(mpd-connect)
-
-;;; XMMS2
-(defcommand xmms2-toggle () ()
-  "Toggle XMMS2 status"
-  (run-shell-command "nyxmms2 toggle"))
-(defcommand xmms2-next () ()
-  "Next song in XMMS2"
-  (run-shell-command "nyxmms2 next"))
-(defcommand xmms2-prev () ()
-  "Previous song in XMMS2"
-  (run-shell-command "nyxmms2 prev"))
-
-(defcommand oss-volup (&optional (step 5))
-    ((:number "Increase volume by: "))
-  "Increase the volume"
-  (run-shell-command
-   (format nil
-	   (case *os*
-	     (|Linux| "ossvol -i ~a")
-	     (|FreeBSD| "mixer vol +~a"))
-	   step)))
-
-(defcommand oss-voldown (&optional (step 5))
-    ((:number "Decrease volume by: "))
-  "Decrease the volume"
-  (run-shell-command
-   (format nil
-	   (case *os*
-	     (|Linux| "ossvol -d ~a")
-	     (|FreeBSD| "mixer vol -~a"))
-	   step)))
-
-(let ((last-volume 0))
-  (defcommand oss-toggle-mute () ()
-    "Mute or demute the volume"
-    (case *os*
-      (|Linux| (run-shell-command "ossvol -t"))
-      (|FreeBSD| (let ((volume 
-                          (parse-integer 
-                           (run-shell-command 
-                            "mixer vol | cut -d: -f2" t))))
-                     (run-shell-command 
-                      (format nil "mixer vol ~a" last-volume))
-                     (setf last-volume volume))))))
-
-(multimedia-key "XF86AudioPlay" "mpd-toggle-pause")
-(multimedia-key "XF86AudioPause" "mpd-toggle-pause")
-(multimedia-key "XF86AudioNext" "mpd-next")
-(multimedia-key "XF86AudioPrev" "mpd-prev")
-(multimedia-key "XF86AudioRaiseVolume" "oss-volup 5")
-(multimedia-key "XF86AudioLowerVolume" "oss-voldown 5")
-(multimedia-key "XF86AudioMute" "oss-toggle-mute")
-(multimedia-key "s-b" "mpd-toggle-pause")
-;(multimedia-key "s-B" "mpd-stop")
-(multimedia-key "s-eacute" "mpd-next")
-(multimedia-key "s-Eacute" "mpd-prev")
-(multimedia-key "s-DEL" "oss-volup 5")
-(multimedia-key "S-s-DEL" "oss-voldown 5")
-(multimedia-key "s-SPC" "oss-toggle-mute")
-
-;;; Yakuake-like terminal, define show-term and hide-term
-(load (data-dir-file "sliding-terminal" "lisp"))
-
-;;; Debug
-;(setf *debug-level* 100)
-;(redirect-all-output (data-dir-file "debug-output" "txt"))
-
-;;; Open a man page
-(defcommand man (name)
-    ((:string "Which man page do you want to consult ? "))
-  (run-shell-command (concat "urxvt -e man " name)))
-
-;;; Fill in the *deny-raise-request* with firefox and octave's windows
-(push '(:title "Figure 1") *deny-raise-request*)
-(push *firefox-role* *deny-raise-request*)
-
-;;; Fill in the *deny-map-request* with firefox
-(push *firefox-role* *deny-map-request*)
-
-;;; dzen2 as a modeline
-(load (data-dir-file "dzen" "lisp"))
-
-(defparameter *dzen-format*
-  `((:group
-     (:color "#3FF") (:string "[")
-     (:fun ,#'(lambda () (group-name (current-group))))
-     (:string "]"))
-    (:group
-     (:color "#F99")
-     (:exec "date"))
-    (:group
-     (:color "#9F9")
-     (:icon "/home/quentin/.stumpwm.d/xbm/wifi_02.xbm")
-     (:exec " ifconfig wlan0 | sed -En 's/.*inet (addr:)?([0-9\\.]+) (Bcast|netmask)?.*/\\2/p'"))
-    (:group
-     (:color "#F22")
-     (:icon "/home/quentin/.stumpwm.d/xbm/cpu.xbm")
-     ,(case *os*
-            (|Linux| '(:exec "sensors | sed -n 's/Core0 Temp:[ \\t]*+\\([0-9\.]*°C\\).*/\\1/p'"))
-            (|FreeBSD| '(:sysctl "dev.amdtemp.0.sensor0.core0"))))
-    (:group
-     (:color "#AAF")
-     (:icon "/home/quentin/.stumpwm.d/xbm/note.xbm")
-     ;(:exec "pgrep xmms2d > /dev/null && nyxmms2 status -f \"\\${artist} - \\${title} (\\${album} - \\${date}) \\${playtime}/\\${duration}\""))))
-     (:exec "mpc -f '[%artist% - %title% - %album%]|[%file%] [- %date%][] - %time%'"))))
-
-;;; Matlab
-(defcommand matlab () ()
-  "Run or raise matlab"
-  (let ((matlab-group (find-group (current-screen) "matlab")))
-    (if matlab-group
-        (gselect matlab-group)
-      (progn
-        (gnew-float "matlab")
-        (run-shell-command "/home/quentin/matlab/bin/matlab -desktop")))))
-
-;;; Redshift
-(defcommand redshift () ()
-  "Launch redshift"
-  ;;; TODO: check if it's already launched
-  (run-shell-command "redshift -l 50.833:4.333 -m vidmode"))
-
-;;; Lock screen
 (defcommand lock () ()
   "Lock the screen"
   (run-shell-command "xlock -mode blank -use3d -font \"-*-erusfont-*-*-*-*-*-*-*-*-*-*-*-*\" +description -info \" \" -fg grey55 -echokeys -echokey \"*\" +usefirst -icongeometry 0x0"))
 
-;;;; Things launched
-;(redshift)
-(when (not (dzen-process))
-  (dzen))
+(defcommand battery () ()
+  "Show how much battery remains"
+  (message (run-shell-command "acpi -b" t)))
 
+(defcommand man (name)
+    ((:string "Which man page do you want to consult ? "))
+  (run-shell-command (concat "urxvtc -e man " name)))
+
+(defcommand redshift () ()
+  "Launch redshift"
+  ;; TODO: check if it's already launched and kill it if its the case
+  (run-shell-command "redshift -l 50.833:4.333 -m randr"))
+
+(defvar *firefox-role* '(:role "browser"))
+(push *firefox-role* *deny-map-request*)
+(push *firefox-role* *deny-raise-request*)
+(defcommand firefox () ()
+  "Launch firefox"
+  (run-or-raise "firefox" *firefox-role*))
+
+;;; Keybindings
+(define-key *top-map* (kbd "s-,") "exec")
+(define-key *top-map* (kbd "s-;") "colon")
+(define-key *top-map* (kbd "s-;") "eval")
+(define-key *top-map* (kbd "s-Return") "exec urxvtc")
+(define-key *top-map* (kbd "s-Q") "delete")
+(define-key *top-map* (kbd "s-e") "emacs")
+(define-key *top-map* (kbd "s-f") "firefox")
+(multimedia-key "Print" "screenshot")
+
+(multimedia-key "XF86AudioRaiseVolume" "exec amixer set Master 2dB+")
+(multimedia-key "XF86AudioLowerVolume" "exec amixer set Master 2dB-")
+(multimedia-key "XF86AudioMute" "exec amixer sset Master toggle")
+(multimedia-key "XF86AudioNext" "exec mpc next")
+(multimedia-key "XF86AudioPrev" "exec mpc prev")
+(multimedia-key "XF86AudioPlay" "exec mpc toggle")
+(multimedia-key "XF86Launch1" "time")
+(multimedia-key "XF86Calculator" "time")
+(multimedia-key "XF86Mail" "mpd-status")
+(multimedia-key "XF86ScreenSaver" "lock")
+(multimedia-key "XF86Battery" "battery")
 
 (setf *mouse-focus-policy* :click)

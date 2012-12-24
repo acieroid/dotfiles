@@ -138,11 +138,10 @@
 ;;; Directory where all single .el files will be placed
 (add-to-list 'load-path (in-personal-dir "elisp/"))
 
-;;; Use marmalade as package manager
+;;; Use melpa as package manager (marmalade contains too much old packages)
 (require 'package)
-(add-to-list 'package-archives 
-    '("marmalade" .
-      "http://marmalade-repo.org/packages/"))
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.milkbox.net/packages/") t)
 (package-initialize)
 
 ;;; List of package to install on a fresh install
@@ -216,14 +215,14 @@
 
 (eval-after-load "slime"
   '(progn
-     (define-key slime-repl-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
-     (define-key slime-repl-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)
+     ;(define-key slime-repl-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
+     ;(define-key slime-repl-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)
      (define-key slime-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
      (define-key slime-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)))
 
 ;;; Clojure
 (add-to-list 'packages-to-install 'clojure-mode)
-(setq clojure-swank-command "lein2 jack-in %s")
+(setq nrepl-server-command "lein2 repl :headless")
 (add-paredit-hook 'clojure-mode-hook)
 (add-to-list 'packages-to-install 'nrepl)
 
@@ -298,7 +297,7 @@
 (autoload 'scala-mode "scala-mode" "Scala mode")
 
 ;;; ProofGeneral
-(load-file "/usr/share/emacs/site-lisp/ProofGeneral/generic/proof-site.el")
+;(load-file "/usr/share/emacs/site-lisp/ProofGeneral/generic/proof-site.el")
 
 ;;; cmake
 (add-to-list 'packages-to-install 'cmake-mode)
@@ -390,5 +389,5 @@
 ;;; On a fresh installation, uncomment those lines and comment the (load-theme
 ;;; ...) line in this file. Launch emacs, recomment those lines and uncomment the
 ;;; (load-theme ...) one and it's done.
-;(package-refresh-contents)
-;(install-all-packages)
+;; (package-refresh-contents)
+;; (install-all-packages)
