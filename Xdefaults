@@ -6,6 +6,7 @@ URxvt*.font: xft:Deja Vu Sans Mono:pixelsize=12
 URxvt*.underlineURLs: true
 URxvt*.perl-ext: selection,matcher
 URxvt*.urlLauncher: firefox
+URxvt*.url-launcher: firefox
 
 URxvt.keysym.Shift-Up: command:\033]720;5\007
 URxvt.keysym.Shift-Down: command:\033]721;5\007

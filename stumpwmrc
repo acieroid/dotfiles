@@ -32,7 +32,7 @@
 (set-bg-color "red")
 (set-fg-color "white")
 (set-unfocus-color "gray30")
-(set-font "-*-erusfont-medium-*-*-*-*-*-*-*-*-*-*-*")
+;(set-font "-*-erusfont-medium-*-*-*-*-*-*-*-*-*-*-*")
 
 ;;; Navigation key bindings
 (defun define-direction (key direction &optional (map *top-map*))
@@ -129,5 +129,6 @@
 (multimedia-key "XF86Mail" "mpd-status")
 (multimedia-key "XF86ScreenSaver" "lock")
 (multimedia-key "XF86Battery" "battery")
+(multimedia-key "XF86Sleep" "exec systemctl suspend")
 
 (setf *mouse-focus-policy* :click)
