@@ -1,0 +1,26 @@
+[beets]
+library: /dd/music/library.blb
+directory: /dd/music
+path_format: $genre/$artist/$album/$track $title
+import_copy: yes
+import_write: yes
+import_resume: ask
+import_art: yes
+import_quiet_fallback: skip
+import_timid: no
+ignore: .AppleDouble ._* *~ .DS_Store .*
+art_filename: albumart
+threaded: yes
+color: yes
+replace = [\\/] _
+            ^\. _
+            [\x00-\x1f] _
+            [<>:"\?\*\|] _
+            \.$ _
+            \s+$ <strip>
+
+[paths]
+default: $albumartist/$album/$track $title
+singleton: Singletons/$artist - $title
+comp: $album/$track $title
+albumtype_soundtrack: Soundtracks/$album/$track $title
