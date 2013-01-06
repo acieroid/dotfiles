@@ -75,7 +75,12 @@ if [ `id -u` -eq 0 ]; then
   local dircol="%{${fg_no_bold[red]}%}"
   local sign="#"
 else
-  local dircol="%{${fg_no_bold[green]}%}"
+  local dircol
+  if [ `uname -m` = 'armv6l' ]; then
+   dircol="%{${fg_no_bold[blue]}%}"
+  else
+   dircol="%{${fg_no_bold[green]}%}"
+  fi
   local sign="$"
 fi
 
