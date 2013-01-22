@@ -2,6 +2,7 @@
 source ~/.vimrc.bepo
 
 map bb :emenu Delicious.Save a new Bookmark...<CR>
+map dta :emenu Tools.DownThemAll! Tools.Manager<CR>
 map R :forward<CR>
 " disable macro replay through @
 map @ <Esc>
