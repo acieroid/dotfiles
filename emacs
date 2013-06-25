@@ -22,7 +22,7 @@
 ;;; Show column number in modeline
 ;;; and line number on the left
 (column-number-mode t)
-(line-number-mode -1)
+(line-number-mode t)
 (setq linum-format "%2d")
 (autoload 'global-linum-mode "linum" "Linum mode")
 (global-linum-mode t)
@@ -59,10 +59,10 @@
 
 ;;; Some custom faces
 (custom-set-faces
- '(diff-added ((t (:foreground "PaleGreen"))) 'now)
- '(diff-removed ((t (:foreground "IndianRed"))) 'now)
- '(diff-context ((t (:foreground "DimGray"))) 'now)
- )
+ '(diff-added ((t (:foreground "PaleGreen"))) t)
+ '(diff-context ((t (:foreground "DimGray"))) t)
+ '(diff-removed ((t (:foreground "IndianRed"))) t)
+ '(quack-pltish-defn-face ((t (:foreground "green" :weight bold)))))
 
 ;;;; File-system related stuff
 ;;; Saves all backup files in one dir
@@ -237,13 +237,19 @@
 (add-to-list 'packages-to-install 'quack)
 (autoload 'scheme-mode "quack" "Scheme Mode")
 (add-paredit-hook 'quack-mode-hook)
-(custom-set-faces ;; Some quack default colors are awful
- '(quack-pltish-defn-face ((t (:foreground "green" :weight bold)))))
+
 
 ;;; Ocaml
-(add-to-list 'packages-to-install 'tuareg)
-(autoload 'tuareg-mode "tuareg" "Major mode for editing Caml code" t)
-(autoload 'camldebug "camldebug" "Run the Caml debugger" t)
+;(add-to-list 'packages-to-install 'tuareg)
+;(autoload 'tuareg-mode "tuareg" "Major mode for editing Caml code" t)
+;(autoload 'camldebug "camldebug" "Run the Caml debugger" t)
+(add-to-list 'load-path (in-personal-dir "ocaml/"))
+(autoload 'caml-mode "caml" "Major mode for editing OCaml code." t)
+(autoload 'run-caml "inf-caml" "Run an inferior OCaml process." t)
+(autoload 'camldebug "camldebug" "Run ocamldebug on program." t)
+(add-to-list 'interpreter-mode-alist '("ocamlrun" . caml-mode))
+(add-to-list 'interpreter-mode-alist '("ocaml" . caml-mode))
+(if window-system (require 'caml-font))
 
 ;;; C and C++
 (defun bind-compile-program ()
@@ -303,6 +309,11 @@
 (add-to-list 'packages-to-install 'cmake-mode)
 (autoload 'cmake-mode "cmake-mode" "CMake mode")
 
+;;; Erlang
+(add-to-list 'load-path "/usr/lib/erlang/lib/tools-2.6.10/emacs/")
+(setq erlang-root-dir "/usr/lib/erlang")
+(require 'erlang-start)
+
 ;;; Org mode
 (require 'org)
 
@@ -324,6 +335,7 @@
 ;(require 'htmlize) ; For syntax highlighting TODO
 (setq org-export-html-style-include-default nil)
 (add-hook 'org-mode-hook (lambda () (auto-fill-mode t)))
+(add-hook 'org-mode-hook (lambda () (linum-mode 0)))
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-cc" 'org-capture)
 (global-set-key "\C-ca" 'org-agenda)
@@ -370,20 +382,21 @@
 ;;;; Modes
 (setq auto-mode-alist
       (append
-       '(("\\.arc" . arc-mode)
-         ("\\.ml[iylp]?" . tuareg-mode)
-         ("\\.hs" . haskell-mode)
-         ("\\.scm" . scheme-mode)
-         ("\\.py" . python-mode)
-         ("\\.factor" . factor-mode)
+       '(("\\.arc$" . arc-mode)
+         ;("\\.ml[iylp]?" . tuareg-mode)
+         ("\\.hs$" . haskell-mode)
+         ("\\.scm$" . scheme-mode)
+         ("\\.py$" . python-mode)
+         ("\\.factor$" . factor-mode)
          ("\\.lua$" . lua-mode)
-         ("\\.m" . octave-mode)
-         ("\\.go" . go-mode)
-         (".stumpwmrc" . lisp-mode)
-         ("SConstruct" . python-mode)
-         ("SConscript" . python-mode)
-         ("CMakeLists.txt" . cmake-mode)
-         ("\\.scala" . scala-mode))
+         ("\\.m$" . octave-mode)
+         ("\\.go$" . go-mode)
+         ("\\.ml[iylp]?$" . caml-mode)
+         (".stumpwmrc$" . lisp-mode)
+         ("SConstruct$" . python-mode)
+         ("SConscript$" . python-mode)
+         ("CMakeLists.txt$" . cmake-mode)
+         ("\\.scala$" . scala-mode))
        auto-mode-alist))
 
 ;;; On a fresh installation, uncomment those lines and comment the (load-theme
@@ -391,3 +404,4 @@
 ;;; (load-theme ...) one and it's done.
 ;; (package-refresh-contents)
 ;; (install-all-packages)
+

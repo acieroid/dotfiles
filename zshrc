@@ -45,7 +45,8 @@ export XDG_CONFIG_HOME=~/.config/
 export GTK_IM_MODULE="xim"
 export GDFONTPATH=/usr/local/lib/X11/fonts/dejavu:/usr/local/lib/X11/fonts/Droid/
 export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
-export MPD_HOST=192.168.2.232
+export MANPATH=$MANPATH:/usr/lib/erlang/man/
+export MPD_HOST=192.168.2.102
 
 if [ -z "$DISPLAY" ]; then
   export DISPLAY=:0.0
@@ -76,7 +77,7 @@ if [ `id -u` -eq 0 ]; then
   local sign="#"
 else
   local dircol
-  if [ `uname -m` = 'armv6l' ]; then
+  if [ `uname -m` = 'armv7l' ]; then
    dircol="%{${fg_no_bold[blue]}%}"
   else
    dircol="%{${fg_no_bold[green]}%}"
@@ -103,3 +104,6 @@ bindkey " " space
 # bind the delete key to delete-char
 bindkey    "^[[3~"          delete-char
 bindkey    "^[3;5~"         delete-char
+
+# opam
+which opam >/dev/null && eval `opam config env`
