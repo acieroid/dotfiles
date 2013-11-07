@@ -29,6 +29,9 @@ alias cp='cp -i'
 alias i='ssh -p 443 -t acieroid@awesom.eu screen -Udr'
 alias s='ssh -C admin@awesom.eu -p 25022'
 alias h='ssh -C acieroid@ks -p 21022'
+alias t='ssh -C torrent@ks2g -p 42022'
+alias i2='ssh -C acieroid@ks2g -p 42022'
+alias k='ssh -C acieroid@ks2g -p 21022'
 alias m='ssh -C acieroid@foo.awesom.eu -p 42022'
 
 # variables
@@ -40,7 +43,7 @@ export PATH=$PATH:/usr/sbin:/sbin:$HOME/bin
 export HISTFILE=~/.zsh_history
 export HISTSIZE=10000
 export SAVEHIST=$HISTSIZE
-export WORDCHARS=${WORDCHARS:s,/,,} # to have an emacs-like backward-kill-word
+export WORDCHARS=${WORDCHARS:s,/,,:s/.//} # to have an emacs-like backward-kill-word
 export XDG_CONFIG_HOME=~/.config/
 export GTK_IM_MODULE="xim"
 export GDFONTPATH=/usr/local/lib/X11/fonts/dejavu:/usr/local/lib/X11/fonts/Droid/
