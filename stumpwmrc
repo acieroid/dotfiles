@@ -26,8 +26,8 @@
 
 ;;; Appearance
 ;; Input and message bar
-(setf *message-window-gravity* :top-right)
-(setf *input-window-gravity* :top-right)
+(setf *message-window-gravity* :center)
+(setf *input-window-gravity* :center)
 (setf *timeout-wait* 1)
 (set-bg-color "red")
 (set-fg-color "white")
