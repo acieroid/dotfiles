@@ -50,6 +50,12 @@
 ;;; Disable useless startup message
 (setq inhibit-startup-message t)
 
+;;; Highlight trailing whitespaces, characters past 80 columns, and tabs
+;; (setq-default show-trailing-whitespace t)
+(require 'whitespace)
+(setq whitespace-style '(face empty tabs lines-tail trailing))
+(global-whitespace-mode t)
+
 ;;; Colored output in M-x shell
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 
@@ -62,7 +68,10 @@
  '(diff-added ((t (:foreground "PaleGreen"))) t)
  '(diff-context ((t (:foreground "DimGray"))) t)
  '(diff-removed ((t (:foreground "IndianRed"))) t)
- '(quack-pltish-defn-face ((t (:foreground "green" :weight bold)))))
+ '(quack-pltish-defn-face ((t (:foreground "green" :weight bold))) t)
+ '(merlin-locked-face ((t (:background "gray23"))) t)
+ '(whitespace-tab ((t (:background "grey20"))) t)
+ '(whitespace-line ((t (:background "red4" :weight bold))) t))
 
 ;;;; File-system related stuff
 ;;; Saves all backup files in one dir
@@ -88,7 +97,9 @@
 
 ;;; Some keybindings
 (global-set-key "\C-h" 'delete-backward-char)
-(global-set-key (kbd "<f1>") 'search-forward-regexp)
+(global-set-key "\C-s" (lambda ()
+                               (interactive)
+                               (isearch-forward t)))
 (global-unset-key "\C-z")
 (global-unset-key "\C-x \C-z")
 
@@ -201,7 +212,7 @@
 (add-to-list 'packages-to-install 'slime)
 (autoload 'slime-setup "slime" "Slime")
 ; TODO: broken
-;(slime-setup '(slime-repl slime-c-p-c slime-editing-commands slime-asdf slime-scratch))
+(slime-setup '(slime-repl slime-c-p-c slime-editing-commands slime-asdf slime-scratch))
 
 (setq slime-complete-symbol-function 'slime-complete-symbol*)
 (add-hook 'slime-mode-hook
@@ -222,9 +233,18 @@
 
 ;;; Clojure
 (add-to-list 'packages-to-install 'clojure-mode)
-(setq nrepl-server-command "lein2 repl :headless")
+(setq nrepl-server-command "lein repl :headless")
 (add-paredit-hook 'clojure-mode-hook)
 (add-to-list 'packages-to-install 'nrepl)
+(add-hook 'nrepl-interaction-mode-hook 'nrepl-turn-on-eldoc-mode)
+(setq nrepl-hide-special-buffers nil)
+(add-to-list 'packages-to-install 'expectations-mode)
+(require 'expectations-mode)
+;; TODO: not very stable yet
+;; (load "/home/quentin/emacs/nrepl-inspect/nrepl-inspect.el")
+;; (define-key nrepl-mode-map (kbd "C-c C-i") 'nrepl-inspect)
+;; (require 'nrepl-ritz)
+
 
 ;;; Parenscript
 ;(add-to-list 'load-path (in-personal-dir "slime-proxy"))
@@ -238,11 +258,10 @@
 (autoload 'scheme-mode "quack" "Scheme Mode")
 (add-paredit-hook 'quack-mode-hook)
 
-
 ;;; Ocaml
-;(add-to-list 'packages-to-install 'tuareg)
-;(autoload 'tuareg-mode "tuareg" "Major mode for editing Caml code" t)
-;(autoload 'camldebug "camldebug" "Run the Caml debugger" t)
+;;(add-to-list 'packages-to-install 'tuareg)
+;;(autoload 'tuareg-mode "tuareg" "Major mode for editing Caml code" t)
+;;(autoload 'camldebug "camldebug" "Run the Caml debugger" t)
 (add-to-list 'load-path (in-personal-dir "ocaml/"))
 (autoload 'caml-mode "caml" "Major mode for editing OCaml code." t)
 (autoload 'run-caml "inf-caml" "Run an inferior OCaml process." t)
@@ -250,6 +269,29 @@
 (add-to-list 'interpreter-mode-alist '("ocamlrun" . caml-mode))
 (add-to-list 'interpreter-mode-alist '("ocaml" . caml-mode))
 (if window-system (require 'caml-font))
+(add-to-list 'load-path "/home/quentin/.opam/system/share/emacs/site-lisp")
+(load-file "/home/quentin/.opam/system/share/typerex/ocp-indent/ocp-indent.el")
+
+(dolist (var
+         (car
+          (read-from-string
+           (shell-command-to-string "opam config env --sexp"))))
+  (setenv (car var) (cadr var)))
+(setq exec-path (split-string (getenv "PATH") path-separator))
+(push (concat (getenv "OCAML_TOPLEVEL_PATH") "/../../share/emacs/site-lisp") load-path)
+(autoload 'utop "utop" "Toplevel for OCaml" t)
+
+(require 'merlin)
+(add-hook 'caml-mode-hook 'merlin-mode)
+(setq merlin-display-lock-zone '(margin highlight))
+
+(add-hook 'caml-mode-hook
+          (lambda ()
+            (local-set-key (kbd "M-q") 'caml-indent-phrase)
+            (local-set-key (kbd "C-x `") 'merlin-error-next)
+            (local-set-key (kbd "M-.") 'merlin-locate)
+            (local-set-key (kbd "M-,") 'merlin-pop-stack)
+            ))
 
 ;;; C and C++
 (defun bind-compile-program ()
@@ -278,7 +320,7 @@
 
 ;;; haskell mode
 (add-to-list 'packages-to-install 'haskell-mode)
-(autoload 'haskell-mode "haskell-site-file" "Haskell mode" t)
+(autoload 'haskell-mode "haskell-mode" "Haskell mode" t)
 (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
 (add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
 
@@ -312,15 +354,16 @@
 ;;; Erlang
 (add-to-list 'load-path "/usr/lib/erlang/lib/tools-2.6.10/emacs/")
 (setq erlang-root-dir "/usr/lib/erlang")
-(require 'erlang-start)
+;(require 'erlang-start)
 
 ;;; Org mode
 (require 'org)
+(require 'org-latex)
 
 ;; See http://thread.gmane.org/gmane.emacs.orgmode/29347
 (add-to-list 'org-modules 'org-timer)
 (setq org-timer-default-timer 25)
-(add-hook 'org-clock-in-hook '(lambda () 
+(add-hook 'org-clock-in-hook '(lambda ()
                                 (org-timer-set-timer '(16))))
 
 
@@ -378,6 +421,22 @@
                                  font-weight:bold; }
   /*]]>*/-->
 </style>")
+
+(setq org-export-html-postamble t)
+(setq org-export-html-postamble-format
+      '(("en" "<p class=\"date\">Last update: %d"</p>)))
+
+(add-to-list 'org-export-latex-classes
+      '("empty"
+        "\\documentclass{report}
+               [NO-DEFAULT-PACKAGES]
+               [NO-PACKAGES]"
+        ("\\chapter{%s}" . "\\chapter*{%s}")
+        ("\\section{%s}" . "\\section*{%s}")
+        ("\\subsection{%s}" . "\\subsection*{%s}")
+        ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+        ("\\paragraph{%s}" . "\\paragraph*{%s}")
+        ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
 ;;;; Modes
 (setq auto-mode-alist
