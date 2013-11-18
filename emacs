@@ -356,6 +356,10 @@
 (setq erlang-root-dir "/usr/lib/erlang")
 ;(require 'erlang-start)
 
+;;; Agda
+(load-file (let ((coding-system-for-read 'utf-8))
+                (shell-command-to-string "agda-mode locate")))
+
 ;;; Org mode
 (require 'org)
 (require 'org-latex)
