@@ -74,6 +74,7 @@ autoload colors
 colors
 
 function precmd {
+local ret=$?
 
 if [ `id -u` -eq 0 ]; then
   local dircol="%{${fg_no_bold[red]}%}"
@@ -88,7 +89,14 @@ else
   local sign="$"
 fi
 
-export PS1="${dircol}%}%~%{${reset_color}%} ${sign} "
+local success
+if [ $ret -eq 0 ]; then
+  success=""
+else
+  success=" %{${fg_bold[red]}%}$ret%{${reset_color}%}"
+fi
+
+export PS1="${dircol}%}%~%{${reset_color}%}${success} ${sign} "
 export PS2="... "
 export RPS1=""
 }
