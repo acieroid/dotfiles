@@ -68,6 +68,7 @@ setopt hist_ignore_all_dups
 setopt nohup
 setopt transient_rprompt
 setopt append_history
+setopt nonomatch
 
 # prompt
 autoload colors
