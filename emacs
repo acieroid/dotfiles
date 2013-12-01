@@ -68,10 +68,10 @@
  '(diff-added ((t (:foreground "PaleGreen"))) t)
  '(diff-context ((t (:foreground "DimGray"))) t)
  '(diff-removed ((t (:foreground "IndianRed"))) t)
+ '(merlin-locked-face ((t (:background "gray23"))))
  '(quack-pltish-defn-face ((t (:foreground "green" :weight bold))) t)
- '(merlin-locked-face ((t (:background "gray23"))) t)
- '(whitespace-tab ((t (:background "grey20"))) t)
- '(whitespace-line ((t (:background "red4" :weight bold))) t))
+ '(whitespace-line ((t (:background "red4" :weight bold))))
+ '(whitespace-tab ((t (:background "grey20")))))
 
 ;;;; File-system related stuff
 ;;; Saves all backup files in one dir
@@ -357,8 +357,9 @@
 ;(require 'erlang-start)
 
 ;;; Agda
-(load-file (let ((coding-system-for-read 'utf-8))
-                (shell-command-to-string "agda-mode locate")))
+;; First, run cabal install agda, and have ~/.cabal/bin in the PATH
+;; (load-file (let ((coding-system-for-read 'utf-8))
+;;                 (shell-command-to-string "agda-mode locate")))
 
 ;;; Org mode
 (require 'org)
@@ -467,4 +468,3 @@
 ;;; (load-theme ...) one and it's done.
 ;; (package-refresh-contents)
 ;; (install-all-packages)
-
