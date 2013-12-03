@@ -1,10 +1,20 @@
 import Data.Map as M (fromList)
+import Graphics.X11.ExtraTypes.XF86
 import XMonad
 import XMonad.Actions.WindowGo (runOrRaise)
 import XMonad.Prompt
 import XMonad.Prompt.Shell
 import XMonad.Prompt.XMonad
 import qualified XMonad.StackSet as W
+import XMonad.Util.Dzen
+import XMonad.Util.Run
+
+myXPConfig = defaultXPConfig
+
+myDzenConfig = (onCurr (vCenter 25))
+
+message cmd args =
+    runProcessWithInput cmd args "" >>= (dzenConfig myDzenConfig)
 
 myModMask = mod1Mask -- TODO: mod4Mask
 myTerminal = "urxvt"
@@ -24,9 +34,11 @@ myKeys conf@(XConfig {modMask = m}) =
            -- Launch terminal
          , ((m, xK_Return),    spawn (XMonad.terminal conf))
            -- Launch command prompt
-         , ((m, xK_comma),     xmonadPrompt defaultXPConfig)
+         , ((m, xK_comma),     shellPrompt myXPConfig)
            -- Launch XMonad prompt
-         , ((m .|. shiftMask , xK_comma), xmonadPrompt defaultXPConfig)
+         , ((m .|. shiftMask , xK_comma), xmonadPrompt myXPConfig)
+           -- Various information (time, mpd, ...)
+         , ((0, xF86XK_Calculator), message "/usr/bin/date" [])
            -- No need for:
            --  - a way to kill windows: I either cleanly close the
            --    program (eg. C-x C-c in emacs), and should I not, I
