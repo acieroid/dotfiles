@@ -37,6 +37,11 @@ myKeys conf@(XConfig {modMask = m}) =
            --  - static layout (like stumpwm)
            --  - move into a specific direction (up, down, left, right)
            --  - testing the behaviour when multiple screens are used
+           --  - deny map and raise from the browser
+           --  - have a simple way to output message (eg. time, battery etc.)
+           --  - screenshot command
+           --  - something similar to stumpwm's fullscreen command
+           --  - center XMonad.Prompt
          ]
          ++
          -- Move between workspaces (bepo layout :])
