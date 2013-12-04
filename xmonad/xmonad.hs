@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, ScopedTypeVariables #-}
+{-# LANGUAGE DeriveDataTypeable, FlexibleInstances, MultiParamTypeClasses, ScopedTypeVariables #-}
 import Control.Exception (catch)
 import qualified Data.Map as M
 import Graphics.X11.ExtraTypes.XF86
@@ -26,6 +26,28 @@ instance LayoutClass Fullscreen a where
     emptyLayout _ _ = return ([], Nothing)
 
     pureMessage _ _ = Nothing
+
+-- Static layout
+
+-- Split the current frame
+data Split = VerticalSplit | HorizontalSplit deriving Typeable
+
+data StaticLayout a = StaticLayout { splits :: [(Rectangle, Maybe Window)]
+                                   , currentSplit :: Rectangle
+                                   }
+                      deriving (Show, Read)
+
+instance LayoutClass StaticLayout Window where
+    description _ = "Static"
+
+    pureLayout l r s = [(W.focus s, currentSplit l)]
+
+    emptyLayout _ r = return ([], Just (StaticLayout
+                                        { splits = [(r, Nothing)]
+                                        , currentSplit = r
+                                        }))
+
+    pureMessage l m = Nothing
 
 -- Like getEnv, but exception-less, with a default value instead
 getEnv' :: String -> String -> IO String
@@ -108,23 +130,26 @@ myWorkspaceKeys = [xK_quotedbl, xK_guillemotleft, xK_guillemotright,
 myKeys conf@(XConfig {modMask = m}) =
     M.fromList $
          [ -- Launch emacs, or just focus it
-           ((m, xK_e),         runOrRaise "emacs"   (className =? "Emacs"))
+           ((m, xK_e),              runOrRaise "emacs"   (className =? "Emacs"))
            -- Launch firefox, or just focus it
-         , ((m, xK_f),         runOrRaise "firefox" (className =? "browser"))
+         , ((m, xK_f),              runOrRaise "firefox" (className =? "browser"))
            -- Launch terminal
-         , ((m, xK_Return),    spawn (XMonad.terminal conf))
+         , ((m, xK_Return),         spawn (XMonad.terminal conf))
            -- Launch command prompt
-         , ((m, xK_comma),     shellPrompt myXPConfig)
+         , ((m, xK_comma),          shellPrompt myXPConfig)
            -- Launch XMonad prompt
-         , ((m .|. shiftMask , xK_comma), xmonadPrompt myXPConfig)
+         , ((m .|. s , xK_comma),   xmonadPrompt myXPConfig)
            -- Various control & information (time, mpd, ...)
          , ((0, xF86XK_Calculator), messageCmd "/usr/bin/date" [])
-         , ((0, xF86XK_Launch1), messageCmd "/usr/bin/date" [])
-         , ((0, xF86XK_Battery), messageCmd "/usr/bin/acpi" ["-b"])
-         , ((0, xF86XK_Mail), mpd MPDStatus)
-         , ((0, xF86XK_AudioNext), mpd MPDNext)
-         , ((0, xF86XK_AudioPrev), mpd MPDPrev)
-         , ((0, xF86XK_AudioPlay), mpd MPDToggle) -- TODO: AudioPlay
+         , ((0, xF86XK_Launch1),    messageCmd "/usr/bin/date" [])
+         , ((0, xF86XK_Battery),    messageCmd "/usr/bin/acpi" ["-b"])
+         , ((0, xF86XK_Mail),       mpd MPDStatus)
+         , ((0, xF86XK_AudioNext),  mpd MPDNext)
+         , ((0, xF86XK_AudioPrev),  mpd MPDPrev)
+         , ((0, xF86XK_AudioPlay),  mpd MPDToggle)
+           -- Move focus between windows
+         , ((m, xK_Tab),            windows W.focusDown)
+         , ((m .|. s, xK_Tab),      windows W.swapDown)
            -- No need for:
            --  - a way to kill windows: I either cleanly close the
            --    program (eg. C-x C-c in emacs), and should I not, I
@@ -146,9 +171,10 @@ myKeys conf@(XConfig {modMask = m}) =
                                         myWorkspaceKeys]
          ++
          -- Move windows between workspaces
-         [((m .|. shiftMask, key), windows $ W.shift workspace)
+         [((m .|. s, key), windows $ W.shift workspace)
               | (workspace, key) <- zip (XMonad.workspaces conf)
                                         myWorkspaceKeys]
+           where s = shiftMask
 
 main = xmonad defaultConfig
         { modMask = myModMask
