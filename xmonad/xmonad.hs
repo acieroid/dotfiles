@@ -1,4 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, ScopedTypeVariables #-}
 import Control.Exception (catch)
 import qualified Data.Map as M
 import Graphics.X11.ExtraTypes.XF86
@@ -12,6 +12,20 @@ import XMonad.Prompt.XMonad
 import qualified XMonad.StackSet as W
 import XMonad.Util.Dzen
 import XMonad.Util.Run
+
+-- Simple fullscreen layout
+data Fullscreen a = Fullscreen
+                  deriving (Show, Read)
+
+instance LayoutClass Fullscreen a where
+    description _ = "Fullscreen"
+
+    -- The currently focused window takes the entire allowed rectangle
+    pureLayout _ r s = [(W.focus s, r)]
+
+    emptyLayout _ _ = return ([], Nothing)
+
+    pureMessage _ _ = Nothing
 
 -- Like getEnv, but exception-less, with a default value instead
 getEnv' :: String -> String -> IO String
@@ -77,6 +91,7 @@ myModMask = mod1Mask -- TODO: mod4Mask
 myTerminal = "urxvt"
 myFocusFollowsMouse = False
 myWorkspaces = map show [1..10]
+myLayout = Fullscreen
 
 -- No xF86XK_Battery in Haskell's X11 library.
 -- https://github.com/haskell-pkg-janitors/X11/issues/21
@@ -140,5 +155,6 @@ main = xmonad defaultConfig
         , terminal = myTerminal
         , focusFollowsMouse = myFocusFollowsMouse
         , workspaces = myWorkspaces
+        , layoutHook = myLayout
         , keys = myKeys
         }
