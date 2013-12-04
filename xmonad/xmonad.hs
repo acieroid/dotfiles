@@ -37,27 +37,68 @@ data Split = VerticalSplit | HorizontalSplit deriving Typeable
 
 instance Message Split
 
-instance Ord Rectangle where
-    compare r1 r2 = mconcat [ compare (rect_x r1) (rect_x r2)
-                            , compare (rect_y r1) (rect_y r2)
-                            , compare (rect_width r1) (rect_width r2)
-                            , compare (rect_height r1) (rect_height r2)
+-- A static rectangle represents the space a window takes on the
+-- screen, but it is not linked to the screen resolution
+data StaticRectangle =
+    StaticRectangle { rx :: Rational
+                    , ry :: Rational
+                    , rw :: Rational
+                    , rh :: Rational }
+    deriving (Show, Read, Eq)
+
+instance Ord StaticRectangle where
+    compare r1 r2 = mconcat [ compare (rx r1) (rx r2)
+                            , compare (ry r1) (ry r2)
+                            , compare (rw r1) (rw r2)
+                            , compare (rh r1) (rh r2)
                             ]
 
-data StaticLayout a = StaticLayout { splits :: M.Map Rectangle (Maybe Window)
-                                   , currentSplit :: Rectangle
-                                   }
-                      deriving (Show, Read)
+-- Full screen static rectangle
+fsRect :: StaticRectangle
+fsRect = StaticRectangle { rx = 0, ry = 0, rw = 1, rh = 1 }
+
+-- Split a rectangle in a given direction
+rectSplit :: StaticRectangle -> Split -> (StaticRectangle, StaticRectangle)
+rectSplit r VerticalSplit =
+    (r { rh = h },
+     r { rh = h
+       , ry = h })
+    where h = (rh r) / 2
+rectSplit r HorizontalSplit =
+    (r { rw = w },
+     r { rw = w
+       , rx = w })
+    where w = (rw r) / 2
+
+-- Scales a X rectangle according to a static rectangle
+rectScale :: Rectangle -> StaticRectangle -> Rectangle
+rectScale xr r  =
+    Rectangle { rect_x = rx r ** rect_x xr
+              , rect_y = ry r ** rect_y xr
+              , rect_width = rw r ** rect_width xr
+              , rect_height = rh r ** rect_height xr }
+    where x ** y = round (x * (fromIntegral y))
+
+-- TODO: we depend on Window, but it would be better to have some kind
+-- of forall a. (Show a, Read a) => M.Map StaticRectangle (Maybe a) as
+-- type for splits
+data StaticLayout a =
+    StaticLayout { splits :: M.Map StaticRectangle (Maybe Window)
+                 , currentSplit :: StaticRectangle
+                 }
+    deriving (Show, Read)
+
+emptyStaticLayout =
+    StaticLayout { splits = M.singleton fsRect Nothing
+                 , currentSplit = fsRect
+                 }
 
 instance LayoutClass StaticLayout Window where
     description _ = "Static"
 
-    pureLayout l r s = [(W.focus s, currentSplit l)]
+    pureLayout l r s = [(W.focus s, rectScale r $ currentSplit l)]
 
-    emptyLayout _ r = return ([], Just (StaticLayout
-                                        { splits = M.singleton r Nothing
-                                        , currentSplit = r
-                                        }))
+    emptyLayout _ r = return ([], Just emptyStaticLayout)
 
     pureMessage l m = msum [fmap split $ fromMessage m]
         where split s =
@@ -70,17 +111,7 @@ instance LayoutClass StaticLayout Window where
                         win = case M.lookup r (splits l) of
                                 Nothing -> Nothing
                                 Just w -> w
-                        (r1, r2) = f s r
-                        f HorizontalSplit = vsplit
-                        f VerticalSplit = hsplit
-              vsplit r = (r { rect_height = h },
-                          r { rect_height = h
-                            , rect_y = fromIntegral (h + 1) })
-                  where h = (rect_height r) `div` 2
-              hsplit r = (r { rect_width = w },
-                          r { rect_width = w
-                            , rect_x = fromIntegral (w + 1) })
-                  where w = (rect_width r) `div` 2
+                        (r1, r2) = rectSplit r s
 
 -- Like getEnv, but exception-less, with a default value instead
 getEnv' :: String -> String -> IO String
@@ -146,7 +177,7 @@ myModMask = mod1Mask -- TODO: mod4Mask
 myTerminal = "urxvt"
 myFocusFollowsMouse = False
 myWorkspaces = map show [1..10]
-myLayout = Fullscreen
+myLayout = emptyStaticLayout
 
 -- No xF86XK_Battery in Haskell's X11 library.
 -- https://github.com/haskell-pkg-janitors/X11/issues/21
