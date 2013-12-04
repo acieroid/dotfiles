@@ -1,6 +1,9 @@
 {-# LANGUAGE DeriveDataTypeable, FlexibleInstances, MultiParamTypeClasses, ScopedTypeVariables #-}
 import Control.Exception (catch)
+import Control.Monad
 import qualified Data.Map as M
+import Data.Monoid
+import Data.Word
 import Graphics.X11.ExtraTypes.XF86
 import qualified Network.MPD as MPD
 import System.Environment (getEnv)
@@ -32,7 +35,16 @@ instance LayoutClass Fullscreen a where
 -- Split the current frame
 data Split = VerticalSplit | HorizontalSplit deriving Typeable
 
-data StaticLayout a = StaticLayout { splits :: [(Rectangle, Maybe Window)]
+instance Message Split
+
+instance Ord Rectangle where
+    compare r1 r2 = mconcat [ compare (rect_x r1) (rect_x r2)
+                            , compare (rect_y r1) (rect_y r2)
+                            , compare (rect_width r1) (rect_width r2)
+                            , compare (rect_height r1) (rect_height r2)
+                            ]
+
+data StaticLayout a = StaticLayout { splits :: M.Map Rectangle (Maybe Window)
                                    , currentSplit :: Rectangle
                                    }
                       deriving (Show, Read)
@@ -43,11 +55,32 @@ instance LayoutClass StaticLayout Window where
     pureLayout l r s = [(W.focus s, currentSplit l)]
 
     emptyLayout _ r = return ([], Just (StaticLayout
-                                        { splits = [(r, Nothing)]
+                                        { splits = M.singleton r Nothing
                                         , currentSplit = r
                                         }))
 
-    pureMessage l m = Nothing
+    pureMessage l m = msum [fmap split $ fromMessage m]
+        where split s =
+                  l { splits = M.insert r1 win $
+                               M.insert r2 Nothing $
+                               M.delete (currentSplit l) (splits l)
+                    , currentSplit = r1
+                    }
+                  where r = currentSplit l
+                        win = case M.lookup r (splits l) of
+                                Nothing -> Nothing
+                                Just w -> w
+                        (r1, r2) = f s r
+                        f HorizontalSplit = vsplit
+                        f VerticalSplit = hsplit
+              vsplit r = (r { rect_height = h },
+                          r { rect_height = h
+                            , rect_y = fromIntegral (h + 1) })
+                  where h = (rect_height r) `div` 2
+              hsplit r = (r { rect_width = w },
+                          r { rect_width = w
+                            , rect_x = fromIntegral (w + 1) })
+                  where w = (rect_width r) `div` 2
 
 -- Like getEnv, but exception-less, with a default value instead
 getEnv' :: String -> String -> IO String
@@ -150,6 +183,9 @@ myKeys conf@(XConfig {modMask = m}) =
            -- Move focus between windows
          , ((m, xK_Tab),            windows W.focusDown)
          , ((m .|. s, xK_Tab),      windows W.swapDown)
+           -- Manage layout
+         , ((m, xK_s),              sendMessage VerticalSplit)
+         , ((m .|. s, xK_s),        sendMessage HorizontalSplit)
            -- No need for:
            --  - a way to kill windows: I either cleanly close the
            --    program (eg. C-x C-c in emacs), and should I not, I
