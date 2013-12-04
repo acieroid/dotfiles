@@ -32,7 +32,8 @@ myDzenConfig = (onCurr (vCenter 25))
 message str =
     dzenConfig myDzenConfig str
 
--- Run a command with the given arguments, and display the result using 'message'
+-- Run a command with the given arguments, and display the result
+-- using 'message'
 messageCmd cmd args =
     runProcessWithInput cmd args "" >>= message
 
@@ -61,7 +62,14 @@ mpd MPDPrev =
     io $ MPD.withMPD MPD.previous >> return ()
 
 mpd MPDToggle =
-    error "todo"
+    io $ MPD.withMPD MPD.status >>=
+       (\res -> case res of
+                  Left err -> return ()
+                  Right status -> case MPD.stState status of
+                                    MPD.Playing -> MPD.withMPD (MPD.pause True)
+                                                   >> return ()
+                                    _ -> MPD.withMPD (MPD.play Nothing)
+                                         >> return ())
 
 -- Basing changes of XMonad defaults
 
@@ -69,6 +77,11 @@ myModMask = mod1Mask -- TODO: mod4Mask
 myTerminal = "urxvt"
 myFocusFollowsMouse = False
 myWorkspaces = map show [1..10]
+
+-- No xF86XK_Battery in Haskell's X11 library.
+-- https://github.com/haskell-pkg-janitors/X11/issues/21
+xF86XK_Battery :: KeySym
+xF86XK_Battery = 0x1008FF93
 
 -- Keybindings, defined from scratch (some bits are copied from
 -- XMonad's defaultKeys)
@@ -89,9 +102,14 @@ myKeys conf@(XConfig {modMask = m}) =
          , ((m, xK_comma),     shellPrompt myXPConfig)
            -- Launch XMonad prompt
          , ((m .|. shiftMask , xK_comma), xmonadPrompt myXPConfig)
-           -- Various information (time, mpd, ...)
+           -- Various control & information (time, mpd, ...)
          , ((0, xF86XK_Calculator), messageCmd "/usr/bin/date" [])
-         , ((m, xK_a), mpd MPDStatus)
+         , ((0, xF86XK_Launch1), messageCmd "/usr/bin/date" [])
+         , ((0, xF86XK_Battery), messageCmd "/usr/bin/acpi" ["-b"])
+         , ((0, xF86XK_Mail), mpd MPDStatus)
+         , ((0, xF86XK_AudioNext), mpd MPDNext)
+         , ((0, xF86XK_AudioPrev), mpd MPDPrev)
+         , ((0, xF86XK_AudioPlay), mpd MPDToggle) -- TODO: AudioPlay
            -- No need for:
            --  - a way to kill windows: I either cleanly close the
            --    program (eg. C-x C-c in emacs), and should I not, I
@@ -103,10 +121,8 @@ myKeys conf@(XConfig {modMask = m}) =
            --  - move into a specific direction (up, down, left, right)
            --  - testing the behaviour when multiple screens are used
            --  - deny map and raise from the browser
-           --  - have a simple way to output message (eg. time, battery etc.)
            --  - screenshot command
            --  - something similar to stumpwm's fullscreen command
-           --  - center XMonad.Prompt
          ]
          ++
          -- Move between workspaces (bepo layout :])
