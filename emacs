@@ -181,6 +181,7 @@
 (require 'ido)
 (setq ido-enable-flex-matching t)
 (setq ido-everywhere t)
+(setq ido-default-buffer-method 'selected-window)
 (ido-mode 1)
 
 ;;;; Appearence
@@ -278,7 +279,8 @@
            (shell-command-to-string "opam config env --sexp"))))
   (setenv (car var) (cadr var)))
 (setq exec-path (split-string (getenv "PATH") path-separator))
-(push (concat (getenv "OCAML_TOPLEVEL_PATH") "/../../share/emacs/site-lisp") load-path)
+(push (concat (getenv "OCAML_TOPLEVEL_PATH") "/../../share/emacs/site-lisp")
+      load-path)
 (autoload 'utop "utop" "Toplevel for OCaml" t)
 
 (require 'merlin)
