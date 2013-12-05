@@ -2,8 +2,10 @@
 import Control.Exception (catch)
 import Control.Monad
 import qualified Data.Map as M
+import qualified Data.List as L
 import Data.Monoid
 import Data.Word
+import Debug.Trace
 import Graphics.X11.ExtraTypes.XF86
 import qualified Network.MPD as MPD
 import System.Environment (getEnv)
@@ -84,10 +86,12 @@ rectSplit r HorizontalSplit =
     where w = (rw r) / 2
 
 -- Scales a X rectangle according to a static rectangle
+-- TODO: will not be correct if Rectangle does not start at 0, 0 (see
+-- if it can happen when using multiple screens
 rectScale :: Rectangle -> StaticRectangle -> Rectangle
 rectScale xr r  =
-    Rectangle { rect_x = rx r ** rect_x xr
-              , rect_y = ry r ** rect_y xr
+    Rectangle { rect_x = rx r ** rect_width xr
+              , rect_y = ry r ** rect_height xr
               , rect_width = rw r ** rect_width xr
               , rect_height = rh r ** rect_height xr }
     where x ** y = round (x * (fromIntegral y))
@@ -96,7 +100,7 @@ rectScale xr r  =
 -- of forall a. (Show a, Read a) => M.Map StaticRectangle (Maybe a) as
 -- type for splits
 data StaticLayout a =
-    StaticLayout { splits :: M.Map StaticRectangle (Maybe a)
+    StaticLayout { splits :: [StaticRectangle] -- does not contain currentSplit
                  , currentSplit :: StaticRectangle
                  , hidden :: [a]
                  }
@@ -104,29 +108,30 @@ data StaticLayout a =
 
 emptyStaticLayout :: StaticLayout a
 emptyStaticLayout =
-    StaticLayout { splits = M.singleton fsRect Nothing
+    StaticLayout { splits = [fsRect]
                  , currentSplit = fsRect
                  , hidden = []
                  }
 
 split :: StaticLayout a -> Split -> StaticLayout a
 split l s =
-    l { splits = M.insert r1 win $
-                 M.insert r2 Nothing $
-                 M.delete (currentSplit l) (splits l)
+    l { splits = r2:(L.delete (currentSplit l) (splits l))
       , currentSplit = r1
       }
     where r = currentSplit l
-          win = case M.lookup r (splits l) of
-                  Nothing -> Nothing
-                  Just w -> w
           (r1, r2) = rectSplit r s
-
 
 instance LayoutClass StaticLayout Window where
     description _ = "Static"
 
-    pureLayout l r s = [(W.focus s, rectScale r $ currentSplit l)]
+    -- We use the StackSet as follows: the currently focused window of
+    -- the StackSet is, well, the currently focused window, which is
+    -- displayed on the current split. The 'up' (or left) windows are
+    -- those that are not displayed. The 'down' (or right) windows are
+    -- those that are displayed.
+    pureLayout l r s = cur:rest
+        where cur = (W.focus s, rectScale r $ currentSplit l)
+              rest = zip ((W.down s) ++ (W.up s)) (map (rectScale r) (splits l))
 
     emptyLayout _ r = return ([], Just emptyStaticLayout)
 
