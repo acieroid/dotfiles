@@ -10,8 +10,8 @@ import System.Environment (getEnv)
 import XMonad
 import XMonad.Actions.WindowGo (runOrRaise)
 import XMonad.Prompt
-import XMonad.Prompt.Shell
-import XMonad.Prompt.XMonad
+import XMonad.Prompt.Shell (shellPrompt)
+import XMonad.Prompt.XMonad (xmonadPrompt)
 import qualified XMonad.StackSet as W
 import XMonad.Util.Dzen
 import XMonad.Util.Run
@@ -36,6 +36,19 @@ instance LayoutClass Fullscreen a where
 data Split = VerticalSplit | HorizontalSplit deriving Typeable
 
 instance Message Split
+
+-- Unsplit the current frame
+data Unsplit = Unsplit deriving Typeable
+
+instance Message Unsplit
+
+-- Move focus or position of windows
+data Focus = FocusLeft | FocusDown | FocusUp | FocusRight
+           | FocusNext | FocusPrev
+           | MoveLeft | MoveDown | MoveUp | MoveRight
+             deriving Typeable
+
+instance Message Focus
 
 -- A static rectangle represents the space a window takes on the
 -- screen, but it is not linked to the screen resolution
@@ -83,15 +96,32 @@ rectScale xr r  =
 -- of forall a. (Show a, Read a) => M.Map StaticRectangle (Maybe a) as
 -- type for splits
 data StaticLayout a =
-    StaticLayout { splits :: M.Map StaticRectangle (Maybe Window)
+    StaticLayout { splits :: M.Map StaticRectangle (Maybe a)
                  , currentSplit :: StaticRectangle
+                 , hidden :: [a]
                  }
     deriving (Show, Read)
 
+emptyStaticLayout :: StaticLayout a
 emptyStaticLayout =
     StaticLayout { splits = M.singleton fsRect Nothing
                  , currentSplit = fsRect
+                 , hidden = []
                  }
+
+split :: StaticLayout a -> Split -> StaticLayout a
+split l s =
+    l { splits = M.insert r1 win $
+                 M.insert r2 Nothing $
+                 M.delete (currentSplit l) (splits l)
+      , currentSplit = r1
+      }
+    where r = currentSplit l
+          win = case M.lookup r (splits l) of
+                  Nothing -> Nothing
+                  Just w -> w
+          (r1, r2) = rectSplit r s
+
 
 instance LayoutClass StaticLayout Window where
     description _ = "Static"
@@ -100,18 +130,7 @@ instance LayoutClass StaticLayout Window where
 
     emptyLayout _ r = return ([], Just emptyStaticLayout)
 
-    pureMessage l m = msum [fmap split $ fromMessage m]
-        where split s =
-                  l { splits = M.insert r1 win $
-                               M.insert r2 Nothing $
-                               M.delete (currentSplit l) (splits l)
-                    , currentSplit = r1
-                    }
-                  where r = currentSplit l
-                        win = case M.lookup r (splits l) of
-                                Nothing -> Nothing
-                                Just w -> w
-                        (r1, r2) = rectSplit r s
+    handleMessage l m = return $ msum [fmap (split l) $ fromMessage m]
 
 -- Like getEnv, but exception-less, with a default value instead
 getEnv' :: String -> String -> IO String
@@ -195,15 +214,15 @@ myKeys conf@(XConfig {modMask = m}) =
     M.fromList $
          [ -- Launch emacs, or just focus it
            ((m, xK_e),              runOrRaise "emacs"   (className =? "Emacs"))
-           -- Launch firefox, or just focus it
+         -- Launch firefox, or just focus it
          , ((m, xK_f),              runOrRaise "firefox" (className =? "browser"))
-           -- Launch terminal
+         -- Launch terminal
          , ((m, xK_Return),         spawn (XMonad.terminal conf))
-           -- Launch command prompt
+         -- Launch command prompt
          , ((m, xK_comma),          shellPrompt myXPConfig)
-           -- Launch XMonad prompt
+         -- Launch XMonad prompt
          , ((m .|. s , xK_comma),   xmonadPrompt myXPConfig)
-           -- Various control & information (time, mpd, ...)
+         -- Various control & information (time, mpd, ...)
          , ((0, xF86XK_Calculator), messageCmd "/usr/bin/date" [])
          , ((0, xF86XK_Launch1),    messageCmd "/usr/bin/date" [])
          , ((0, xF86XK_Battery),    messageCmd "/usr/bin/acpi" ["-b"])
@@ -211,12 +230,27 @@ myKeys conf@(XConfig {modMask = m}) =
          , ((0, xF86XK_AudioNext),  mpd MPDNext)
          , ((0, xF86XK_AudioPrev),  mpd MPDPrev)
          , ((0, xF86XK_AudioPlay),  mpd MPDToggle)
-           -- Move focus between windows
+         -- Move focus between windows
          , ((m, xK_Tab),            windows W.focusDown)
          , ((m .|. s, xK_Tab),      windows W.swapDown)
-           -- Manage layout
-         , ((m, xK_s),              sendMessage VerticalSplit)
-         , ((m .|. s, xK_s),        sendMessage HorizontalSplit)
+         -- Static layout related stuff
+         -- Move focus between displayed windows
+         , ((m, xK_c),              sendMessage FocusLeft)
+         , ((m, xK_t),              sendMessage FocusDown)
+         , ((m, xK_s),              sendMessage FocusUp)
+         , ((m, xK_r),              sendMessage FocusRight)
+         -- Change displayed windows
+         , ((m, xK_n),              sendMessage FocusNext)
+         , ((m, xK_p),              sendMessage FocusPrev)
+         -- Move windows inside layout
+         , ((m .|. s, xK_c),        sendMessage MoveLeft)
+         , ((m .|. s, xK_t),        sendMessage MoveDown)
+         , ((m .|. s, xK_s),        sendMessage MoveUp)
+         , ((m .|. s, xK_r),        sendMessage MoveRight)
+         -- Manage splits
+         , ((m, xK_v),              sendMessage VerticalSplit)
+         , ((m, xK_d),              sendMessage HorizontalSplit)
+         , ((m, xK_l),              sendMessage Unsplit)
            -- No need for:
            --  - a way to kill windows: I either cleanly close the
            --    program (eg. C-x C-c in emacs), and should I not, I
