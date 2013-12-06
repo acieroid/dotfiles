@@ -2,8 +2,10 @@
 import Control.Exception (catch)
 import Control.Monad
 import qualified Data.Map as M
-import qualified Data.List as L
+import Data.Maybe
 import Data.Monoid
+import qualified Data.List as L
+import qualified Data.Set as S
 import Data.Word
 import Debug.Trace
 import Graphics.X11.ExtraTypes.XF86
@@ -44,13 +46,25 @@ data Unsplit = Unsplit deriving Typeable
 
 instance Message Unsplit
 
--- Move focus or position of windows
-data Focus = FocusLeft | FocusDown | FocusUp | FocusRight
-           | FocusNext | FocusPrev
-           | MoveLeft | MoveDown | MoveUp | MoveRight
-             deriving Typeable
+-- Move focus between frames
+data Focus = FocusLeft | FocusDown | FocusUp | FocusRight deriving Typeable
 
 instance Message Focus
+
+-- Move windows between frames
+data Move = MoveLeft | MoveDown | MoveUp | MoveRight deriving Typeable
+
+instance Message Move
+
+-- Swap focused windows, staying on the same frame
+data FocusWin = FocusNext | FocusPrev deriving Typeable
+
+instance Message FocusWin
+
+-- Add or remove a window from the layout
+data WinEvent = NewWindow Window | RemovedWindow Window deriving Typeable
+
+instance Message WinEvent
 
 -- A static rectangle represents the space a window takes on the
 -- screen, but it is not linked to the screen resolution
@@ -96,46 +110,109 @@ rectScale xr r  =
               , rect_height = rh r ** rect_height xr }
     where x ** y = round (x * (fromIntegral y))
 
--- TODO: we depend on Window, but it would be better to have some kind
--- of forall a. (Show a, Read a) => M.Map StaticRectangle (Maybe a) as
--- type for splits
 data StaticLayout a =
-    StaticLayout { splits :: [StaticRectangle] -- does not contain currentSplit
-                 , currentSplit :: StaticRectangle
-                 , hidden :: [a]
+    StaticLayout { -- Contains the frames that are not focused (each
+                   -- one is associated with one possible window)
+                   frames :: M.Map StaticRectangle (Maybe a)
+                   -- The currently focused frame (represented by the
+                   -- StaticRectangle), associated with a stack of
+                   -- windows, one of theim being focused, the other
+                   -- ones being hidden
+                 , current :: (Maybe (W.Stack a), StaticRectangle)
                  }
     deriving (Show, Read)
 
 emptyStaticLayout :: StaticLayout a
 emptyStaticLayout =
-    StaticLayout { splits = [fsRect]
-                 , currentSplit = fsRect
-                 , hidden = []
+    StaticLayout { frames = M.empty
+                 , current = (Nothing, fsRect)
                  }
+
+stackNewWindow :: (Eq a) => Maybe (W.Stack a) -> Maybe (W.Stack a) -> Maybe a
+stackNewWindow Nothing (Just s2) = Just (W.focus s2)
+stackNewWindow (Just _) Nothing = Nothing
+stackNewWindow (Just s1) (Just s2) =
+  if W.up s1 == W.up s2 && W.down s1 == W.down s2
+  then if W.focus s1 == W.focus s2
+       then Nothing
+       else Just (W.focus s2)
+  else Nothing -- Windows have moved or one has been removed
+
+stackRemovedWindow :: (Eq a) => Maybe (W.Stack a) -> Maybe (W.Stack a) -> Maybe a
+stackRemovedWindow Nothing (Just _) = Nothing
+stackRemovedWindow (Just s1) Nothing = Just (W.focus s1)
+stackRemovedWindow (Just s1) (Just s2) =
+  if W.focus s1 == W.focus s2
+  then Nothing
+  else if W.up s1 == W.up s2 || W.down s1 == W.down s2
+       then Just (W.focus s1)
+       else Nothing
 
 split :: StaticLayout a -> Split -> StaticLayout a
 split l s =
-    l { splits = r2:(L.delete (currentSplit l) (splits l))
-      , currentSplit = r1
-      }
-    where r = currentSplit l
+    -- TODO: can put a hidden window in the new frame (r2)
+    l { frames = M.insert r2 Nothing $
+                 frames l
+      , current = (stack, r1) }
+    where (stack, r) = current l
           (r1, r2) = rectSplit r s
 
 instance LayoutClass StaticLayout Window where
     description _ = "Static"
 
-    -- We use the StackSet as follows: the currently focused window of
-    -- the StackSet is, well, the currently focused window, which is
-    -- displayed on the current split. The 'up' (or left) windows are
-    -- those that are not displayed. The 'down' (or right) windows are
-    -- those that are displayed.
-    pureLayout l r s = cur:rest
-        where cur = (W.focus s, rectScale r $ currentSplit l)
-              rest = zip ((W.down s) ++ (W.up s)) (map (rectScale r) (splits l))
+    pureLayout l r s = [(W.focus s, r)]
+        -- mapMaybe (\(mw, r) -> fmap (\w -> (w, r)) mw) $
+        -- cur:rest
+        where cur = (fmap W.focus stack, rectScale r frame)
+              rest = map (\(rect, w) -> (w, rectScale r rect)) $
+                     M.toList $ frames l
+              (stack, frame) = current l
 
-    emptyLayout _ r = return ([], Just emptyStaticLayout)
+    emptyLayout l r = return ([], Just l)
 
-    handleMessage l m = return $ msum [fmap (split l) $ fromMessage m]
+    handleMessage l m = do
+        io $ maybe (return ()) printMessage $ fromMessage m
+        return $ msum [ fmap (split l) $ fromMessage m
+                      , fmap xmessage $ fromMessage m
+                      ]
+        where xmessage (NewWindow w) = traceShow w l
+              xmessage (RemovedWindow w) = traceShow w l
+              printMessage (NewWindow w) = putStrLn "New window"
+              printMessage (RemovedWindow w) = putStrLn "Removed window"
+
+-- Overrides XMonad's default event hook to add some behaviour (mainly
+-- sending messages on some actions). Most of the code is unshamefully
+-- taken from XMonad original source code
+myHandle :: Event -> X All
+myHandle (MapRequestEvent {ev_window = w}) = withDisplay $ \dpy -> do
+    wa <- io $ getWindowAttributes dpy w -- ignore override windows
+    -- need to ignore mapping requests by managed windows not on the
+    -- current workspace
+    managed <- isClient w
+    when (not (wa_override_redirect wa) && not managed) $ do
+      sendMessage (NewWindow w)
+      manage w
+    return (All False) -- Don't run XMonad's handle
+
+myHandle (DestroyWindowEvent {ev_window = w}) = do
+  whenX (isClient w) $ do
+    unmanage w
+    sendMessage (RemovedWindow w)
+    modify (\s -> s { mapped       = S.delete w (mapped s)
+                    , waitingUnmap = M.delete w (waitingUnmap s)})
+  return (All False) -- Don't run XMonad's handle
+
+myHandle (UnmapEvent {ev_window = w, ev_send_event = synthetic}) = do
+  whenX (isClient w) $ do
+    e <- gets (fromMaybe 0 . M.lookup w . waitingUnmap)
+    if (synthetic || e == 0)
+        then unmanage w >> sendMessage (RemovedWindow w)
+        else modify (\s -> s { waitingUnmap = M.update mpred w (waitingUnmap s) })
+  return (All False) -- Don't run XMonad's handle
+ where mpred 1 = Nothing
+       mpred n = Just $ pred n
+
+myHandle _ = return (All True)
 
 -- Like getEnv, but exception-less, with a default value instead
 getEnv' :: String -> String -> IO String
@@ -239,20 +316,20 @@ myKeys conf@(XConfig {modMask = m}) =
          , ((m, xK_Tab),            windows W.focusDown)
          , ((m .|. s, xK_Tab),      windows W.swapDown)
          -- Static layout related stuff
-         -- Move focus between displayed windows
+         -- Move focus between frames
          , ((m, xK_c),              sendMessage FocusLeft)
          , ((m, xK_t),              sendMessage FocusDown)
          , ((m, xK_s),              sendMessage FocusUp)
          , ((m, xK_r),              sendMessage FocusRight)
-         -- Change displayed windows
+         -- Change displayed window inside a frame
          , ((m, xK_n),              sendMessage FocusNext)
          , ((m, xK_p),              sendMessage FocusPrev)
-         -- Move windows inside layout
+         -- Move frames
          , ((m .|. s, xK_c),        sendMessage MoveLeft)
          , ((m .|. s, xK_t),        sendMessage MoveDown)
          , ((m .|. s, xK_s),        sendMessage MoveUp)
          , ((m .|. s, xK_r),        sendMessage MoveRight)
-         -- Manage splits
+         -- Manage frames
          , ((m, xK_v),              sendMessage VerticalSplit)
          , ((m, xK_d),              sendMessage HorizontalSplit)
          , ((m, xK_l),              sendMessage Unsplit)
@@ -288,5 +365,6 @@ main = xmonad defaultConfig
         , focusFollowsMouse = myFocusFollowsMouse
         , workspaces = myWorkspaces
         , layoutHook = myLayout
+        , handleEventHook = myHandle
         , keys = myKeys
         }
