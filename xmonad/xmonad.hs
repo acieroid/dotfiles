@@ -20,6 +20,9 @@ import qualified XMonad.StackSet as W
 import XMonad.Util.Dzen
 import XMonad.Util.Run
 
+-- For debugging purposes
+t a = traceShow a a
+
 -- Simple fullscreen layout
 data Fullscreen a = Fullscreen
                   deriving (Show, Read)
@@ -128,27 +131,7 @@ emptyStaticLayout =
                  , current = (Nothing, fsRect)
                  }
 
-stackNewWindow :: (Eq a) => Maybe (W.Stack a) -> Maybe (W.Stack a) -> Maybe a
-stackNewWindow Nothing (Just s2) = Just (W.focus s2)
-stackNewWindow (Just _) Nothing = Nothing
-stackNewWindow (Just s1) (Just s2) =
-  if W.up s1 == W.up s2 && W.down s1 == W.down s2
-  then if W.focus s1 == W.focus s2
-       then Nothing
-       else Just (W.focus s2)
-  else Nothing -- Windows have moved or one has been removed
-
-stackRemovedWindow :: (Eq a) => Maybe (W.Stack a) -> Maybe (W.Stack a) -> Maybe a
-stackRemovedWindow Nothing (Just _) = Nothing
-stackRemovedWindow (Just s1) Nothing = Just (W.focus s1)
-stackRemovedWindow (Just s1) (Just s2) =
-  if W.focus s1 == W.focus s2
-  then Nothing
-  else if W.up s1 == W.up s2 || W.down s1 == W.down s2
-       then Just (W.focus s1)
-       else Nothing
-
-split :: StaticLayout a -> Split -> StaticLayout a
+split :: (Show a) => StaticLayout a -> Split -> StaticLayout a
 split l s =
     -- TODO: can put a hidden window in the new frame (r2)
     l { frames = M.insert r2 Nothing $
@@ -157,12 +140,25 @@ split l s =
     where (stack, r) = current l
           (r1, r2) = rectSplit r s
 
+addWindow :: StaticLayout a -> a -> StaticLayout a
+addWindow l w = l { current = (Just (W.Stack { W.focus = w
+                                             , W.up = newUp
+                                             , W.down = newDown
+                                             }),
+                               (snd (current l)))
+                  }
+    where newUp = maybe [] (\s -> (W.focus s):(W.up s)) stack
+          newDown = maybe [] W.down stack
+          stack = fst (current l)
+
+removeWindow :: StaticLayout a -> a -> StaticLayout a
+removeWindow l w = error "TODO"
+
 instance LayoutClass StaticLayout Window where
     description _ = "Static"
 
-    pureLayout l r s = [(W.focus s, r)]
-        -- mapMaybe (\(mw, r) -> fmap (\w -> (w, r)) mw) $
-        -- cur:rest
+    pureLayout l r s = t $ mapMaybe (\(mw, r) -> fmap (\w -> (w, r)) mw) $
+                       cur:rest
         where cur = (fmap W.focus stack, rectScale r frame)
               rest = map (\(rect, w) -> (w, rectScale r rect)) $
                      M.toList $ frames l
@@ -171,14 +167,13 @@ instance LayoutClass StaticLayout Window where
     emptyLayout l r = return ([], Just l)
 
     handleMessage l m = do
-        io $ maybe (return ()) printMessage $ fromMessage m
-        return $ msum [ fmap (split l) $ fromMessage m
-                      , fmap xmessage $ fromMessage m
-                      ]
-        where xmessage (NewWindow w) = traceShow w l
-              xmessage (RemovedWindow w) = traceShow w l
-              printMessage (NewWindow w) = putStrLn "New window"
-              printMessage (RemovedWindow w) = putStrLn "Removed window"
+      return $ msum [ fmap (split l) $ fromMessage m
+                    , fmap xmessage $ fromMessage m
+                    ]
+        where xmessage (NewWindow w) = addWindow l w
+              xmessage (RemovedWindow w) = removeWindow l w
+              printMessage (NewWindow w) = putStrLn "new"
+              printMessage (RemovedWindow w) = putStrLn "removed"
 
 -- Overrides XMonad's default event hook to add some behaviour (mainly
 -- sending messages on some actions). Most of the code is unshamefully
