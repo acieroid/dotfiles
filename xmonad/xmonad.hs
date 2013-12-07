@@ -113,6 +113,10 @@ rectScale xr r  =
               , rect_height = rh r ** rect_height xr }
     where x ** y = round (x * (fromIntegral y))
 
+rectContains :: StaticRectangle -> Rational -> Rational -> Bool
+rectContains r x y = rx r <= x && ry r <= y &&
+                     (rx r + rw r) > x && (ry r + rh r) > y
+
 data StaticLayout a =
     StaticLayout { -- Contains the frames that are not focused (each
                    -- one is associated with one possible window)
@@ -130,6 +134,15 @@ emptyStaticLayout =
     StaticLayout { frames = M.empty
                  , current = (Nothing, fsRect)
                  }
+
+-- Finds the rectangle that contains a position in the layout (don't
+-- look into the current frame)
+findRect :: StaticLayout a -> Rational -> Rational -> Maybe StaticRectangle
+findRect (StaticLayout { frames = f }) x y =
+    if M.size remaining == 0
+    then Nothing
+    else Just (fst (M.elemAt 0 remaining))
+    where remaining = M.filterWithKey (\r _ -> rectContains r x y) f
 
 split :: (Show a) => StaticLayout a -> Split -> StaticLayout a
 split l s =
