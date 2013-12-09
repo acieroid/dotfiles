@@ -13,6 +13,8 @@ import qualified Network.MPD as MPD
 import System.Environment (getEnv)
 import XMonad
 import XMonad.Actions.WindowGo (runOrRaise)
+import XMonad.Layout.Gaps
+import XMonad.Layout.NoBorders
 import XMonad.Prompt
 import XMonad.Prompt.Shell (shellPrompt)
 import XMonad.Prompt.XMonad (xmonadPrompt)
@@ -282,11 +284,15 @@ mpd MPDToggle =
 
 -- Basing changes of XMonad defaults
 
-myModMask = mod1Mask -- TODO: mod4Mask
+myModMask = mod4Mask
 myTerminal = "urxvt"
 myFocusFollowsMouse = False
 myWorkspaces = map show [1..10]
-myLayout = emptyStaticLayout
+myClickJustFocuses = False
+myLayoutHook = gaps [(D, 3)] $
+               smartBorders $
+               tiled ||| Mirror tiled ||| Full
+    where tiled = Tall 1 (5/100) (2/3)
 
 -- No xF86XK_Battery in Haskell's X11 library.
 -- https://github.com/haskell-pkg-janitors/X11/issues/21
@@ -305,7 +311,7 @@ myKeys conf@(XConfig {modMask = m}) =
          [ -- Launch emacs, or just focus it
            ((m, xK_e),              runOrRaise "emacs"   (className =? "Emacs"))
          -- Launch firefox, or just focus it
-         , ((m, xK_f),              runOrRaise "firefox" (className =? "browser"))
+         , ((m, xK_f),              runOrRaise "firefox" (className =? "Navigator"))
          -- Launch terminal
          , ((m, xK_Return),         spawn (XMonad.terminal conf))
          -- Launch command prompt
@@ -325,6 +331,7 @@ myKeys conf@(XConfig {modMask = m}) =
          , ((m .|. s, xK_Tab),      windows W.swapDown)
          -- Static layout related stuff
          -- Move focus between frames
+         {-
          , ((m, xK_c),              sendMessage FocusLeft)
          , ((m, xK_t),              sendMessage FocusDown)
          , ((m, xK_s),              sendMessage FocusUp)
@@ -341,6 +348,21 @@ myKeys conf@(XConfig {modMask = m}) =
          , ((m, xK_v),              sendMessage VerticalSplit)
          , ((m, xK_d),              sendMessage HorizontalSplit)
          , ((m, xK_l),              sendMessage Unsplit)
+         -}
+         -- Dynamic layout conf
+         , ((m, xK_n),              windows W.focusDown)
+         , ((m .|. s, xK_n),        windows W.swapDown)
+         , ((m, xK_p),              windows W.focusUp)
+         , ((m .|. s, xK_p),        windows W.swapUp)
+         , ((m, xK_m),              windows W.focusMaster)
+         , ((m .|. s, xK_m),        windows W.swapMaster)
+         , ((m, xK_c),              sendMessage Shrink)
+         , ((m, xK_r),              sendMessage Expand)
+         , ((m, xK_g),              withFocused $ windows . W.sink)
+         , ((m, xK_v),              sendMessage (IncMasterN 1))
+         , ((m, xK_d),              sendMessage (IncMasterN (-1)))
+         , ((m, xK_space),          sendMessage NextLayout)
+         , ((m .|. s, xK_space),    setLayout $ XMonad.layoutHook conf)
            -- No need for:
            --  - a way to kill windows: I either cleanly close the
            --    program (eg. C-x C-c in emacs), and should I not, I
@@ -371,8 +393,9 @@ main = xmonad defaultConfig
         { modMask = myModMask
         , terminal = myTerminal
         , focusFollowsMouse = myFocusFollowsMouse
+        , clickJustFocuses = myClickJustFocuses
         , workspaces = myWorkspaces
-        , layoutHook = myLayout
-        , handleEventHook = myHandle
+        , layoutHook = myLayoutHook
+        -- , handleEventHook = myHandle
         , keys = myKeys
         }
