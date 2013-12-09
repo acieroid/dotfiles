@@ -311,7 +311,7 @@ myKeys conf@(XConfig {modMask = m}) =
          [ -- Launch emacs, or just focus it
            ((m, xK_e),              runOrRaise "emacs"   (className =? "Emacs"))
          -- Launch firefox, or just focus it
-         , ((m, xK_f),              runOrRaise "firefox" (className =? "Navigator"))
+         , ((m, xK_f),              runOrRaise "firefox" (className =? "Firefox"))
          -- Launch terminal
          , ((m, xK_Return),         spawn (XMonad.terminal conf))
          -- Launch command prompt
