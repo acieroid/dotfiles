@@ -87,6 +87,30 @@
       browse-url-new-window-flag  t
       browse-url-firefox-new-window-is-tab t)
 
+;;; Move between windows using shift and arrows or M-{c,t,s,r}
+(windmove-default-keybindings)
+(defvar win-minor-mode-map (make-keymap) "win-minor-mode keymap.")
+
+(define-key win-minor-mode-map (kbd "M-c") 'windmove-left)
+(define-key win-minor-mode-map (kbd "M-r") 'windmove-right)
+(define-key win-minor-mode-map (kbd "M-s") 'windmove-up)
+(define-key win-minor-mode-map (kbd "M-t") 'windmove-down)
+
+(define-minor-mode win-minor-mode
+  "Minor mode to move between emacs' windows"
+  t " win-minor-mode" 'win-minor-mode-map)
+
+(win-minor-mode 1)
+
+;; Disable killing emacs by C-x C-c...
+(global-set-key (kbd "C-x C-c") 'keyboard-quit)
+
+;; ...but we don't want to M-x save-buffers-kill-terminal to quit, M-x
+;; quit is simpler
+(defun quit ()
+  (interactive)
+  (save-buffers-kill-terminal))
+
 ;;;; Edit-mode improvements
 ;;; Auto-fill set to 80 columns
 (auto-fill-mode)
