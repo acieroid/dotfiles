@@ -13,8 +13,9 @@ import qualified Network.MPD as MPD
 import System.Environment (getEnv)
 import XMonad
 import XMonad.Actions.WindowGo (runOrRaise)
-import XMonad.Layout.Gaps
-import XMonad.Layout.NoBorders
+import XMonad.Actions.Volume (toggleMute, raiseVolume, lowerVolume)
+import XMonad.Layout.Gaps (gaps, Direction2D(..))
+import XMonad.Layout.NoBorders (smartBorders)
 import XMonad.Prompt
 import XMonad.Prompt.Shell (shellPrompt)
 import XMonad.Prompt.XMonad (xmonadPrompt)
@@ -282,14 +283,31 @@ mpd MPDToggle =
                                     _ -> MPD.withMPD (MPD.play Nothing)
                                          >> return ())
 
+-- Some commands to display info or launch stuff
+displayDate = messageCmd "/usr/bin/date" []
+displayBattery = messageCmd "/usr/bin/acpi" ["-b"]
+lockScreen = safeSpawn "/usr/bin/xlock"
+             ["-mode", "blank",
+              "-use3d", "-font", "-*-erusfont-*-*-*-*-*-*-*-*-*-*-*-*",
+              "+description", "-info", " ",
+              "-fg", "grey55", "-echokeys", "-echokey", "*",
+              "+usefirst", "-icongeometry", "0x0"]
+displayVolume = message . (++ "%") . ("Volume: " ++) . show . ceiling
+volumeDown = lowerVolume 4 >>= displayVolume
+volumeUp = raiseVolume 4 >>= displayVolume
+volumeToggle = toggleMute >>= message . ("Volume: " ++) . show
+
 -- Basing changes of XMonad defaults
 
 myModMask = mod4Mask
 myTerminal = "urxvt"
 myFocusFollowsMouse = False
-myWorkspaces = map show [1..10]
 myClickJustFocuses = False
-myLayoutHook = gaps [(D, 3)] $
+myBorderWidth = 3
+myNormalBorderColor = "black"
+myFocusedBorderColor = "white"
+myWorkspaces = map show [1..10]
+myLayoutHook = gaps [(D, 2)] $
                smartBorders $
                tiled ||| Mirror tiled ||| Full
     where tiled = Tall 1 (5/100) (2/3)
@@ -309,60 +327,64 @@ myWorkspaceKeys = [xK_quotedbl, xK_guillemotleft, xK_guillemotright,
 myKeys conf@(XConfig {modMask = m}) =
     M.fromList $
          [ -- Launch emacs, or just focus it
-           ((m, xK_e),              runOrRaise "emacs"   (className =? "Emacs"))
+           ((m, xK_e),               runOrRaise "emacs"   (className =? "Emacs"))
          -- Launch firefox, or just focus it
-         , ((m, xK_f),              runOrRaise "firefox" (className =? "Firefox"))
+         , ((m, xK_f),               runOrRaise "firefox" (className =? "Firefox"))
          -- Launch terminal
-         , ((m, xK_Return),         spawn (XMonad.terminal conf))
+         , ((m, xK_Return),          spawn (XMonad.terminal conf))
          -- Launch command prompt
-         , ((m, xK_comma),          shellPrompt myXPConfig)
+         , ((m, xK_comma),           shellPrompt myXPConfig)
          -- Launch XMonad prompt
-         , ((m .|. s , xK_comma),   xmonadPrompt myXPConfig)
+         , ((m .|. s , xK_comma),    xmonadPrompt myXPConfig)
          -- Various control & information (time, mpd, ...)
-         , ((0, xF86XK_Calculator), messageCmd "/usr/bin/date" [])
-         , ((0, xF86XK_Launch1),    messageCmd "/usr/bin/date" [])
-         , ((0, xF86XK_Battery),    messageCmd "/usr/bin/acpi" ["-b"])
-         , ((0, xF86XK_Mail),       mpd MPDStatus)
-         , ((0, xF86XK_AudioNext),  mpd MPDNext)
-         , ((0, xF86XK_AudioPrev),  mpd MPDPrev)
-         , ((0, xF86XK_AudioPlay),  mpd MPDToggle)
+         , ((0, xF86XK_Calculator),  displayDate)
+         , ((0, xF86XK_Launch1),     displayDate)
+         , ((0, xF86XK_Battery),     displayBattery)
+         , ((0, xF86XK_ScreenSaver), lockScreen)
+         , ((0, xF86XK_Mail),        mpd MPDStatus)
+         , ((0, xF86XK_AudioNext),   mpd MPDNext)
+         , ((0, xF86XK_AudioPrev),   mpd MPDPrev)
+         , ((0, xF86XK_AudioPlay),   mpd MPDToggle)
+         , ((0, xF86XK_AudioRaiseVolume), volumeUp)
+         , ((0, xF86XK_AudioLowerVolume), volumeDown)
+         , ((0, xF86XK_AudioMute),   volumeToggle)
          -- Move focus between windows
-         , ((m, xK_Tab),            windows W.focusDown)
-         , ((m .|. s, xK_Tab),      windows W.swapDown)
+         , ((m, xK_Tab),             windows W.focusDown)
+         , ((m .|. s, xK_Tab),       windows W.swapDown)
          -- Static layout related stuff
          -- Move focus between frames
          {-
-         , ((m, xK_c),              sendMessage FocusLeft)
-         , ((m, xK_t),              sendMessage FocusDown)
-         , ((m, xK_s),              sendMessage FocusUp)
-         , ((m, xK_r),              sendMessage FocusRight)
+         , ((m, xK_c),               sendMessage FocusLeft)
+         , ((m, xK_t),               sendMessage FocusDown)
+         , ((m, xK_s),               sendMessage FocusUp)
+         , ((m, xK_r),               sendMessage FocusRight)
          -- Change displayed window inside a frame
-         , ((m, xK_n),              sendMessage FocusNext)
-         , ((m, xK_p),              sendMessage FocusPrev)
+         , ((m, xK_n),               sendMessage FocusNext)
+         , ((m, xK_p),               sendMessage FocusPrev)
          -- Move frames
-         , ((m .|. s, xK_c),        sendMessage MoveLeft)
-         , ((m .|. s, xK_t),        sendMessage MoveDown)
-         , ((m .|. s, xK_s),        sendMessage MoveUp)
-         , ((m .|. s, xK_r),        sendMessage MoveRight)
+         , ((m .|. s, xK_c),         sendMessage MoveLeft)
+         , ((m .|. s, xK_t),         sendMessage MoveDown)
+         , ((m .|. s, xK_s),         sendMessage MoveUp)
+         , ((m .|. s, xK_r),         sendMessage MoveRight)
          -- Manage frames
-         , ((m, xK_v),              sendMessage VerticalSplit)
-         , ((m, xK_d),              sendMessage HorizontalSplit)
-         , ((m, xK_l),              sendMessage Unsplit)
+         , ((m, xK_v),               sendMessage VerticalSplit)
+         , ((m, xK_d),               sendMessage HorizontalSplit)
+         , ((m, xK_l),               sendMessage Unsplit)
          -}
          -- Dynamic layout conf
-         , ((m, xK_n),              windows W.focusDown)
-         , ((m .|. s, xK_n),        windows W.swapDown)
-         , ((m, xK_p),              windows W.focusUp)
-         , ((m .|. s, xK_p),        windows W.swapUp)
-         , ((m, xK_m),              windows W.focusMaster)
-         , ((m .|. s, xK_m),        windows W.swapMaster)
-         , ((m, xK_c),              sendMessage Shrink)
-         , ((m, xK_r),              sendMessage Expand)
-         , ((m, xK_g),              withFocused $ windows . W.sink)
-         , ((m, xK_v),              sendMessage (IncMasterN 1))
-         , ((m, xK_d),              sendMessage (IncMasterN (-1)))
-         , ((m, xK_space),          sendMessage NextLayout)
-         , ((m .|. s, xK_space),    setLayout $ XMonad.layoutHook conf)
+         , ((m, xK_n),               windows W.focusDown)
+         , ((m .|. s, xK_n),         windows W.swapDown)
+         , ((m, xK_p),               windows W.focusUp)
+         , ((m .|. s, xK_p),         windows W.swapUp)
+         , ((m, xK_m),               windows W.focusMaster)
+         , ((m .|. s, xK_m),         windows W.swapMaster)
+         , ((m, xK_c),               sendMessage Shrink)
+         , ((m, xK_r),               sendMessage Expand)
+         , ((m, xK_g),               withFocused $ windows . W.sink)
+         , ((m, xK_v),               sendMessage (IncMasterN 1))
+         , ((m, xK_d),               sendMessage (IncMasterN (-1)))
+         , ((m, xK_space),           sendMessage NextLayout)
+         , ((m .|. s, xK_space),     setLayout $ XMonad.layoutHook conf)
            -- No need for:
            --  - a way to kill windows: I either cleanly close the
            --    program (eg. C-x C-c in emacs), and should I not, I
@@ -394,6 +416,9 @@ main = xmonad defaultConfig
         , terminal = myTerminal
         , focusFollowsMouse = myFocusFollowsMouse
         , clickJustFocuses = myClickJustFocuses
+        , borderWidth = myBorderWidth
+        , normalBorderColor = myNormalBorderColor
+        , focusedBorderColor = myFocusedBorderColor
         , workspaces = myWorkspaces
         , layoutHook = myLayoutHook
         -- , handleEventHook = myHandle
