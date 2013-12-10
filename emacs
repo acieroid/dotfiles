@@ -453,6 +453,7 @@
   /*]]>*/-->
 </style>")
 
+(setq org-export-html-style-include-scripts nil)
 (setq org-export-html-postamble t)
 (setq org-export-html-postamble-format
       '(("en" "<p class=\"date\">Last update: %d"</p>)))
