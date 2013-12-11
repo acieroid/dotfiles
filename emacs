@@ -279,9 +279,12 @@
 ;  (slime-setup '(slime-proxy slime-parenscript)))
 
 ;;; Scheme
-(add-to-list 'packages-to-install 'quack)
-(autoload 'scheme-mode "quack" "Scheme Mode")
-(add-paredit-hook 'quack-mode-hook)
+;(add-to-list 'packages-to-install 'quack)
+;(autoload 'scheme-mode "quack" "Scheme Mode")
+;(add-paredit-hook 'quack-mode-hook)
+;; Use scheme.el instead of quack. I don't really need to interact
+;; with an inferior process for Scheme.
+(require 'scheme)
 
 ;;; Ocaml
 ;;(add-to-list 'packages-to-install 'tuareg)
