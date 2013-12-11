@@ -238,7 +238,7 @@ safeHead _ = Nothing
 
 myXPConfig = defaultXPConfig
 
-myDzenConfig = (onCurr (vCenter 25))
+myDzenConfig = (onCurr (vCenter 25)) >=> (timeout 1)
 
 -- Display a centered message
 message str =
