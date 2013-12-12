@@ -296,6 +296,7 @@ displayVolume = message . (++ "%") . ("Volume: " ++) . show . ceiling
 volumeDown = lowerVolume 4 >>= displayVolume
 volumeUp = raiseVolume 4 >>= displayVolume
 volumeToggle = toggleMute >>= message . ("Volume: " ++) . show
+suspend = safeSpawn "/usr/bin/systemctl" ["suspend"]
 
 -- Basing changes of XMonad defaults
 
@@ -341,6 +342,7 @@ myKeys conf@(XConfig {modMask = m}) =
          , ((0, xF86XK_Launch1),     displayDate)
          , ((0, xF86XK_Battery),     displayBattery)
          , ((0, xF86XK_ScreenSaver), lockScreen)
+         , ((0, xF86XK_Sleep),       suspend)
          , ((0, xF86XK_Mail),        mpd MPDStatus)
          , ((0, xF86XK_AudioNext),   mpd MPDNext)
          , ((0, xF86XK_AudioPrev),   mpd MPDPrev)
