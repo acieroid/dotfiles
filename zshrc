@@ -33,6 +33,7 @@ alias t='ssh -C torrent@ks2g -p 42022'
 alias i2='ssh -C acieroid@ks2g -p 42022'
 alias k='ssh -C acieroid@ks2g -p 21022'
 alias m='ssh -C acieroid@foo.awesom.eu -p 42022'
+alias e='emacsclient'
 
 # variables
 export LANG=en_US.UTF-8
