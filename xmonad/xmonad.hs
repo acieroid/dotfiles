@@ -295,7 +295,7 @@ lockScreen = safeSpawn "/usr/bin/xlock"
 displayVolume = message . (++ "%") . ("Volume: " ++) . show . ceiling
 volumeDown = lowerVolume 4 >>= displayVolume
 volumeUp = raiseVolume 4 >>= displayVolume
-volumeToggle = toggleMute >>= message . ("Volume: " ++) . show
+volumeToggle = toggleMute >>= message . ("Volume: " ++) . show . not
 suspend = safeSpawn "/usr/bin/systemctl" ["suspend"]
 
 -- Basing changes of XMonad defaults
