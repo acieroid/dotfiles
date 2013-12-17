@@ -111,6 +111,9 @@
   (interactive)
   (save-buffers-kill-terminal))
 
+;; Disable the awful doc-view-mode
+(rassq-delete-all #'doc-view-mode auto-mode-alist)
+
 ;;;; Edit-mode improvements
 ;;; Auto-fill set to 80 columns
 (auto-fill-mode)
