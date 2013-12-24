@@ -1,5 +1,6 @@
 #!/bin/sh
-DEFAULTWM="/home/quentin/p/stumpwm/stumpwm"
+DEFAULTWM="xmonad"
+#DEFAULTWM="/home/quentin/p/stumpwm/stumpwm"
 #DEFAULTWM="openbox-session"
 urxvtd -q -f -o &
 xset -b
