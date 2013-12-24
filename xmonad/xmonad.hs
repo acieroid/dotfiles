@@ -12,6 +12,7 @@ import Graphics.X11.ExtraTypes.XF86
 import qualified Network.MPD as MPD
 import System.Environment (getEnv)
 import XMonad
+import XMonad.Actions.CycleWS (nextScreen, swapNextScreen)
 import XMonad.Actions.WindowGo (runOrRaise)
 import XMonad.Actions.Volume (toggleMute, raiseVolume, lowerVolume)
 import XMonad.Layout.Gaps (gaps, Direction2D(..))
@@ -350,9 +351,9 @@ myKeys conf@(XConfig {modMask = m}) =
          , ((0, xF86XK_AudioRaiseVolume), volumeUp)
          , ((0, xF86XK_AudioLowerVolume), volumeDown)
          , ((0, xF86XK_AudioMute),   volumeToggle)
-         -- Move focus between windows
-         , ((m, xK_Tab),             windows W.focusDown)
-         , ((m .|. s, xK_Tab),       windows W.swapDown)
+         -- Move focus between screens
+         , ((m, xK_Tab),             nextScreen)
+         , ((m .|. s, xK_Tab),       swapNextScreen)
          -- Static layout related stuff
          -- Move focus between frames
          {-
