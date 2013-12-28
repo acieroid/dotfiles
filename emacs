@@ -52,9 +52,9 @@
 
 ;;; Highlight trailing whitespaces, characters past 80 columns, and tabs
 ;; (setq-default show-trailing-whitespace t)
-(require 'whitespace)
-(setq whitespace-style '(face empty tabs lines-tail trailing))
-(global-whitespace-mode t)
+;(require 'whitespace)
+;(setq whitespace-style '(face empty tabs lines-tail trailing))
+;(global-whitespace-mode nil)
 
 ;;; Colored output in M-x shell
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
@@ -300,8 +300,12 @@
 (add-to-list 'interpreter-mode-alist '("ocamlrun" . caml-mode))
 (add-to-list 'interpreter-mode-alist '("ocaml" . caml-mode))
 (if window-system (require 'caml-font))
-(add-to-list 'load-path "/home/quentin/.opam/system/share/emacs/site-lisp")
-(load-file "/home/quentin/.opam/system/share/typerex/ocp-indent/ocp-indent.el")
+(add-to-list 'load-path
+             (concat
+              (replace-regexp-in-string "\n$" ""
+                                        (shell-command-to-string "opam config var share"))
+              "/emacs/site-lisp"))
+(require 'ocp-indent)
 
 (dolist (var
          (car
@@ -309,8 +313,6 @@
            (shell-command-to-string "opam config env --sexp"))))
   (setenv (car var) (cadr var)))
 (setq exec-path (split-string (getenv "PATH") path-separator))
-(push (concat (getenv "OCAML_TOPLEVEL_PATH") "/../../share/emacs/site-lisp")
-      load-path)
 (autoload 'utop "utop" "Toplevel for OCaml" t)
 
 (require 'merlin)
