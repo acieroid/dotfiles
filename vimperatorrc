@@ -13,4 +13,4 @@ set noautocomplete
 set editor="urxvt -e vim"
 set toolbars=noaddons,nobookmarks,nomenu,nonavigation,tabs
 style "chrome://*" #appmenu-toolbar-button, .scrollbutton-up, .scrollbutton-down { display:none; }
-set defsearch=ddg
+set defsearch=gg
