@@ -1,14 +1,41 @@
 #!/bin/sh
-DEFAULTWM="xmonad"
-#DEFAULTWM="/home/quentin/p/stumpwm/stumpwm"
+#DEFAULTWM="xmonad"
+DEFAULTWM="/home/quentin/p/stumpwm/stumpwm"
 #DEFAULTWM="openbox-session"
-urxvtd -q -f -o &
-xset -b
-xset r on
-xhost +
-redshift -l 50.833:4.333 -m randr&
-xmodmap /home/quentin/.Xmodmap
-xbattbar -s ~/bin/xbattbar-check-acpi &
+which urxvtd 2>/dev/null
+if [ $? -eq 0 ]; then
+  urxvtd -q -f -o &
+fi
+
+which xset 2>/dev/null
+if [ $? -eq 0 ]; then
+  xset -b
+  xset r on
+fi
+
+
+which xhost 2>/dev/null
+if [ $? -eq 0 ]; then
+  xhost +
+fi
+
+
+which redshift 2>/dev/null
+if [ $? -eq 0 ]; then
+  redshift -l 50.833:4.333 -m randr&
+fi
+
+
+which xmodmap 2>/dev/null
+if [ $? -eq 0 ]; then
+  xmodmap /home/quentin/.Xmodmap
+fi
+
+which xbattbar 2>/dev/null
+if [ $? -eq 0 ]; then
+  xbattbar -s ~/bin/xbattbar-check-acpi &
+fi
+
 if [ -n "$2" ]
 then
   echo "Executing $2"
