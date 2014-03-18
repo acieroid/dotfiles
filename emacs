@@ -176,10 +176,9 @@
 ;;; Directory where all single .el files will be placed
 (add-to-list 'load-path (in-personal-dir "elisp/"))
 
-;;; Use melpa as package manager (marmalade contains too much old packages)
 (require 'package)
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.milkbox.net/packages/") t)
+(setq package-archives '(("marmalade" . "http://marmalade-repo.org/packages/")
+                         ("melpa" . "http://melpa.milkbox.net/packages/")))
 (package-initialize)
 
 ;;; List of package to install on a fresh install
@@ -266,8 +265,8 @@
 (add-to-list 'packages-to-install 'nrepl)
 (add-hook 'nrepl-interaction-mode-hook 'nrepl-turn-on-eldoc-mode)
 (setq nrepl-hide-special-buffers nil)
-(add-to-list 'packages-to-install 'expectations-mode)
-(require 'expectations-mode)
+;; (add-to-list 'packages-to-install 'expectations-mode)
+;; (require 'expectations-mode)
 ;; TODO: not very stable yet
 ;; (load "/home/quentin/emacs/nrepl-inspect/nrepl-inspect.el")
 ;; (define-key nrepl-mode-map (kbd "C-c C-i") 'nrepl-inspect)
