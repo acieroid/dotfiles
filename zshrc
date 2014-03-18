@@ -40,16 +40,15 @@ export LANG=en_US.UTF-8
 export PAGER=most
 export EDITOR=vim
 export EMAIL=quentin.stievenart@gmail.com
-export PATH=$PATH:/usr/sbin:/sbin:$HOME/bin:$HOME/.cabal/bin
+export PATH=/usr/sbin:/sbin:$HOME/bin:$HOME/.cabal/bin:$PATH
 export HISTFILE=~/.zsh_history
 export HISTSIZE=10000
 export SAVEHIST=$HISTSIZE
 export WORDCHARS=${WORDCHARS:s,/,,:s/.//:s/&//} # to have an emacs-like backward-kill-word
 export XDG_CONFIG_HOME=~/.config/
 export GTK_IM_MODULE="xim"
-export GDFONTPATH=/usr/local/lib/X11/fonts/dejavu:/usr/local/lib/X11/fonts/Droid/
 export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
-export MANPATH=$MANPATH:/usr/lib/erlang/man/
+export MANPATH=$MANPATH
 export MPD_HOST=192.168.2.102
 
 if [ -z "$DISPLAY" ]; then
@@ -119,4 +118,6 @@ bindkey    "^[[3~"          delete-char
 bindkey    "^[3;5~"         delete-char
 
 # opam
-which opam >/dev/null && eval `opam config env`
+if [ `id -u` -ne 0 ]; then
+  . /home/quentin/.opam/opam-init/init.zsh > /dev/null 2> /dev/null || true
+fi
