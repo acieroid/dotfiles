@@ -14,7 +14,7 @@
 
 ;;;; Appearance stuff
 ;;; Initial scratch mesage
-(setq initial-scratch-message nil)
+(setq-default initial-scratch-message nil)
 
 ;;; Font
 (set-face-attribute 'default nil :height 90)
@@ -23,7 +23,7 @@
 ;;; and line number on the left
 (column-number-mode t)
 (line-number-mode t)
-(setq linum-format "%2d")
+(setq-default linum-format "%2d")
 (autoload 'global-linum-mode "linum" "Linum mode")
 (global-linum-mode t)
 
@@ -48,13 +48,13 @@
 (fset 'yes-or-no-p 'y-or-n-p)
 
 ;;; Disable useless startup message
-(setq inhibit-startup-message t)
+(setq-default inhibit-startup-message t)
 
 ;;; Highlight trailing whitespaces, characters past 80 columns, and tabs
-;; (setq-default show-trailing-whitespace t)
-;(require 'whitespace)
-;(setq whitespace-style '(face empty tabs lines-tail trailing))
-;(global-whitespace-mode nil)
+;(setq-default show-trailing-whitespace t)
+(require 'whitespace)
+(setq whitespace-style '(face empty tabs lines-tail trailing))
+(global-whitespace-mode nil)
 
 ;;; Colored output in M-x shell
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
@@ -117,7 +117,7 @@
 ;;;; Edit-mode improvements
 ;;; Auto-fill set to 80 columns
 (auto-fill-mode)
-(setq fill-column 80)
+(setq-default fill-column 80)
 
 ;;; Disable tabs
 (setq-default indent-tabs-mode nil)
@@ -195,13 +195,11 @@
 ;;;;; From here, almost everything is not "vanilla"-emacs ;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-;;; Alternative file/buffer browser
-;; lusty-explorer (not in marmalade nor in emacs by default)
-;(add-to-list 'load-path (in-personal-dir "lusty-emacs"))
-;(require 'lusty-explorer)
-;(global-set-key (kbd "C-x C-f") 'lusty-file-explorer)
-;(global-set-key (kbd "C-x b") 'lusty-buffer-explorer)
+;;; 80-column indicator
+(require 'fill-column-indicator)
+(define-globalized-minor-mode
+  global-fci-mode fci-mode (lambda () (fci-mode 1)))
+(global-fci-mode t)
 
 ;; ido -- in emacs by default
 (require 'ido)
@@ -243,9 +241,9 @@
 
 (setq slime-complete-symbol-function 'slime-complete-symbol*)
 (add-hook 'slime-mode-hook
-	  (lambda ()
-	    (unless (slime-connected-p)
-	      (save-excursion (slime)))))
+          (lambda ()
+            (unless (slime-connected-p)
+              (save-excursion (slime)))))
 (add-paredit-hook 'slime-mode-hook)
 (add-hook 'slime-repl-mode-hook (lambda () (paredit-mode t)))
 (add-hook 'slime-repl-mode-hook
@@ -413,7 +411,7 @@
         ("CANCELLED" . org-archived)))
 
 
-;(require 'htmlize) ; For syntax highlighting TODO
+;(require 'htmlize) ; For syntax highlighting in html output
 (setq org-export-html-style-include-default nil)
 (add-hook 'org-mode-hook (lambda () (auto-fill-mode t)))
 (add-hook 'org-mode-hook (lambda () (linum-mode 0)))
@@ -498,7 +496,7 @@
        auto-mode-alist))
 
 ;;; On a fresh installation, uncomment those lines and comment the (load-theme
-;;; ...) line in this file. Launch emacs, recomment those lines and uncomment the
-;;; (load-theme ...) one and it's done.
+;;; ...) line in this file. Launch emacs, recomment those lines and uncomment
+;;; the (load-theme ...) one and it's done.
 ;; (package-refresh-contents)
 ;; (install-all-packages)
