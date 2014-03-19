@@ -60,4 +60,3 @@ map <F3> :set list!<CR>
 
 " file-dependent stuff
 au BufRead,BufNewFile Makefile set noexpandtab
-
