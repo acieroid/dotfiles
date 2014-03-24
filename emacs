@@ -217,6 +217,10 @@
 ;;; Paredit
 (add-to-list 'packages-to-install 'paredit)
 (autoload 'paredit-mode "paredit" "Paredit emode")
+(eval-after-load "paredit"
+  ;; M-r clashes with my win-minor-mode setup, and I don't use M-r in paredit
+  '(define-key paredit-mode-map (kbd "M-r") nil))
+
 
 (defun add-paredit-hook (hook)
   "Add cool paren stuff to a mode"
