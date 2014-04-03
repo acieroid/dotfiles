@@ -212,7 +212,13 @@
 ;;; Zenburn as color theme
 (add-to-list 'packages-to-install 'zenburn-theme)
 (load-theme 'zenburn t)
-;(load-theme 'wombat) ;; Another nice dark theme
+(global-set-key (kbd "<f6>") '(lambda ()
+                                (interactive)
+                                (disable-theme 'zenburn)))
+(global-set-key (kbd "<f7>") '(lambda ()
+                                (interactive)
+                                (load-theme 'zenburn t)))
+;(load-theme 'wombat) ; Another nice dark theme
 
 ;;; Paredit
 (add-to-list 'packages-to-install 'paredit)
