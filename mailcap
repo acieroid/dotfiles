@@ -1,0 +1,4 @@
+image/*; feh %s
+application/pdf; zathura %s
+text/html; links %s
+text/*; vim %s
