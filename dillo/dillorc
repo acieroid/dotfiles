@@ -1,0 +1,7 @@
+search_url="gg Google http://www.google.com/search?ie=UTF-8&oe=UTF-8&q=%s"
+search_url="dd DuckDuckGo http://duckduckgo.com/lite/?kp=-1&q=%s"
+search_url="wp Wikipedia http://www.wikipedia.org/w/index.php?search=%s&go=Go"
+search_url="enfr WordReferenceENFR http://www.wordreference.com/enfr/%s"
+search_url="fren WordReferenceFREN http://www.wordreference.com/fren/%s"
+
+http_language="en-US,en;q=0.5"
