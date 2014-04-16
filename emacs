@@ -130,6 +130,15 @@
 (global-unset-key "\C-z")
 (global-unset-key "\C-x \C-z")
 
+;; Typing M-x ansi-term zsh is long, and we only one one terminal running
+(defun terminal ()
+  (interactive)
+  (let ((term-buf (get-buffer "*term*")))
+    (if term-buf
+        (pop-to-buffer term-buf)
+      (ansi-term "/bin/zsh" "term"))))
+(global-set-key (kbd "<f1>") 'terminal)
+
 ;;; Parenthese-related stuff
 (autoload 'show-paren-mode "paren" "Show-paren mode")
 (show-paren-mode t)
