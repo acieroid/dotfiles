@@ -374,6 +374,12 @@
 (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
 (add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
 
+(add-to-list 'load-path (concat (getenv "HOME")
+                                "/.cabal/share/x86_64-linux-ghc-7.6.3/ghc-mod-4.0.2/"))
+(autoload 'ghc-init "ghc" nil t)
+(add-hook 'haskell-mode-hook (lambda () (ghc-init)))
+(setq-default ghc-display-error 'minibuffer)
+
 ;;; Factor
 ;(add-to-list 'load-path (in-personal-dir "fuel/"))
 ;(setq fuel-factor-root-dir (in-personal-dir "fuel/"))
