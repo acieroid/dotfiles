@@ -380,6 +380,9 @@
 (add-hook 'haskell-mode-hook (lambda () (ghc-init)))
 (setq-default ghc-display-error 'minibuffer)
 
+;; Idris
+(add-to-list 'packages-to-install 'idris-mode)
+
 ;;; Factor
 ;(add-to-list 'load-path (in-personal-dir "fuel/"))
 ;(setq fuel-factor-root-dir (in-personal-dir "fuel/"))
