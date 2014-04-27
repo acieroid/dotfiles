@@ -118,6 +118,14 @@ bindkey    "^[[3~"          delete-char
 bindkey    "^[3;5~"         delete-char
 
 # opam
-if [ `id -u` -ne 0 ]; then
+which opam > /dev/null 2> /dev/null
+if [ $? -eq 0 -eq `id -u` -ne 0 ]; then
   . /home/quentin/.opam/opam-init/init.zsh > /dev/null 2> /dev/null || true
+fi
+
+# pulse
+pgrep pulseaudio > /dev/null 2> /dev/null
+if [ $? -eq 1 -a `uname -m` = 'cobalt']; then
+  # cobalt is the sound server, launch pulseaudio as it is not yet launched
+  pulseaudio --start
 fi
