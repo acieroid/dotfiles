@@ -49,7 +49,7 @@ export XDG_CONFIG_HOME=~/.config/
 export GTK_IM_MODULE="xim"
 export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
 export MANPATH=$MANPATH
-export MPD_HOST=192.168.2.102
+export MPD_HOST=192.168.2.226
 
 if [ -z "$DISPLAY" ]; then
   export DISPLAY=:0.0
@@ -123,9 +123,21 @@ if [ $? -eq 0 -a -eq `id -u` -ne 0 ]; then
   . /home/quentin/.opam/opam-init/init.zsh > /dev/null 2> /dev/null || true
 fi
 
-# pulse
-pgrep pulseaudio > /dev/null 2> /dev/null
-if [ $? -eq 1 -a `hostname` = 'cobalt' ]; then
-  # cobalt is the sound server, launch pulseaudio as it is not yet launched
-  pulseaudio --start
+# headless sound server
+if [ `hostname` = 'cobalt' ]; then
+  pgrep pulseaudio > /dev/null 2> /dev/null
+  if [ $? -eq 1 ]; then
+    echo "Starting pulseaudio"
+    pulseaudio --start > /dev/null 2> /dev/null
+  fi
+  pgrep mpd > /dev/null 2> /dev/null
+  if [ $? -eq 1 ]; then
+    echo "Starting mpd"
+    mpd > /dev/null 2> /dev/null
+  fi
+  pgrep rtorrent > /dev/null 2> /dev/null
+  if [ $? -eq 1 -a -d /dd/torrents ]; then
+    echo "Starting rtorrent"
+    tmux new-session -s rtorrent -n rtorrent -d rtorrent
+  fi
 fi

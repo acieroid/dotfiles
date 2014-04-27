@@ -2,31 +2,28 @@
 
 library: /dd/music/library.blb
 directory: /dd/music
-path_format: $genre/$artist/$album/$track $title
+art_filename: cover
 
 import:
     copy: true
     write: true
-    resume: ask 
+    resume: ask
     art: true
     quiet_fallback: skip
     timid: false
 ignore: .AppleDouble ._* *~ .DS_Store .*
-art_filename: albumart
 threaded: true
 color: true
 
 replace:
-    '[\\/]': _
-    ^\.: _
-    '[\x00-\x1f]': _
-    '[<>:"\?\*\|]': _
-    \.$: _
-    \s+$: ''
+    '\s+': '-'
 
 paths:
-    default: $albumartist/$album/$track $title
-    singleton: Singletons/$artist - $title
-    comp: $album/$track $title
-    albumtype:soundtrack: Soundtracks/$album/$track $title
+    default: '%asciify{$albumartist}/%asciify{$album%aunique{}}/$track-%asciify{$title}'
+    singleton: $artist/non-album/$title
+    comp: Compilations/%asciify{$album%aunique{}}/$track-%asciify{$title}
+    albumtype:soundtrack: Soundtracks/$album/$track-%asciify{$title}
+
+fetchart:
+    auto: true
 
