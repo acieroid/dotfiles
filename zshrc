@@ -18,7 +18,7 @@ zstyle ':completion:*:kill:*' force-list always
 zstyle ':completion:*:cd:*' ignore-parents parent pwd
 
 # aliases
-case `uname -s` in
+case "$(uname -s)" in
   FreeBSD) alias ls='ls -FG';;
   Linux) alias ls='ls -F --color=auto';;
 esac
@@ -49,7 +49,8 @@ export XDG_CONFIG_HOME=~/.config/
 export GTK_IM_MODULE="xim"
 export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
 export MANPATH=$MANPATH
-export MPD_HOST=192.168.2.226
+export MPD_HOST=cobalt
+export PULSE_SERVER=cobalt
 
 if [ -z "$DISPLAY" ]; then
   export DISPLAY=:0.0
@@ -57,7 +58,7 @@ fi
 
 
 # terminal name
-if [ `echo $TERM | wc -c` -gt 8 ]; then
+if [ "$(echo $TERM | wc -c)" -gt 8 ]; then
   export TERM="rxvt"
 fi
 
@@ -77,12 +78,12 @@ colors
 function precmd {
 local ret=$?
 
-if [ `id -u` -eq 0 ]; then
+if [ "$(id -u)" -eq 0 ]; then
   local dircol="%{${fg_no_bold[red]}%}"
   local sign="#"
 else
   local dircol
-  if [ `uname -m` = 'armv7l' ]; then
+  if [ "$(uname -m)" = 'armv7l' ]; then
    dircol="%{${fg_no_bold[blue]}%}"
   else
    dircol="%{${fg_no_bold[green]}%}"
@@ -119,12 +120,12 @@ bindkey    "^[3;5~"         delete-char
 
 # opam
 which opam > /dev/null 2> /dev/null
-if [ $? -eq 0 -a -eq `id -u` -ne 0 ]; then
+if [ $? -eq 0 -a "$(id -u)" -ne 0 ]; then
   . /home/quentin/.opam/opam-init/init.zsh > /dev/null 2> /dev/null || true
 fi
 
 # headless sound server
-if [ `hostname` = 'cobalt' ]; then
+if [ "$(hostname)" = 'cobalt' ]; then
   pgrep pulseaudio > /dev/null 2> /dev/null
   if [ $? -eq 1 ]; then
     echo "Starting pulseaudio"
