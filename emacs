@@ -63,15 +63,16 @@
 (font-lock-add-keywords
  nil '(("\\<\\(FIXME\\|TODO\\|BUG\\)" 1 font-lock-warning-face t)))
 
-;;; Some custom faces
+;;; Some custom faces (some other are also defined when changing theme, see
+;; below)
 (custom-set-faces
- '(diff-added ((t (:foreground "PaleGreen"))) t)
- '(diff-context ((t (:foreground "DimGray"))) t)
+ '(diff-added ((t (:foreground "forestgreen"))) t)
+ '(diff-context ((t (:foreground "grey20"))) t)
  '(diff-removed ((t (:foreground "IndianRed"))) t)
- '(merlin-locked-face ((t (:background "gray23"))))
+ '(merlin-locked-face ((t (:background "gray95"))))
  '(quack-pltish-defn-face ((t (:foreground "green" :weight bold))) t)
  '(whitespace-line ((t (:background "red4" :weight bold))))
- '(whitespace-tab ((t (:background "grey20")))))
+ '(whitespace-tab ((t (:background "snow2")))))
 
 ;;;; File-system related stuff
 ;;; Saves all backup files in one dir
@@ -123,12 +124,22 @@
 (setq-default indent-tabs-mode nil)
 
 ;;; Some keybindings
-(global-set-key "\C-h" 'delete-backward-char)
-(global-set-key "\C-s" (lambda ()
+(global-set-key (kbd "C-h") 'delete-backward-char)
+(global-set-key (kbd "C-s") (lambda ()
                                (interactive)
                                (isearch-forward t)))
-(global-unset-key "\C-z")
-(global-unset-key "\C-x \C-z")
+(global-unset-key (kbd "C-z"))
+(global-unset-key (kbd "C-x C-z"))
+
+;; Line joining (a la :join in vim), because M-^ works in the reversed way
+(defun join-lines (arg)
+  (interactive "p")
+  (end-of-line)
+  (delete-char 1)
+  (delete-horizontal-space)
+  (insert " ")
+  (backward-char 1))
+(global-set-key (kbd "M-j") 'join-lines)
 
 ;; Typing M-x ansi-term zsh is long, and we only one one terminal running
 (defun terminal ()
@@ -187,7 +198,8 @@
 
 (require 'package)
 (setq package-archives '(("marmalade" . "http://marmalade-repo.org/packages/")
-                         ("melpa" . "http://melpa.milkbox.net/packages/")))
+                         ("melpa" . "http://melpa.milkbox.net/packages/")
+                         ))
 (package-initialize)
 
 ;;; List of package to install on a fresh install
@@ -220,12 +232,16 @@
 ;;;; Appearence
 ;;; Zenburn as color theme
 (add-to-list 'packages-to-install 'zenburn-theme)
-(load-theme 'zenburn t)
+;(load-theme 'zenburn t)
 (global-set-key (kbd "<f6>") '(lambda ()
                                 (interactive)
+                                (custom-set-faces
+                                  '(merlin-locked-face ((t (:background "gray95")))))
                                 (disable-theme 'zenburn)))
 (global-set-key (kbd "<f7>") '(lambda ()
                                 (interactive)
+                                (custom-set-faces
+                                 '(merlin-locked-face ((t (:background "gray20")))))
                                 (load-theme 'zenburn t)))
 ;(load-theme 'wombat) ; Another nice dark theme
 
@@ -353,6 +369,9 @@
 (add-hook 'c-mode-hook 'bind-compile-program)
 (add-hook 'c++-mode-hook 'bind-compile-program)
 
+(setq-default c-default-style "linux"
+              c-basic-offset 4)
+
 (add-hook 'c-mode-common-hook 'set-newline-and-indent)
 
 ;; cscope
@@ -372,13 +391,13 @@
 (add-to-list 'packages-to-install 'haskell-mode)
 (autoload 'haskell-mode "haskell-mode" "Haskell mode" t)
 (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
-(add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
+(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
 
-(add-to-list 'load-path (concat (getenv "HOME")
-                                "/.cabal/share/x86_64-linux-ghc-7.6.3/ghc-mod-4.0.2/"))
-(autoload 'ghc-init "ghc" nil t)
-(add-hook 'haskell-mode-hook (lambda () (ghc-init)))
-(setq-default ghc-display-error 'minibuffer)
+;; (add-to-list 'load-path (concat (getenv "HOME")
+;;                                 "/.cabal/share/x86_64-linux-ghc-7.6.3/ghc-mod-4.0.2/"))
+;; (autoload 'ghc-init "ghc" nil t)
+;; (add-hook 'haskell-mode-hook (lambda () (ghc-init)))
+;; (setq-default ghc-display-error 'minibuffer)
 
 ;; Idris
 (add-to-list 'packages-to-install 'idris-mode)
@@ -404,7 +423,7 @@
 (autoload 'scala-mode "scala-mode" "Scala mode")
 
 ;;; ProofGeneral
-;(load-file "/usr/share/emacs/site-lisp/ProofGeneral/generic/proof-site.el")
+(load-file "/usr/share/emacs/site-lisp/ProofGeneral/generic/proof-site.el")
 
 ;;; cmake
 (add-to-list 'packages-to-install 'cmake-mode)
@@ -422,7 +441,7 @@
 
 ;;; Org mode
 (require 'org)
-(require 'org-latex)
+;(require 'org-latex)
 
 ;; See http://thread.gmane.org/gmane.emacs.orgmode/29347
 (add-to-list 'org-modules 'org-timer)
@@ -443,10 +462,10 @@
 (setq org-export-html-style-include-default nil)
 (add-hook 'org-mode-hook (lambda () (auto-fill-mode t)))
 (add-hook 'org-mode-hook (lambda () (linum-mode 0)))
-(global-set-key "\C-cl" 'org-store-link)
-(global-set-key "\C-cc" 'org-capture)
-(global-set-key "\C-ca" 'org-agenda)
-(global-set-key "\C-cb" 'org-iswitchb)
+(global-set-key (kbd "C-c l") 'org-store-link)
+(global-set-key (kbd "C-c c") 'org-capture)
+(global-set-key (kbd "C-c a") 'org-agenda)
+(global-set-key (kbd "C-c b") 'org-iswitchb)
 (setq org-export-html-style
 "<style type=\"text/css\">
  <!--/*--><![CDATA[/*><!--*/
@@ -490,18 +509,6 @@
 (setq org-export-html-postamble t)
 (setq org-export-html-postamble-format
       '(("en" "<p class=\"date\">Last update: %d"</p>)))
-
-(add-to-list 'org-export-latex-classes
-      '("empty"
-        "\\documentclass{report}
-               [NO-DEFAULT-PACKAGES]
-               [NO-PACKAGES]"
-        ("\\chapter{%s}" . "\\chapter*{%s}")
-        ("\\section{%s}" . "\\section*{%s}")
-        ("\\subsection{%s}" . "\\subsection*{%s}")
-        ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-        ("\\paragraph{%s}" . "\\paragraph*{%s}")
-        ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
 ;;;; Modes
 (setq auto-mode-alist
