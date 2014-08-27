@@ -8,11 +8,11 @@ set bg=dark
 syn on
 set number
 
-" indentation, follow the Linux coding style
-set noexpandtab
+" indentation
+set expandtab
 set tabstop=8
-set shiftwidth=8
-set softtabstop=8
+set shiftwidth=4
+set softtabstop=4
 set listchars=tab:⇥␣
 set list!
 set backspace=2
@@ -57,6 +57,11 @@ map! <F1> <Esc>
 map <F1> :set number!<CR>
 map <F2> :set expandtab!<CR>
 map <F3> :set list!<CR>
+map <F4> :set ignorecase!<CR>
 
 " file-dependent stuff
 au BufRead,BufNewFile Makefile set noexpandtab
+
+syntax on
+filetype on
+" filetype plugin indent on
