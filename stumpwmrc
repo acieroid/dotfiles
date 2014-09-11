@@ -94,7 +94,7 @@
 
 (defcommand man (name)
     ((:string "Which man page do you want to consult ? "))
-  (run-shell-command (concat "urxvtc -e man " name)))
+  (run-shell-command (concat "roxterm -e man " name)))
 
 (defcommand redshift () ()
   "Launch redshift"
@@ -112,7 +112,7 @@
 (define-key *top-map* (kbd "s-,") "exec")
 (define-key *top-map* (kbd "s-;") "colon")
 (define-key *top-map* (kbd "s-:") "eval")
-(define-key *top-map* (kbd "s-Return") "exec urxvtc")
+(define-key *top-map* (kbd "s-Return") "exec roxterm")
 (define-key *top-map* (kbd "s-Q") "delete")
 (define-key *top-map* (kbd "s-e") "emacs")
 (define-key *top-map* (kbd "s-f") "firefox")

@@ -4,7 +4,7 @@ set ttyfast
 
 " look
 set vb
-set bg=dark
+set bg=light
 syn on
 set number
 
