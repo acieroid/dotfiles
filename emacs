@@ -125,9 +125,6 @@
 
 ;;; Some keybindings
 (global-set-key (kbd "C-h") 'delete-backward-char)
-(global-set-key (kbd "C-s") (lambda ()
-                               (interactive)
-                               (isearch-forward t)))
 (global-unset-key (kbd "C-z"))
 (global-unset-key (kbd "C-x C-z"))
 
