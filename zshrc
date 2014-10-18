@@ -33,7 +33,8 @@ alias t='ssh -C torrent@ks2g -p 42022'
 alias i2='ssh -C acieroid@ks2g -p 42022'
 alias k='ssh -C acieroid@ks2g -p 21022'
 alias m='ssh -C acieroid@foo.awesom.eu -p 42022'
-alias e='emacsclient'
+alias e='emacsclient -n'
+alias ec='emacsclient -c -n'
 
 # variables
 export LANG=en_US.UTF-8
@@ -136,8 +137,7 @@ if [ "$(hostname)" = 'cobalt' ]; then
     echo "Starting mpd"
     mpd > /dev/null 2> /dev/null
   fi
-  pgrep rtorrent > /dev/null 2> /dev/null
-  if [ $? -eq 1 -a -d /dd/torrents ]; then
+  if [ -z "$(tmux list-sessions | grep rtorrent)" -a -d /dd/torrents ]; then
     echo "Starting rtorrent"
     tmux new-session -s rtorrent -n rtorrent -d rtorrent
   fi
