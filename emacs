@@ -196,7 +196,7 @@
 (require 'package)
 (setq package-archives '(("marmalade" . "http://marmalade-repo.org/packages/")
                          ("melpa" . "http://melpa.milkbox.net/packages/")
-                         ))
+                         ("org" . "http://orgmode.org/elpa/")))
 (package-initialize)
 
 ;;; List of package to install on a fresh install
@@ -289,12 +289,13 @@
      (define-key slime-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)))
 
 ;;; Clojure
-(add-to-list 'packages-to-install 'clojure-mode)
-(setq nrepl-server-command "lein repl :headless")
-(add-paredit-hook 'clojure-mode-hook)
-(add-to-list 'packages-to-install 'nrepl)
-(add-hook 'nrepl-interaction-mode-hook 'nrepl-turn-on-eldoc-mode)
-(setq nrepl-hide-special-buffers nil)
+(add-to-list 'packages-to-install 'clj-mode)
+(require 'clj-mode)
+;(setq nrepl-server-command "lein repl :headless")
+;(add-paredit-hook 'clojure-mode-hook)
+;(add-to-list 'packages-to-install 'nrepl)
+;(add-hook 'nrepl-interaction-mode-hook 'nrepl-turn-on-eldoc-mode)
+;(setq nrepl-hide-special-buffers nil)
 ;; (add-to-list 'packages-to-install 'expectations-mode)
 ;; (require 'expectations-mode)
 ;; TODO: not very stable yet
@@ -344,8 +345,14 @@
 (setq exec-path (split-string (getenv "PATH") path-separator))
 (autoload 'utop "utop" "Toplevel for OCaml" t)
 
+
+(setq opam-share (substring (shell-command-to-string "opam config var share 2> /dev/null") 0 -1))
+(add-to-list 'load-path (concat opam-share "/emacs/site-lisp"))
 (require 'merlin)
-(add-hook 'caml-mode-hook 'merlin-mode)
+(add-hook 'tuareg-mode-hook 'merlin-mode t)
+(add-hook 'caml-mode-hook 'merlin-mode t)
+(setq merlin-use-auto-complete-mode 'easy)
+(setq merlin-command 'opam)
 (setq merlin-display-lock-zone '(margin highlight))
 
 (add-hook 'caml-mode-hook
@@ -421,6 +428,8 @@
 
 ;;; ProofGeneral
 (load-file "/usr/share/emacs/site-lisp/ProofGeneral/generic/proof-site.el")
+(setq proof-splash-enable nil
+      proof-electric-terminator-enable t)
 
 ;;; cmake
 (add-to-list 'packages-to-install 'cmake-mode)
@@ -438,74 +447,75 @@
 
 ;;; Org mode
 (require 'org)
-;(require 'org-latex)
-
-;; See http://thread.gmane.org/gmane.emacs.orgmode/29347
-(add-to-list 'org-modules 'org-timer)
-(setq org-timer-default-timer 25)
-(add-hook 'org-clock-in-hook '(lambda ()
-                                (org-timer-set-timer '(16))))
-
-
-(setq org-todo-keywords '((sequence "TODO" "STARTED"
-                                    "REREAD" "SUMMARIZED"
-                                    "|" "DONE" "CANCELLED")))
-(setq org-todo-keyword-faces
-      '(("STARTED" . (:foreground "yellow" :weight bold))
-        ("CANCELLED" . org-archived)))
-
-
-;(require 'htmlize) ; For syntax highlighting in html output
-(setq org-export-html-style-include-default nil)
+(require 'htmlize) ; For syntax highlighting in html output
+(setq org-html-style-include-scripts nil)
 (add-hook 'org-mode-hook (lambda () (auto-fill-mode t)))
+(add-hook 'org-mode-hook (lambda () (fci-mode 0)))
 (add-hook 'org-mode-hook (lambda () (linum-mode 0)))
-(global-set-key (kbd "C-c l") 'org-store-link)
-(global-set-key (kbd "C-c c") 'org-capture)
-(global-set-key (kbd "C-c a") 'org-agenda)
-(global-set-key (kbd "C-c b") 'org-iswitchb)
-(setq org-export-html-style
-"<style type=\"text/css\">
- <!--/*--><![CDATA[/*><!--*/
-  html { font-family: serif; font-size: 12pt; }
-  body { width: 75%; margin-left: auto; margin-right: auto; }
-  .title  { text-align: center; font-weight: normal; margin-top: 2.8em; font-size: 200%;}
-  a { text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .author, .date, .creator { color: gray; font-style: italic; text-align: right; }
-  .todo   { color: red; }
-  .done   { color: green; }
-  .tag    { background-color: #add8e6; font-weight:normal }
-  .target { }
-  .timestamp { color: #bebebe; }
-  .timestamp-kwd { color: #5f9ea0; }
-  p.verse { margin-left: 3% }
-  pre {
-  background-color: #000000;
-  color: #ffffff;
-  padding: 5pt;
-  font-family: courier, monospace;
-        font-size: 90%;
-        overflow:auto;
-  }
-  table { border-collapse: collapse; }
-  td, th { vertical-align: top; }
-  dt { font-weight: bold; }
-  div.figure { padding: 0.5em; }
-  div.figure p { text-align: center; }
-  .linenr { font-size:smaller }
-  .code-highlighted {background-color:#ffff00;}
-  .org-info-js_info-navigation { border-style:none; }
-  #org-info-js_console-label { font-size:10px; font-weight:bold;
-                               white-space:nowrap; }
-  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
-                                 font-weight:bold; }
-  /*]]>*/-->
-</style>")
+;; (global-set-key (kbd "C-c l") 'org-store-link)
+;; (global-set-key (kbd "C-c c") 'org-capture)
+;; (global-set-key (kbd "C-c a") 'org-agenda)
+;; (global-set-key (kbd "C-c b") 'org-iswitchb)
+;; (setq org-export-html-style
+;; "<style type=\"text/css\">
+;;  <!--/*--><![CDATA[/*><!--*/
+;;   html { font-family: serif; font-size: 12pt; }
+;;   body { width: 75%; margin-left: auto; margin-right: auto; }
+;;   .title  { text-align: center; font-weight: normal; margin-top: 2.8em; font-size: 200%;}
+;;   a { text-decoration: none; }
+;;   a:hover { text-decoration: underline; }
+;;   .author, .date, .creator { color: gray; font-style: italic; text-align: right; }
+;;   .todo   { color: red; }
+;;   .done   { color: green; }
+;;   .tag    { background-color: #add8e6; font-weight:normal }
+;;   .target { }
+;;   .timestamp { color: #bebebe; }
+;;   .timestamp-kwd { color: #5f9ea0; }
+;;   p.verse { margin-left: 3% }
+;;   pre {
+;;   background-color: #000000;
+;;   color: #ffffff;
+;;   padding: 5pt;
+;;   font-family: courier, monospace;
+;;         font-size: 90%;
+;;         overflow:auto;
+;;   }
+;;   table { border-collapse: collapse; }
+;;   td, th { vertical-align: top; }
+;;   dt { font-weight: bold; }
+;;   div.figure { padding: 0.5em; }
+;;   div.figure p { text-align: center; }
+;;   .linenr { font-size:smaller }
+;;   .code-highlighted {background-color:#ffff00;}
+;;   .org-info-js_info-navigation { border-style:none; }
+;;   #org-info-js_console-label { font-size:10px; font-weight:bold;
+;;                                white-space:nowrap; }
+;;   .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+;;                                  font-weight:bold; }
+;;   /*]]>*/-->
+;; </style>")
+(setq org-html-preamble nil)
+(setq org-html-postamble t)
+(setq org-html-postamble-format
+      '(("en" "<p class=\"date\">Given on: %d</p>
+<p class=\"date\">Last update: %T</p>
+<p class=\"author\">Author: %a</p>")))
 
-(setq org-export-html-style-include-scripts nil)
-(setq org-export-html-postamble t)
-(setq org-export-html-postamble-format
-      '(("en" "<p class=\"date\">Last update: %d"</p>)))
+(setq org-publish-project-alist
+      '(("soft"
+         :base-directory "~/soft/"
+         :publishing-directory "~/public_html"
+         :section-numbers t
+         :with-toc nil
+         :publishing-function org-html-publish-to-html
+         :htmlized-source t
+         :html-postamble (lambda (plist) (format "<p>Last update: %s%s</p>"
+                                                 (format-time-string "%Y-%m-%dT%T")
+                                                 ((lambda (x) (concat (substring x 0 3) ":" (substring x 3 5)))
+                                                  (format-time-string "%z"))))
+         :recursive t
+         :section-numbers t
+         )))
 
 ;;;; Modes
 (setq auto-mode-alist
