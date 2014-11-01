@@ -1,7 +1,7 @@
 
 # completion
 autoload -U compinit
-compinit
+compinit -u
 autoload -U bashcompinit
 bashcompinit
 
@@ -23,7 +23,7 @@ case "$(uname -s)" in
   Linux) alias ls='ls -F --color=auto';;
 esac
 alias grep='grep --color=auto'
-alias rm='rm -I'
+alias rm='rm -i'
 alias mv='mv -i'
 alias cp='cp -i'
 alias i='ssh -p 443 -t acieroid@awesom.eu screen -Udr'
