@@ -1,4 +1,4 @@
-;;;; -*- mode: emacs-lisp -*-
+»;;;; -*- mode: emacs-lisp -*-
 ;;;; vim: ft=lisp
 
 ;; Languages that I currently use
@@ -244,11 +244,12 @@
   (require 'fixme-mode))
 
 ;;; 80-column indicator
-(with-package 'fill-column-indicator
-  (require 'fill-column-indicator)
-  (define-globalized-minor-mode
-    global-fci-mode fci-mode (lambda () (fci-mode 1)))
-  (global-fci-mode t))
+;;; Disabled because it is not that useful, and integrates badly with htmlize
+;; (with-package 'fill-column-indicator
+;;   (require 'fill-column-indicator)
+;;   (define-globalized-minor-mode
+;;     global-fci-mode fci-mode (lambda () (fci-mode 1)))
+;;   (global-fci-mode t))
 
 ;;;; Appearence
 ;;; Zenburn as color theme
