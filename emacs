@@ -1,9 +1,16 @@
 ;;;; -*- mode: emacs-lisp -*-
 ;;;; vim: ft=lisp
 
-;;;; Useful functions
-(defcustom emacs-personal-dir (concat (getenv "HOME") "/emacs/")
-  "The path to a directory that contains things useful to emacs (slime,…)")
+;; Languages that I currently use
+;; possible values: common-lisp, clojure, parenscript, scheme, ocaml, c, arc, elisp, haskell, idris, factor, python, lua, go, scala, coq, cmake, erlang, agda
+(defvar *languages* '(clojure ocaml c elisp haskell))
+(defmacro with-language (language &rest body)
+  `(when (member ,language *languages*)
+     ,@body))
+(put 'with-language 'lisp-indent-function 1)
+
+(defcustom emacs-personal-dir (concat (getenv "HOME") "/.emacs.d/")
+  "The path to a directory that contains things useful to emacs")
 (defun in-personal-dir (dir)
   "Give the path of a file/directory in the EMACS-PERSONAL-DIR"
   (concat emacs-personal-dir dir))
@@ -38,8 +45,9 @@
 (tool-bar-mode 0)
 (scroll-bar-mode 0)
 
-;;; Non-blinking cursor
+;;; Non-blinking, box cursor
 (blink-cursor-mode 0)
+(setq cursor-type 'box)
 
 ;;; Don't show the region (C-SPC-SPC to see it)
 (transient-mark-mode 0)
@@ -50,18 +58,14 @@
 ;;; Disable useless startup message
 (setq-default inhibit-startup-message t)
 
-;;; Highlight trailing whitespaces, characters past 80 columns, and tabs
-;(setq-default show-trailing-whitespace t)
+;;; Highlight trailing whitespaces, and tabs, but not characters past 80 columns
+;;; (add lines-tails for this)
 (require 'whitespace)
-(setq whitespace-style '(face empty tabs lines-tail trailing))
+(setq whitespace-style '(face empty tabs trailing))
 (global-whitespace-mode nil)
 
 ;;; Colored output in M-x shell
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-
-;;; Highlight some keywords
-(font-lock-add-keywords
- nil '(("\\<\\(FIXME\\|TODO\\|BUG\\)" 1 font-lock-warning-face t)))
 
 ;;; Some custom faces (some other are also defined when changing theme, see
 ;; below)
@@ -113,12 +117,17 @@
   (save-buffers-kill-terminal))
 
 ;; Disable the awful doc-view-mode
+;; TODO: doesn't seem to really disable it
 (rassq-delete-all #'doc-view-mode auto-mode-alist)
 
 ;;;; Edit-mode improvements
 ;;; Auto-fill set to 80 columns
 (auto-fill-mode)
 (setq-default fill-column 80)
+;; but disable it in latex-mode
+(add-hook 'latex-mode-hook (lambda () (auto-fill-mode -1)))
+;; and enable visual-line-mode
+(add-hook 'latex-mode-hook (lambda () (visual-line-mode 1)))
 
 ;;; Disable tabs
 (setq-default indent-tabs-mode nil)
@@ -197,27 +206,15 @@
 (setq package-archives '(("marmalade" . "http://marmalade-repo.org/packages/")
                          ("melpa" . "http://melpa.milkbox.net/packages/")
                          ("org" . "http://orgmode.org/elpa/")))
+
+(defmacro with-package (package &rest body)
+  `(if (package-installed-p ,package)
+       (progn ,@body)
+     (when (y-or-n-p (format "Package '%s' not installed. Install it?" ,package))
+       (package-install ,package)
+       ,@body)))
+(put 'with-package 'lisp-indent-function 1)
 (package-initialize)
-
-;;; List of package to install on a fresh install
-(defvar packages-to-install '())
-
-;;; Install all the packages in packages-to-install
-(defun install-all-packages ()
-  (interactive)
-  (dolist (package packages-to-install)
-    (unless (package-installed-p package)
-      (package-install package))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;; From here, almost everything is not "vanilla"-emacs ;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;; 80-column indicator
-(require 'fill-column-indicator)
-(define-globalized-minor-mode
-  global-fci-mode fci-mode (lambda () (fci-mode 1)))
-(global-fci-mode t)
 
 ;; ido -- in emacs by default
 (require 'ido)
@@ -226,10 +223,24 @@
 (setq ido-default-buffer-method 'selected-window)
 (ido-mode 1)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;; From here, almost everything is not "vanilla"-emacs ;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; Highlight some keywords
+(with-package 'fixme-mode
+  (require 'fixme-mode))
+
+;;; 80-column indicator
+(with-package 'fill-column-indicator
+  (require 'fill-column-indicator)
+  (define-globalized-minor-mode
+    global-fci-mode fci-mode (lambda () (fci-mode 1)))
+  (global-fci-mode t))
+
 ;;;; Appearence
 ;;; Zenburn as color theme
-(add-to-list 'packages-to-install 'zenburn-theme)
-;(load-theme 'zenburn t)
+(with-package 'zenburn-theme)
 (global-set-key (kbd "<f6>") '(lambda ()
                                 (interactive)
                                 (custom-set-faces
@@ -243,12 +254,12 @@
 ;(load-theme 'wombat) ; Another nice dark theme
 
 ;;; Paredit
-(add-to-list 'packages-to-install 'paredit)
-(autoload 'paredit-mode "paredit" "Paredit emode")
-(eval-after-load "paredit"
-  ;; M-r clashes with my win-minor-mode setup, and I don't use M-r in paredit
-  '(define-key paredit-mode-map (kbd "M-r") nil))
-
+(with-package 'paredit
+  (add-to-list 'packages-to-install 'paredit)
+  (autoload 'paredit-mode "paredit" "Paredit emode")
+  (eval-after-load "paredit"
+    ;; M-r clashes with my win-minor-mode setup, and I don't use M-r in paredit
+    '(define-key paredit-mode-map (kbd "M-r") nil)))
 
 (defun add-paredit-hook (hook)
   "Add cool paren stuff to a mode"
@@ -258,192 +269,168 @@
             (lambda () (local-set-key (kbd "RET") 'paredit-newline))))
 
 ;;;; Languages
-;;; Common Lisp
-(setq inferior-lisp-program "sbcl")
-(setq slime-lisp-implementations
-      `((sbcl ("sbcl") :coding-system utf-8-unix)
-        (clisp ("clisp") :coding-system utf-8-unix)
-        (ecl ("ecl") :coding-system utf-8-unix)))
-(setq slime-net-coding-system 'utf-8-unix)
+(with-language 'common-lisp
+  (with-package 'slime
+    (setq inferior-lisp-program "sbcl")
+    (setq slime-lisp-implementations
+          `((sbcl ("sbcl") :coding-system utf-8-unix)
+            (clisp ("clisp") :coding-system utf-8-unix)
+            (ecl ("ecl") :coding-system utf-8-unix)))
+    (setq slime-net-coding-system 'utf-8-unix)
 
-(add-to-list 'packages-to-install 'slime)
-(autoload 'slime-setup "slime" "Slime")
-; TODO: broken
-(slime-setup '(slime-repl slime-c-p-c slime-editing-commands slime-asdf slime-scratch))
+    (add-to-list 'packages-to-install 'slime)
+    (autoload 'slime-setup "slime" "Slime")
+    ;; TODO: broken
+    (slime-setup '(slime-repl slime-c-p-c slime-editing-commands slime-asdf slime-scratch))
 
-(setq slime-complete-symbol-function 'slime-complete-symbol*)
-(add-hook 'slime-mode-hook
-          (lambda ()
-            (unless (slime-connected-p)
-              (save-excursion (slime)))))
-(add-paredit-hook 'slime-mode-hook)
-(add-hook 'slime-repl-mode-hook (lambda () (paredit-mode t)))
-(add-hook 'slime-repl-mode-hook
-          (lambda () (local-set-key (kbd "RET") 'paredit-newline)))
+    (setq slime-complete-symbol-function 'slime-complete-symbol*)
+    (add-hook 'slime-mode-hook
+              (lambda ()
+                (unless (slime-connected-p)
+                  (save-excursion (slime)))))
+    (add-paredit-hook 'slime-mode-hook)
+    (add-hook 'slime-repl-mode-hook (lambda () (paredit-mode t)))
+    (add-hook 'slime-repl-mode-hook
+              (lambda () (local-set-key (kbd "RET") 'paredit-newline)))
 
-(eval-after-load "slime"
-  '(progn
-     ;(define-key slime-repl-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
-     ;(define-key slime-repl-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)
-     (define-key slime-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
-     (define-key slime-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)))
+    (eval-after-load "slime"
+      '(progn
+         ;;(define-key slime-repl-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
+         ;;(define-key slime-repl-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)
+         (define-key slime-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
+         (define-key slime-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)))))
 
-;;; Clojure
-(add-to-list 'packages-to-install 'clj-mode)
-(require 'clj-mode)
-;(setq nrepl-server-command "lein repl :headless")
-;(add-paredit-hook 'clojure-mode-hook)
-;(add-to-list 'packages-to-install 'nrepl)
-;(add-hook 'nrepl-interaction-mode-hook 'nrepl-turn-on-eldoc-mode)
-;(setq nrepl-hide-special-buffers nil)
-;; (add-to-list 'packages-to-install 'expectations-mode)
-;; (require 'expectations-mode)
-;; TODO: not very stable yet
-;; (load "/home/quentin/emacs/nrepl-inspect/nrepl-inspect.el")
-;; (define-key nrepl-mode-map (kbd "C-c C-i") 'nrepl-inspect)
-;; (require 'nrepl-ritz)
+;; TODO: autoload instead of require
+(with-language 'clojure
+  (with-package 'clj-mode
+    (require 'clj-mode)))
 
+(with-language 'parenscript
+  (with-package 'slime
+    ;; Probably broken
+    (add-to-list 'load-path (in-personal-dir "slime-proxy"))
+    (add-to-list 'load-path (in-personal-dir "slime-proxy/contrib/slime-parenscript"))
+    (defun slime-proxy-setup ()
+      (interactive)
+      (slime-setup '(slime-proxy slime-parenscript)))))
 
-;;; Parenscript
-;(add-to-list 'load-path (in-personal-dir "slime-proxy"))
-;(add-to-list 'load-path (in-personal-dir "slime-proxy/contrib/slime-parenscript"))
-;(defun slime-proxy-setup ()
-;  (interactive)
-;  (slime-setup '(slime-proxy slime-parenscript)))
+(with-language 'scheme
+  (with-package 'quack
+    (autoload 'scheme-mode "quack" "Scheme Mode")
+    (add-paredit-hook 'quack-mode-hook))
+  ;; Alternative, simpler-way (without REPL interaction):
+  ;; (require 'scheme)
+  )
 
-;;; Scheme
-;(add-to-list 'packages-to-install 'quack)
-;(autoload 'scheme-mode "quack" "Scheme Mode")
-;(add-paredit-hook 'quack-mode-hook)
-;; Use scheme.el instead of quack. I don't really need to interact
-;; with an inferior process for Scheme.
-(require 'scheme)
+(with-language 'ocaml
+  (with-package 'tuareg
+    (autoload 'tuareg-mode "tuareg" "Major mode for editing OCaml code" t)
+    ;; Installed through opam instead of emacs's packages
+    (add-to-list 'load-path
+                 (concat
+                  (replace-regexp-in-string "\n$" ""
+                                            (shell-command-to-string "opam config var share"))
+                  "/emacs/site-lisp"))
+    ;; TODO: autoload
+    (require 'ocp-indent)
+    (require 'merlin)
+    (add-hook 'tuareg-mode-hook 'merlin-mode t)
+    (add-hook 'caml-mode-hook 'merlin-mode t)
+    (setq merlin-use-auto-complete-mode 'easy)
+    (setq merlin-command 'opam)
+    (setq merlin-display-lock-zone '(margin highlight))
+    (add-hook 'caml-mode-hook
+              (lambda ()
+                (local-set-key (kbd "M-q") 'caml-indent-phrase)
+                (local-set-key (kbd "C-x `") 'merlin-error-next)
+                (local-set-key (kbd "M-.") 'merlin-locate)
+                (local-set-key (kbd "M-,") 'merlin-pop-stack)))
+    (add-hook 'tuareg-mode-hook
+              (lambda ()
+                (local-set-key (kbd "M-q") 'tuareg-indent-phrase)
+                (local-set-key (kbd "C-x `") 'merlin-error-next)
+                (local-set-key (kbd "M-.") 'merlin-locate)
+                (local-set-key (kbd "M-,") 'merlin-pop-stack)))))
 
-;;; Ocaml
-;;(add-to-list 'packages-to-install 'tuareg)
-;;(autoload 'tuareg-mode "tuareg" "Major mode for editing Caml code" t)
-;;(autoload 'camldebug "camldebug" "Run the Caml debugger" t)
-(add-to-list 'load-path (in-personal-dir "ocaml/"))
-(autoload 'caml-mode "caml" "Major mode for editing OCaml code." t)
-(autoload 'run-caml "inf-caml" "Run an inferior OCaml process." t)
-(autoload 'camldebug "camldebug" "Run ocamldebug on program." t)
-(add-to-list 'interpreter-mode-alist '("ocamlrun" . caml-mode))
-(add-to-list 'interpreter-mode-alist '("ocaml" . caml-mode))
-(if window-system (require 'caml-font))
-(add-to-list 'load-path
-             (concat
-              (replace-regexp-in-string "\n$" ""
-                                        (shell-command-to-string "opam config var share"))
-              "/emacs/site-lisp"))
-(require 'ocp-indent)
+(with-language 'c
+  (defun bind-compile-program ()
+    (interactive)
+    (local-set-key (kbd "C-c C-c")
+                   (lambda ()
+                     (interactive)
+                     (compile "make -k"))))
+  (add-hook 'c-mode-hook 'bind-compile-program)
+  (add-hook 'c++-mode-hook 'bind-compile-program)
 
-(dolist (var
-         (car
-          (read-from-string
-           (shell-command-to-string "opam config env --sexp"))))
-  (setenv (car var) (cadr var)))
-(setq exec-path (split-string (getenv "PATH") path-separator))
-(autoload 'utop "utop" "Toplevel for OCaml" t)
+  (setq-default c-default-style "linux"
+                c-basic-offset 4)
 
+  (add-hook 'c-mode-common-hook 'set-newline-and-indent)
 
-(setq opam-share (substring (shell-command-to-string "opam config var share 2> /dev/null") 0 -1))
-(add-to-list 'load-path (concat opam-share "/emacs/site-lisp"))
-(require 'merlin)
-(add-hook 'tuareg-mode-hook 'merlin-mode t)
-(add-hook 'caml-mode-hook 'merlin-mode t)
-(setq merlin-use-auto-complete-mode 'easy)
-(setq merlin-command 'opam)
-(setq merlin-display-lock-zone '(margin highlight))
+  ;; cscope
+  (autoload 'xcscope "xcscope" "cscope")
+  (setq cscope-do-not-update-database nil))
 
-(add-hook 'caml-mode-hook
-          (lambda ()
-            (local-set-key (kbd "M-q") 'caml-indent-phrase)
-            (local-set-key (kbd "C-x `") 'merlin-error-next)
-            (local-set-key (kbd "M-.") 'merlin-locate)
-            (local-set-key (kbd "M-,") 'merlin-pop-stack)
-            ))
+(with-language 'arc
+  (add-to-list 'load-path (in-personal-dir "arc/"))
+  (add-to-list 'auto-mode-alist '("\\.arc" . arc-mode))
+  (autoload 'arc-mode "inferior-arc" "Major mode for editing arc code" t))
 
-;;; C and C++
-(defun bind-compile-program ()
-  (interactive)
-  (local-set-key (kbd "C-c C-c")
-                 (lambda ()
-                   (interactive)
-                   (compile "make -k"))))
-(add-hook 'c-mode-hook 'bind-compile-program)
-(add-hook 'c++-mode-hook 'bind-compile-program)
+(with-language 'elisp
+  (add-hook 'emacs-lisp-mode-hook 'set-newline-and-indent)
+  (add-hook 'emacs-lisp-mode-hook 'paredit-mode))
 
-(setq-default c-default-style "linux"
-              c-basic-offset 4)
+(with-language 'haskell
+  (with-package 'haskell-mode
+    (add-to-list 'packages-to-install 'haskell-mode)
+    (autoload 'haskell-mode "haskell-mode" "Haskell mode" t)
+    (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
+    (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)))
 
-(add-hook 'c-mode-common-hook 'set-newline-and-indent)
+(with-language 'idris
+  (with-package 'idris-mode))
 
-;; cscope
-(autoload 'xcscope "xcscope" "cscope")
-(setq cscope-do-not-update-database nil)
+(with-language 'factor
+  (with-package 'fuel
+    (autoload 'factor-mode "factor-mode" "Factor mode")))
 
-;;; arc
-;(add-to-list 'load-path (in-personal-dir "arc/"))
-;(add-to-list 'auto-mode-alist '("\\.arc" . arc-mode))
-;(autoload 'arc-mode "inferior-arc" "Major mode for editing arc code" t)
+(with-language 'python
+  (when (executable-find "python2") ; else it's probably just "python"
+      (setq python-python-command "python2")))
 
-;;; emacs lisp
-(add-hook 'emacs-lisp-mode-hook 'set-newline-and-indent)
-(add-hook 'emacs-lisp-mode-hook 'paredit-mode)
+(with-language 'lua
+  (with-package 'lua-mode
+    (autoload 'lua-mode "lua-mode" "Lua mode")))
 
-;;; haskell mode
-(add-to-list 'packages-to-install 'haskell-mode)
-(autoload 'haskell-mode "haskell-mode" "Haskell mode" t)
-(add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
-(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+(with-language 'go
+  (with-package 'go-mode
+    (autoload 'go-mode "go-mode" "Go mode")))
 
-;; (add-to-list 'load-path (concat (getenv "HOME")
-;;                                 "/.cabal/share/x86_64-linux-ghc-7.6.3/ghc-mod-4.0.2/"))
-;; (autoload 'ghc-init "ghc" nil t)
-;; (add-hook 'haskell-mode-hook (lambda () (ghc-init)))
-;; (setq-default ghc-display-error 'minibuffer)
+(with-language 'scala
+  (with-package 'scala-mode
+    (autoload 'scala-mode "scala-mode" "Scala mode")))
 
-;; Idris
-(add-to-list 'packages-to-install 'idris-mode)
+(with-language 'coq
+  ;; TODO: Probably broken on non-linux
+  (load-file "/usr/share/emacs/site-lisp/ProofGeneral/generic/proof-site.el")
+  (setq proof-splash-enable nil
+        proof-electric-terminator-enable t))
 
-;;; Factor
-;(add-to-list 'load-path (in-personal-dir "fuel/"))
-;(setq fuel-factor-root-dir (in-personal-dir "fuel/"))
-;(autoload 'factor-mode "factor-mode" "Factor mode")
+(with-language 'cmake
+  (with-package 'cmake-mode
+    (autoload 'cmake-mode "cmake-mode" "CMake mode")))
 
-;;; Python
-(setq python-python-command "python2")
+(with-language 'erlang
+  (with-package 'erlang
+    (add-to-list 'load-path "/usr/lib/erlang/lib/tools-2.6.10/emacs/")
+    (setq erlang-root-dir "/usr/lib/erlang")
+    ;; TODO: autoload
+    (require 'erlang-start)))
 
-;;; Lua
-(add-to-list 'packages-to-install 'lua-mode)
-(autoload 'lua-mode "lua-mode" "Lua mode")
-
-;;; Go
-(add-to-list 'packages-to-install 'go-mode)
-(autoload 'go-mode "go-mode" "Go mode")
-
-;;; Scala
-(add-to-list 'packages-to-install 'scala-mode)
-(autoload 'scala-mode "scala-mode" "Scala mode")
-
-;;; ProofGeneral
-(load-file "/usr/share/emacs/site-lisp/ProofGeneral/generic/proof-site.el")
-(setq proof-splash-enable nil
-      proof-electric-terminator-enable t)
-
-;;; cmake
-(add-to-list 'packages-to-install 'cmake-mode)
-(autoload 'cmake-mode "cmake-mode" "CMake mode")
-
-;;; Erlang
-(add-to-list 'load-path "/usr/lib/erlang/lib/tools-2.6.10/emacs/")
-(setq erlang-root-dir "/usr/lib/erlang")
-;(require 'erlang-start)
-
-;;; Agda
-;; First, run cabal install agda, and have ~/.cabal/bin in the PATH
-;; (load-file (let ((coding-system-for-read 'utf-8))
-;;                 (shell-command-to-string "agda-mode locate")))
+(with-language 'agda
+  ;; First, run cabal install agda, and have ~/.cabal/bin in the PATH
+  (load-file (let ((coding-system-for-read 'utf-8))
+               (shell-command-to-string "agda-mode locate"))))
 
 ;;; Org mode
 (require 'org)
@@ -452,48 +439,6 @@
 (add-hook 'org-mode-hook (lambda () (auto-fill-mode t)))
 (add-hook 'org-mode-hook (lambda () (fci-mode 0)))
 (add-hook 'org-mode-hook (lambda () (linum-mode 0)))
-;; (global-set-key (kbd "C-c l") 'org-store-link)
-;; (global-set-key (kbd "C-c c") 'org-capture)
-;; (global-set-key (kbd "C-c a") 'org-agenda)
-;; (global-set-key (kbd "C-c b") 'org-iswitchb)
-;; (setq org-export-html-style
-;; "<style type=\"text/css\">
-;;  <!--/*--><![CDATA[/*><!--*/
-;;   html { font-family: serif; font-size: 12pt; }
-;;   body { width: 75%; margin-left: auto; margin-right: auto; }
-;;   .title  { text-align: center; font-weight: normal; margin-top: 2.8em; font-size: 200%;}
-;;   a { text-decoration: none; }
-;;   a:hover { text-decoration: underline; }
-;;   .author, .date, .creator { color: gray; font-style: italic; text-align: right; }
-;;   .todo   { color: red; }
-;;   .done   { color: green; }
-;;   .tag    { background-color: #add8e6; font-weight:normal }
-;;   .target { }
-;;   .timestamp { color: #bebebe; }
-;;   .timestamp-kwd { color: #5f9ea0; }
-;;   p.verse { margin-left: 3% }
-;;   pre {
-;;   background-color: #000000;
-;;   color: #ffffff;
-;;   padding: 5pt;
-;;   font-family: courier, monospace;
-;;         font-size: 90%;
-;;         overflow:auto;
-;;   }
-;;   table { border-collapse: collapse; }
-;;   td, th { vertical-align: top; }
-;;   dt { font-weight: bold; }
-;;   div.figure { padding: 0.5em; }
-;;   div.figure p { text-align: center; }
-;;   .linenr { font-size:smaller }
-;;   .code-highlighted {background-color:#ffff00;}
-;;   .org-info-js_info-navigation { border-style:none; }
-;;   #org-info-js_console-label { font-size:10px; font-weight:bold;
-;;                                white-space:nowrap; }
-;;   .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
-;;                                  font-weight:bold; }
-;;   /*]]>*/-->
-;; </style>")
 (setq org-html-preamble nil)
 (setq org-html-postamble t)
 (setq org-html-postamble-format
@@ -517,6 +462,9 @@
          :section-numbers t
          )))
 
+;; Magit
+(with-package 'magit)
+
 ;;;; Modes
 (setq auto-mode-alist
       (append
@@ -536,9 +484,3 @@
          ("CMakeLists.txt$" . cmake-mode)
          ("\\.scala$" . scala-mode))
        auto-mode-alist))
-
-;;; On a fresh installation, uncomment those lines and comment the (load-theme
-;;; ...) line in this file. Launch emacs, recomment those lines and uncomment
-;;; the (load-theme ...) one and it's done.
-;; (package-refresh-contents)
-;; (install-all-packages)
