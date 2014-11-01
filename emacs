@@ -441,6 +441,9 @@
   (load-file (let ((coding-system-for-read 'utf-8))
                (shell-command-to-string "agda-mode locate"))))
 
+(with-language 'rust
+  (with-package 'rust-mode))
+
 ;;; Org mode
 (require 'org)
 (with-package 'htmlize (require 'htmlize)) ; For syntax highlighting in html output
