@@ -1,4 +1,4 @@
-»;;;; -*- mode: emacs-lisp -*-
+;;;; -*- mode: emacs-lisp -*-
 ;;;; vim: ft=lisp
 
 ;; Languages that I currently use
@@ -311,10 +311,9 @@
          (define-key slime-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
          (define-key slime-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)))))
 
-;; TODO: autoload instead of require
 (with-language 'clojure
   (with-package 'clj-mode
-    (require 'clj-mode)))
+    (autoload 'clj-mode "clj-mode" "Clojure Mode")))
 
 (with-language 'parenscript
   (with-package 'slime
@@ -342,9 +341,7 @@
                   (replace-regexp-in-string "\n$" ""
                                             (shell-command-to-string "opam config var share"))
                   "/emacs/site-lisp"))
-    ;; TODO: autoload
-    (require 'ocp-indent)
-    (require 'merlin)
+    (autoload 'merlin-mode "merlin" "Merlin mode" t)
     (add-hook 'tuareg-mode-hook 'merlin-mode t)
     (add-hook 'caml-mode-hook 'merlin-mode t)
     (setq merlin-use-auto-complete-mode 'easy)
@@ -361,7 +358,9 @@
                 (local-set-key (kbd "M-q") 'tuareg-indent-phrase)
                 (local-set-key (kbd "C-x `") 'merlin-error-next)
                 (local-set-key (kbd "M-.") 'merlin-locate)
-                (local-set-key (kbd "M-,") 'merlin-pop-stack)))))
+                (local-set-key (kbd "M-,") 'merlin-pop-stack)))
+    (eval-after-load "tuareg"
+      (require 'ocp-indent))))
 
 (with-language 'c
   (defun bind-compile-program ()
@@ -434,7 +433,7 @@
   (with-package 'erlang
     (add-to-list 'load-path "/usr/lib/erlang/lib/tools-2.6.10/emacs/")
     (setq erlang-root-dir "/usr/lib/erlang")
-    ;; TODO: autoload
+    ;; No autoload as it is erlang-start that contains the autoload
     (require 'erlang-start)))
 
 (with-language 'agda
