@@ -47,7 +47,7 @@
 
 ;;; Non-blinking, box cursor
 (blink-cursor-mode 0)
-(setq cursor-type 'box)
+(setq-default cursor-type 'box)
 
 ;;; Don't show the region (C-SPC-SPC to see it)
 (transient-mark-mode 0)
@@ -223,6 +223,18 @@
 (setq ido-default-buffer-method 'selected-window)
 (ido-mode 1)
 
+;;;; OS X specific
+(when (eq system-type 'darwin)
+  ;; Left command is meta, right command is altgr (modified by karabiner to be
+  ;; option)
+  (setq mac-option-modifier nil
+        mac-command-modifier 'meta
+        x-select-enable-clipboard t
+        magic-mode-alist nil)
+  (when (boundp 'tabbar-mode)
+    (tabbar-mode 0))
+  (set-face-attribute 'default nil :height 140))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;; From here, almost everything is not "vanilla"-emacs ;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -255,7 +267,6 @@
 
 ;;; Paredit
 (with-package 'paredit
-  (add-to-list 'packages-to-install 'paredit)
   (autoload 'paredit-mode "paredit" "Paredit emode")
   (eval-after-load "paredit"
     ;; M-r clashes with my win-minor-mode setup, and I don't use M-r in paredit
@@ -278,7 +289,6 @@
             (ecl ("ecl") :coding-system utf-8-unix)))
     (setq slime-net-coding-system 'utf-8-unix)
 
-    (add-to-list 'packages-to-install 'slime)
     (autoload 'slime-setup "slime" "Slime")
     ;; TODO: broken
     (slime-setup '(slime-repl slime-c-p-c slime-editing-commands slime-asdf slime-scratch))
@@ -382,7 +392,6 @@
 
 (with-language 'haskell
   (with-package 'haskell-mode
-    (add-to-list 'packages-to-install 'haskell-mode)
     (autoload 'haskell-mode "haskell-mode" "Haskell mode" t)
     (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
     (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)))
@@ -434,7 +443,7 @@
 
 ;;; Org mode
 (require 'org)
-(require 'htmlize) ; For syntax highlighting in html output
+(with-package 'htmlize (require 'htmlize)) ; For syntax highlighting in html output
 (setq org-html-style-include-scripts nil)
 (add-hook 'org-mode-hook (lambda () (auto-fill-mode t)))
 (add-hook 'org-mode-hook (lambda () (fci-mode 0)))
