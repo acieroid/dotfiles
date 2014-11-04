@@ -10,7 +10,12 @@
 (put 'with-language 'lisp-indent-function 1)
 
 (defun add-to-mode-alist (ext mode)
+  "Add an extension/mode pair to auto-mode-alist"
   (setq auto-mode-alist (append (list (cons ext mode)) auto-mode-alist)))
+
+(defun find-executable (name)
+  "Find the full path of a program"
+  (shell-command-to-string (format "which '%s' | tr -d '\n'" name)))
 
 (defcustom emacs-personal-dir (concat (getenv "HOME") "/.emacs.d/")
   "The path to a directory that contains things useful to emacs")
@@ -331,7 +336,7 @@
   (with-package 'geiser
     (autoload 'geiser-mode "geiser" "Scheme Mode")
     (add-paredit-hook 'geiser-mode-hook)
-    (setq geiser-racket-binary (shell-command-to-string "which racket | tr -d '\n'")))
+    (setq geiser-racket-binary (find-executable "racket")))
   ;; Alternative, simpler-way (without REPL interaction):
   ;; (require 'scheme)
   )
@@ -339,6 +344,7 @@
 (with-language 'ocaml
   (with-package 'tuareg
     (autoload 'tuareg-mode "tuareg" "Major mode for editing OCaml code" t)
+    (add-to-mode-alist "\\.ml[iylp]?" 'tuareg-mode)
     ;; Installed through opam instead of emacs's packages
     (add-to-list 'load-path
                  (concat
@@ -364,7 +370,9 @@
                 (local-set-key (kbd "M-.") 'merlin-locate)
                 (local-set-key (kbd "M-,") 'merlin-pop-stack)))
     (eval-after-load "tuareg"
-      (require 'ocp-indent))))
+      (lambda ()
+        (require 'ocp-indent)
+        (setq ocp-indent-path (find-executable "ocp-indent"))))))
 
 (with-language 'c
   (defun bind-compile-program ()
