@@ -20,6 +20,7 @@ zstyle ':completion:*:cd:*' ignore-parents parent pwd
 # aliases
 case "$(uname -s)" in
   FreeBSD) alias ls='ls -FG';;
+  Darwin) alias ls='ls -FG';;
   Linux) alias ls='ls -F --color=auto';;
 esac
 alias grep='grep --color=auto'
@@ -122,7 +123,7 @@ bindkey    "^[3;5~"         delete-char
 # opam
 which opam > /dev/null 2> /dev/null
 if [ $? -eq 0 -a "$(id -u)" -ne 0 ]; then
-  . /home/quentin/.opam/opam-init/init.zsh > /dev/null 2> /dev/null || true
+  . $HOME/.opam/opam-init/init.zsh > /dev/null 2> /dev/null || true
 fi
 
 # headless sound server
