@@ -3,11 +3,14 @@
 
 ;; Languages that I currently use
 ;; possible values: common-lisp, clojure, parenscript, scheme, ocaml, c, arc, elisp, haskell, idris, factor, python, lua, go, scala, coq, cmake, erlang, agda
-(defvar *languages* '(clojure ocaml c elisp haskell))
+(defvar *languages* '(clojure ocaml c elisp haskell scheme scala))
 (defmacro with-language (language &rest body)
   `(when (member ,language *languages*)
      ,@body))
 (put 'with-language 'lisp-indent-function 1)
+
+(defun add-to-mode-alist (ext mode)
+  (setq auto-mode-alist (append (list (cons ext mode)) auto-mode-alist)))
 
 (defcustom emacs-personal-dir (concat (getenv "HOME") "/.emacs.d/")
   "The path to a directory that contains things useful to emacs")
@@ -325,9 +328,10 @@
       (slime-setup '(slime-proxy slime-parenscript)))))
 
 (with-language 'scheme
-  (with-package 'quack
-    (autoload 'scheme-mode "quack" "Scheme Mode")
-    (add-paredit-hook 'quack-mode-hook))
+  (with-package 'geiser
+    (autoload 'geiser-mode "geiser" "Scheme Mode")
+    (add-paredit-hook 'geiser-mode-hook)
+    (setq geiser-racket-binary (shell-command-to-string "which racket | tr -d '\n'")))
   ;; Alternative, simpler-way (without REPL interaction):
   ;; (require 'scheme)
   )
@@ -383,7 +387,6 @@
 
 (with-language 'arc
   (add-to-list 'load-path (in-personal-dir "arc/"))
-  (add-to-list 'auto-mode-alist '("\\.arc" . arc-mode))
   (autoload 'arc-mode "inferior-arc" "Major mode for editing arc code" t))
 
 (with-language 'elisp
@@ -476,23 +479,3 @@
 
 ;; Magit
 (with-package 'magit)
-
-;;;; Modes
-(setq auto-mode-alist
-      (append
-       '(("\\.arc$" . arc-mode)
-         ;("\\.ml[iylp]?" . tuareg-mode)
-         ("\\.hs$" . haskell-mode)
-         ("\\.scm$" . scheme-mode)
-         ("\\.py$" . python-mode)
-         ("\\.factor$" . factor-mode)
-         ("\\.lua$" . lua-mode)
-         ("\\.m$" . octave-mode)
-         ("\\.go$" . go-mode)
-         ("\\.ml[iylp]?$" . caml-mode)
-         (".stumpwmrc$" . lisp-mode)
-         ("SConstruct$" . python-mode)
-         ("SConscript$" . python-mode)
-         ("CMakeLists.txt$" . cmake-mode)
-         ("\\.scala$" . scala-mode))
-       auto-mode-alist))
