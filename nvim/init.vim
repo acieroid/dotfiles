@@ -22,7 +22,7 @@ set statusline=%F%m%r%h%w\ %{&ff}\ %Y\ hex:0x\%02.2B\ pos:%0l,%0v\ [%p%%]
 set laststatus=2
 
 " bépo configuration
-source ~/.vimrc.bepo
+source ~/.config/nvim/bepo.vim
 
 " highlight non-breakable space characters (because you don't want them in a
 " file edited by vim, never)

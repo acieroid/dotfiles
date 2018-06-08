@@ -3,7 +3,7 @@
 
 ;; Languages that I currently use
 ;; possible values: common-lisp, clojure, parenscript, scheme, ocaml, c, arc, elisp, haskell, idris, factor, python, lua, go, scala, coq, cmake, erlang, agda
-(defvar *languages* '(clojure ocaml c elisp haskell scheme scala))
+(defvar *languages* '())
 (defmacro with-language (language &rest body)
   `(when (member ,language *languages*)
      ,@body))
