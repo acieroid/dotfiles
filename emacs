@@ -1,31 +1,23 @@
 ;;; -*- mode: emacs-lisp -*-
 ;;; vim: ft=lisp
-
 ;;; Code:
 
-;; Languages that I currently use
-;; possible values: common-lisp, clojure, parenscript, scheme, ocaml, c, arc, elisp, haskell, idris, factor, python, lua, go, scala, coq, cmake, erlang, agda
-;; (defvar *languages* '(scala ocaml))
-;; (defmacro with-language (language &rest body)
-;;   `(when (member ,language *languages*)
-;;      ,@body))
-;; (put 'with-language 'lisp-indent-function 1)
-;; 
-;; (defun add-to-mode-alist (ext mode)
-;;   "Add an extension/mode pair to auto-mode-alist."
-;;   (setq auto-mode-alist (append (list (cons ext mode)) auto-mode-alist)))
-;; 
 (defun find-executable (name)
   "Find the full path of a program NAME."
   (shell-command-to-string (format "which '%s' | tr -d '\n'" name)))
-;; 
-;; (defcustom emacs-personal-dir (concat (getenv "HOME") "/.emacs.d/")
-;;   "The path to a directory that contains things useful to emacs.")
-;; (defun in-personal-dir (dir)
-;;   "Give the path of a file/directory in the EMACS-PERSONAL-DIR."
-;;   (concat emacs-personal-dir dir))
 
-;;;; Appearance stuff
+;; Initialize package sources
+(require 'package)
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/")
+                         ("elpa" . "https://elpa.gnu.org/packages/")))
+
+(package-initialize)
+(unless package-archive-contents
+  (package-refresh-contents))
+
+(require 'use-package)
+(setq use-package-always-ensure t)
 
 ;;; Theme
 ;; Doom theme, with its modeline
@@ -58,23 +50,11 @@
 (set-face-attribute 'default nil :font "Fira Code Retina" :height default-font-size)
 (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height default-font-size)
 (set-face-attribute 'variable-pitch nil :font "Cantarell" :height default-variable-font-size :weight 'regular)
-
-;;; Font
-;; (custom-set-faces
-;;  ;; custom-set-faces was added by Custom.
-;;  ;; If you edit it by hand, you could mess it up, so be careful.
-;;  ;; Your init file should contain only one such instance.
-;;  ;; If there is more than one, they won't work right.
-;;  '(default ((t (:height 120 :family "Hack"))))
-;;  '(diff-added ((t (:foreground "forestgreen"))))
-;;  '(diff-context ((t (:foreground "grey20"))))
-;;  '(diff-removed ((t (:foreground "IndianRed"))))
-;;  '(merlin-locked-face ((t (:background "gray95"))))
-;;  '(quack-pltish-defn-face ((t (:foreground "green" :weight bold))) t)
-;;  '(whitespace-line ((t (:background "red4" :weight bold))))
-;;  '(whitespace-tab ((t (:background "grey20")))))
-;; ; (add-to-list 'default-frame-alist '(font "DejaVu Sans Mono-16"))
-;; ; (set-face-attribute 'default nil :height 160)
+(set-face-attribute 'whitespace-tab nil :background "grey20")
+(set-face-attribute 'whitespace-line :background "red4")
+;; (set-face-attribute 'diff-added nil :foreground "forestgreen")
+;; (set-face-attribute 'diff-context nil :foreground "grey20")
+;; (set-face-attribute 'diff-removed nil :foreground "IndianRed")
 
 ;; Show column number in the mode line
 (column-number-mode)
@@ -117,9 +97,11 @@
 
 ;;; Highlight trailing whitespaces, and tabs, but not characters past 80 columns
 ;;; (add lines-tails for this)
-(require 'whitespace)
-(setq whitespace-style '(face empty tabs trailing))
-(global-whitespace-mode t)
+(use-package whitespace
+  :init
+  (global-whitespace-mode t)
+  :config
+  (setq whitespace-style '(face tabs empty trailing lines-tail)))
 
 ;;; Colored output in M-x shell
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
@@ -241,21 +223,7 @@
 ; (setq select-enable-clipboard nil)
 ; (setq select-enable-primary t)
 ; (setq mouse-drag-copy-region t)
-
-;;;; Packages/extensions
-;; Initialize package sources
-(require 'package)
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
-
-(package-initialize)
-(unless package-archive-contents
-  (package-refresh-contents))
-
-(require 'use-package)
-(setq use-package-always-ensure t)
-
+<
 ;; ido -- in emacs by default
 ;; (require 'ido)
 ;; (setq ido-enable-flex-matching t)
@@ -287,23 +255,6 @@
 ;;; Highlight some keywords
 (use-package fixme-mode
   :config (fixme-mode t))
-
-;;; Zenburn as color theme
-;; (global-set-key (kbd "<f6>") '(lambda ()
-;;                                 (interactive)
-;;                                 (custom-set-faces
-;;                                   '(merlin-locked-face ((t (:background "gray95")))))
-;;                                 (disable-theme 'spacemacs-light)))
-;; (global-set-key (kbd "<f7>") '(lambda ()
-;;                                 (interactive)
-;;                                 ;(custom-set-faces
-;;                                         ; '(merlin-locked-face ((t (:background "gray20")))))
-;;                                 (load-theme 'spacemacs-light t)))
-; (setq custom-safe-themes (cons 'spacemacs-dark custom-safe-themes))
-;; (load-theme 'spacemacs-dark t)
-;(with-package 'powerline
-;(powerline-default-theme))
-;; There can be style issues with the powerline when changing theme, to fix them: run powerline-reset
 
 ;;; Paredit
 (use-package paredit
