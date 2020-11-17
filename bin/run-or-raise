@@ -4,5 +4,5 @@ if [ $(pgrep -c "$1") -eq 0 ]; then
     $1
 else
     echo Raising $2
-    i3-msg "[class=$2] focus"
+    swaymsg "[class=$2] focus"
 fi
