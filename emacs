@@ -50,8 +50,6 @@
 (set-face-attribute 'default nil :font "Fira Code Retina" :height default-font-size)
 (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height default-font-size)
 (set-face-attribute 'variable-pitch nil :font "Cantarell" :height default-variable-font-size :weight 'regular)
-(set-face-attribute 'whitespace-tab nil :background "grey20")
-(set-face-attribute 'whitespace-line :background "red4")
 ;; (set-face-attribute 'diff-added nil :foreground "forestgreen")
 ;; (set-face-attribute 'diff-context nil :foreground "grey20")
 ;; (set-face-attribute 'diff-removed nil :foreground "IndianRed")
@@ -65,7 +63,8 @@
                 term-mode-hook
                 shell-mode-hook
                 treemacs-mode-hook
-                eshell-mode-hook))
+                eshell-mode-hook
+                pdf-view-mode))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 ;;; UTF-8
@@ -101,7 +100,9 @@
   :init
   (global-whitespace-mode t)
   :config
-  (setq whitespace-style '(face tabs empty trailing lines-tail)))
+  (progn (setq whitespace-style '(face tabs empty trailing))
+         (set-face-attribute 'whitespace-tab nil :background "grey18")
+         (set-face-attribute 'whitespace-line nil :background "red4")))
 
 ;;; Colored output in M-x shell
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
@@ -109,8 +110,12 @@
 ;;;; File-system related stuff
 ;;; Saves all backup files in one dir
 (setq backup-by-copying t
-      backup-directory-alist `(("." . "~/.emacs.d/backups/"))
+      backup-directory-alist `((".*" . ,temporary-file-directory))
+      auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
       delete-old-versions t)
+
+;; Dno't create lockfiles, these have a tendency to break some other applications
+(setq create-lockfiles nil)
 
 ;;; Follow symlinks
 (setq vc-follow-symlinks t)
@@ -162,7 +167,7 @@
 (setq-default indent-tabs-mode nil)
 
 ;;; Some keybindings
-(global-set-key (kbd "C-h") 'delete-backward-char)
+;; (global-set-key (kbd "C-h") 'delete-backward-char)
 (global-unset-key (kbd "C-z"))
 (global-unset-key (kbd "C-x C-z"))
 (global-set-key (kbd "C-,") 'flyspell-goto-next-error)
@@ -223,7 +228,6 @@
 ; (setq select-enable-clipboard nil)
 ; (setq select-enable-primary t)
 ; (setq mouse-drag-copy-region t)
-<
 ;; ido -- in emacs by default
 ;; (require 'ido)
 ;; (setq ido-enable-flex-matching t)
@@ -462,7 +466,8 @@
 (add-hook 'org-mode-hook (lambda () (auto-fill-mode t)))
 ; (add-hook 'org-mode-hook (lambda () (fci-mode 0)))
 (add-hook 'org-mode-hook (lambda () (linum-mode 0)))
-(global-set-key (kbd "<f12>") 'org-agenda)
+(global-set-key (kbd "<f12>") (lambda () (interactive)  (org-agenda nil "w")))
+
 
 (setq org-agenda-files
       (append
@@ -506,18 +511,12 @@
                "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
               ("r" "respond" entry (file "~/notes/refile.org")
                "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
-              ("n" "note" entry (file "~/notes/refile.org")
+              ("n" "next" entry (file "~/notes/refile.org")
+               "* NEXT %?" :clock-in t :clock-resume t)
+              ("N" "note" entry (file "~/notes/refile.org")
                "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
-              ("j" "Journal" entry (file+datetree "~/notes/diary.org")
-               "* %?\n%U\n" :clock-in t :clock-resume t)
-              ("w" "org-protocol" entry (file "~/notes/refile.org")
-               "* TODO Review %c\n%U\n" :immediate-finish t)
               ("m" "Meeting" entry (file "~/notes/refile.org")
-               "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
-              ("p" "Phone call" entry (file "~/notes/refile.org")
-               "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
-              ("h" "Habit" entry (file "~/notes/refile.org")
-               "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n"))))
+               "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t))))
 
 (setq org-refile-targets (quote ((nil :maxlevel . 9)
                                  (org-agenda-files :maxlevel . 9))))
@@ -585,14 +584,15 @@
   ;; NOTE: Set this to the folder where you keep your Git repos!
   (setq projectile-project-search-path '("~/p" "~/f"))
   (setq projectile-completion-system 'helm)
-  (setq projectile-switch-project-action #'projectile-dired))
-
-(global-set-key (kbd "C-c C-f") 'helm-projectile)
-(global-set-key (kbd "C-c C-g") 'helm-projectile-grep)
+  (setq projectile-switch-project-action #'projectile-dired)
+  (setq ffap-machine-p-known 'reject) ;; Don't ping websites when I try to autocomplete...
+  (global-set-key (kbd "C-c C-f") 'helm-projectile)
+  (global-set-key (kbd "C-c C-g") 'helm-projectile-grep))
 
 (use-package flycheck
   :defer 2
   :diminish
+  :config (setq flycheck-global-modes '(not "tuareg-mode" "caml-mode" "ocaml-mode"))
   :init (global-flycheck-mode)
   :bind (("C-," . flycheck-next-error))
   :custom
@@ -629,6 +629,8 @@
   (interactive)
   (defun tide-imenu-index () nil)
   (tide-setup)
+  (flycheck-mode +1)
+  (setq flycheck-check-syntax-automatically '(save mode-enabled))
   (tide-hl-identifier-mode +1))
 
 (use-package tide
@@ -641,38 +643,6 @@
     (add-hook 'js2-mode-hook #'setup-tide-mode)
     (add-hook 'rjsx-mode-hook #'setup-tide-mode)))
 
-(defun tide-annotate-completions (completions prefix file-location)
-  "Annotate tide completions."
-  (-map
-   (lambda (completion)
-     (let ((name (plist-get completion :name)))
-       (put-text-property 0 1 'file-location file-location name)
-       (put-text-property 0 1 'completion completion name)
-       name))
-   (-sort
-    'tide-compare-completions
-    (-filter
-     (let ((member-p (tide-member-completion-p prefix)))
-       (lambda (completion)
-         (and (string-prefix-p prefix (plist-get completion :name))
-              (or (not member-p)
-                  (member (plist-get completion :kind) '("warning" "export" "method" "property" "getter" "setter"))))))
-     completions))))
-
-(setq backup-directory-alist
-      `((".*" . ,temporary-file-directory)))
-(setq auto-save-file-name-transforms
-      `((".*" ,temporary-file-directory t)))
-
-(setq create-lockfiles nil)
-
-;; To sort
-(use-package which-key
-  :init (which-key-mode)
-  :diminish which-key-mode
-  :config
-  (setq which-key-idle-delay 1))
-
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -680,10 +650,53 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("2f1518e906a8b60fac943d02ad415f1d8b3933a5a7f75e307e6e9a26ef5bf570" "2cdc13ef8c76a22daa0f46370011f54e79bae00d5736340a5ddfe656a767fddf" "71e5acf6053215f553036482f3340a5445aee364fb2e292c70d9175fb0cc8af7" "9efb2d10bfb38fe7cd4586afb3e644d082cbcdb7435f3d1e8dd9413cbe5e61fc" "8e959d5a6771b4d1e2177263e1c1e62c62c0f848b265e9db46f18754ea1c1998" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "a3b6a3708c6692674196266aad1cb19188a6da7b4f961e1369a68f06577afa16" "c4bdbbd52c8e07112d1bfd00fee22bf0f25e727e95623ecb20c4fa098b74c1bd" "4bca89c1004e24981c840d3a32755bf859a6910c65b829d9441814000cf6c3d0" "6b80b5b0762a814c62ce858e9d72745a05dd5fc66f821a1c5023b4f2a76bc910" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" default))
- '(helm-completion-style 'emacs))
+ '(helm-completion-style 'emacs)
+ '(package-selected-packages
+   '(counsel-projectile dune helm-rg ripgrep go-mode mu4e zenburn-theme which-key vterm utop use-package tuareg tide spacemacs-theme solarized-theme slime scala-mode sbt-mode rust-mode proof-general powerline pdf-tools paredit org-journal openwith ocp-indent neotree merlin markdown-mode magit ivy-rich inf-clojure hydra htmlize helm-projectile gdscript-mode fixme-mode erlang doom-themes doom-modeline counsel company command-log-mode clj-mode auth-source-xoauth2)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+
+(add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
+(require 'mu4e)
+(setq mu4e-drafts-folder "/Gmail/[Gmail].Drafts"
+      mu4e-sent-folder "/Gmail/[Gmail].Sent Mail"
+      mu4e-trash-folder "/Gmail/[Gmail].Trash")
+(setq mu4e-sent-messages-behavior 'delete)
+(setq mu4e-get-mail-command "offlineimap")
+(setq user-mail-address "quentin.stievenart@gmail.com"
+      user-full-name  "Quentin Stiévenart")
+(require 'smtpmail)
+(setq message-send-mail-function 'smtpmail-send-it
+      starttls-use-gnutls t
+      smtpmail-starttls-credentials '(("smt.gmail.com" 587 nil nil))
+      smtpmail-default-smtp-server "smtp.gmail.com"
+      smtpmail-stream-type 'starttls
+      smtpmail-smtp-server "smtp.gmail.com"
+      smtpmail-smtp-service 587)
+(setq message-kill-buffer-on-exit t)
+(setq mu4e-maildir-shortcuts
+      '(("/Gmail/INBOX"             . ?g)
+        ("/Exchange/INBOX"          . ?e)
+        ("/Gmail/[Gmail].Sent Mail" . ?s)
+        ("/Gmail/[Gmail].Trash"     . ?t)))
+
+(require 'org-mu4e)
+(setq org-mu4e-link-query-in-headers-mode nil)
+;; ## added by OPAM user-setup for emacs / base ## 56ab50dc8996d2bb95e7856a6eddb17b ## you can edit, but keep this line
+(require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")
+;; ## end of OPAM user-setup addition for emacs / base ## keep this line
+
+
+;; Enable colors in *compilation* buffer
+(ignore-errors
+  (require 'ansi-color)
+  (defun my-colorize-compilation-buffer ()
+    (when (eq major-mode 'compilation-mode)
+      (ansi-color-apply-on-region compilation-filter-start (point-max))))
+  (add-hook 'compilation-hook 'my-colorize-compilation-buffer))
+
