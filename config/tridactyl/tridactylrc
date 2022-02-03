@@ -1,0 +1,28 @@
+set editor="emacsclient -n"
+guiset none
+
+set searchurls.qwant https://www.qwant.com/?q=%s&t=web
+set searchurls.gg    https://google.com/search?q=%s
+set searchurls.enfr https://www.wordreference.com/enfr/%s
+set searchurls.fren https://www.wordreference.com/fren/%s
+set searchurls.wp   https://en.wikipedia.org/wiki/%s
+set searchurls.wpf  https://fr.wikipedia.org/wiki/%s
+set searchurls.wk   https://en.wiktionary.org/wiki/%s
+set searchurls.wkf  https://fr.wiktionary.org/wiki/%s
+
+set searchengine gg
+set theme dark
+
+
+# Bepo bindings
+bind c scrollpx -50
+bind t scrollline 10
+bind s scrollline -10
+bind r scrollpx 50
+
+bind C back
+bind T forward
+bind j fillcmdline tabopen
+
+bind gé tabnext
+bind gb tabprev

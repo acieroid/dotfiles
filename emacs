@@ -45,11 +45,11 @@
 (setq-default initial-scratch-message nil)
 
 ;;; Fonts
-(defvar default-font-size 120)
-(defvar default-variable-font-size 120)
+(defvar default-font-size 150)
+(defvar default-variable-font-size 150)
 (set-face-attribute 'default nil :font "Fira Code Retina" :height default-font-size)
 (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height default-font-size)
-(set-face-attribute 'variable-pitch nil :font "Cantarell" :height default-variable-font-size :weight 'regular)
+; (set-face-attribute 'variable-pitch nil :font "Georgia" :height 180)
 ;; (set-face-attribute 'diff-added nil :foreground "forestgreen")
 ;; (set-face-attribute 'diff-context nil :foreground "grey20")
 ;; (set-face-attribute 'diff-removed nil :foreground "IndianRed")
@@ -74,7 +74,7 @@
 (set-language-environment 'utf-8)
 
 ;;; Disable toolbar/menubar/scrollbar
-(menu-bar-mode 0)
+(menu-bar-mode 1)
 (tool-bar-mode 0)
 (scroll-bar-mode 0)
 
@@ -121,9 +121,10 @@
 (setq vc-follow-symlinks t)
 
 ;;; URLs
-(setq browse-url-browser-function 'browse-url-chromium
+(setq browse-url-browser-function 'browse-url-firefox
+      browse-url-firefox-program "firefox"
       browse-url-chromium-program "brave"
-      browse-url-new-window-flag t)
+      browse-url-new-window-flag nil)
 
 ;;; Move between windows using shift and arrows or M-{c,t,s,r}
 (windmove-default-keybindings)
@@ -145,7 +146,8 @@
 (defun quit ()
   "Shortcut to 'save-buffers-kill-terminal."
   (interactive)
-  (save-buffers-kill-terminal))
+  (progn (org-clock-out nil t)
+         (save-buffers-kill-terminal)))
 
 ;;; PDF handling
 (use-package pdf-tools
@@ -222,27 +224,61 @@
                                 (hs-minor-mode 1)
                                 (hs-show-block)))
 
-;;; X selection
-;; Since emacs 24, the default behavior for selection changed, which really
-;; confuses me. This enable the old behavior
-; (setq select-enable-clipboard nil)
-; (setq select-enable-primary t)
-; (setq mouse-drag-copy-region t)
-;; ido -- in emacs by default
-;; (require 'ido)
-;; (setq ido-enable-flex-matching t)
-;; (setq ido-everywhere t)
-;; (setq ido-default-buffer-method 'selected-window)
-;; (ido-mode 0)
+(use-package counsel
+  :after ivy
+  :config (counsel-mode)
+  :bind (("M-x" . counsel-M-x)
+         ("M-y" . counsel-yank-pop)
+         ("C-x C-f" . counsel-find-file)
+         ("C-C C-f" . counsel-projectile-find-file)
+         ("C-c C-f" . counsel-git)
+         ("C-c C-g" . counsel-git-grep)))
 
-;; Helm, see https://tuhdo.github.io/helm-intro.html
-(use-package helm
-  :init (helm-mode 1)
-  :bind (("M-x" . helm-M-x)
-         ("M-y" . helm-show-kill-ring)
-         ("C-x C-f" . helm-find-files)
-         ("C-C C-f" . helm-projectile-find-file)
-         ("C-x b" . helm-mini)))
+(use-package ivy
+  :defer 0.1
+  :diminish
+  :bind (("C-c C-r" . ivy-resume)
+         ("C-x b" . ivy-switch-buffer))
+  :custom
+  (ivy-count-format "(%d/%d) ")
+  (ivy-use-virtual-buffers t)
+  :config (ivy-mode))
+
+(use-package ivy-rich
+  :after ivy
+  :custom
+  (ivy-virtual-abbreviate 'full
+                          ivy-rich-switch-buffer-align-virtual-buffer t
+                          ivy-rich-path-style 'abbrev)
+  :config
+  (progn
+    (ivy-rich-mode 1)
+    (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+
+    (defun ivy-rich-switch-buffer-icon (candidate)
+      (with-current-buffer
+          (get-buffer candidate)
+        (let ((icon (all-the-icons-icon-for-mode major-mode)))
+          (if (symbolp icon)
+              (all-the-icons-icon-for-mode 'fundamental-mode)
+            icon))))
+    (setq ivy-rich-display-transformers-list
+          `(counsel-M-x
+            (:columns
+             ((counsel-M-x-transformer (:width 40))
+              (ivy-rich-counsel-function-docstring (:face font-lock-doc-face))))
+            (setq ivy-rich-display-transformers-list
+                  ivy-switch-buffer
+                  (:columns
+                   ((ivy-rich-switch-buffer-icon (:width 2))
+                    (ivy-rich-candidate (:width 30))
+                    (ivy-rich-switch-buffer-size (:width 7))
+                    (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
+                    (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+                    (ivy-rich-switch-buffer-project (:width 15 :face success))
+                    (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
+                   :predicate
+                   (lambda (cand) (get-buffer cand))))))))
 
 ;;;; OS X specific
 (when (eq system-type 'darwin)
@@ -274,59 +310,7 @@
     (with-eval-after-load "eldoc"
       (eldoc-add-command #'paredit-backward-delete #'paredit-close-round))))
 
-;;;; Languages
-;; (with-language 'common-lisp
-;;   (with-package 'slime
-;;     (setq inferior-lisp-program "sbcl")
-;;     (setq slime-lisp-implementations
-;;           `((sbcl ("sbcl") :coding-system utf-8-unix)
-;;             (clisp ("clisp") :coding-system utf-8-unix)
-;;             (ecl ("ecl") :coding-system utf-8-unix)))
-;;     (setq slime-net-coding-system 'utf-8-unix)
-;; 
-;;     (autoload 'slime-setup "slime" "Slime")
-;;     ;; TODO: broken
-;;     (slime-setup '(slime-repl slime-c-p-c slime-editing-commands slime-asdf slime-scratch))
-;; 
-;;     (setq slime-complete-symbol-function 'slime-complete-symbol*)
-;;     (add-hook 'slime-mode-hook
-;;               (lambda ()
-;;                 (unless (slime-connected-p)
-;;                   (save-excursion (slime)))))
-;;     (add-paredit-hook 'slime-mode-hook)
-;;     (add-hook 'slime-repl-mode-hook (lambda () (paredit-mode t)))
-;;     (add-hook 'slime-repl-mode-hook
-;;               (lambda () (local-set-key (kbd "RET") 'paredit-newline)))
-;; 
-;;     (eval-after-load "slime"
-;;       '(progn
-;;          ;;(define-key slime-repl-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
-;;          ;;(define-key slime-repl-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)
-;;          (define-key slime-mode-map (kbd "C-c ;") 'slime-insert-balanced-comments)
-;;          (define-key slime-mode-map (kbd "C-c M-;") 'slime-remove-balanced-comments)))))
-;; 
-;; (with-language 'clojure
-;;   (with-package 'clj-mode
-;;     (autoload 'clj-mode "clj-mode" "Clojure Mode")))
-;; 
-;; (with-language 'parenscript
-;;   (with-package 'slime
-;;     ;; Probably broken
-;;     (add-to-list 'load-path (in-personal-dir "slime-proxy"))
-;;     (add-to-list 'load-path (in-personal-dir "slime-proxy/contrib/slime-parenscript"))
-;;     (defun slime-proxy-setup ()
-;;       (interactive)
-;;       (slime-setup '(slime-proxy slime-parenscript)))))
-;; 
-;; (with-language 'scheme
-;;   (with-package 'geiser
-;;     (autoload 'geiser-mode "geiser" "Scheme Mode")
-;;     (add-paredit-hook 'geiser-mode-hook)
-;;     (setq geiser-racket-binary (find-executable "racket")))
-;;   ;; Alternative, simpler-way (without REPL interaction):
-;;   ;; (require 'scheme)
-;;   )
-
+;;; OCaml
 (use-package tuareg
   :config
   ; (add-hook 'tuareg-mode-hook #'electric-pair-local-mode) ;; No, I despise that :(
@@ -343,10 +327,6 @@
                   ("\\.topml$" . tuareg-mode))
                 auto-mode-alist)))
 
-(use-package ocp-indent
-  :config
-  (setq ocp-indent-path (find-executable "ocp-indent")))
-
 (use-package merlin
   :config
   ;; Use opam switch to lookup ocamlmerlin binary
@@ -355,120 +335,56 @@
   ;; (add-hook 'merlin-mode-hook #'company-mode)
   (setq merlin-error-after-save t))
 
-;; (with-language 'c
-;;   (defun bind-compile-program ()
-;;     (interactive)
-;;     (local-set-key (kbd "C-c C-c")
-;;                    (lambda ()
-;;                      (interactive)
-;;                      (compile "make -k"))))
-;;   (add-hook 'c-mode-hook 'bind-compile-program)
-;;   (add-hook 'c++-mode-hook 'bind-compile-program)
-;; 
-;;   (setq-default c-default-style "linux"
-;;                 c-basic-offset 4)
-;; 
-;;   ;;; Auto-indent (to add to hooks)
-;; (defun set-newline-and-indent ()
-;;   (local-set-key (kbd "RET") 'newline-and-indent))
-;; 
-;; (add-hook 'c-mode-common-hook 'set-newline-and-indent)
-;; 
-;;   ;; cscope
-;;   (autoload 'xcscope "xcscope" "cscope")
-;;   (setq cscope-do-not-update-database nil))
-;; 
-;; (with-language 'elisp
-;;   (add-hook 'emacs-lisp-mode-hook 'set-newline-and-indent)
-;;   (add-hook 'emacs-lisp-mode-hook 'paredit-mode))
-;; 
-;; (with-language 'haskell
-;;   (with-package 'haskell-mode
-;;     (autoload 'haskell-mode "haskell-mode" "Haskell mode" t)
-;;     (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
-;;     (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)))
-;; 
-;; (with-language 'idris
-;;   (with-package 'idris-mode))
-;; 
-;; (with-language 'factor
-;;   (with-package 'fuel
-;;     (autoload 'factor-mode "factor-mode" "Factor mode")))
-;; 
-;; (with-language 'python
-;;   (when (executable-find "python")
-;;       (setq python-python-command "python")))
-;; 
-;; (with-language 'lua
-;;   (with-package 'lua-mode
-;;     (autoload 'lua-mode "lua-mode" "Lua mode")))
-;; 
-;; (with-language 'go
-;;   (with-package 'go-mode
-;;     (autoload 'go-mode "go-mode" "Go mode")))
-;; 
-;; (with-language 'scala
-;;   (with-package 'scala-mode
-;;     (autoload 'scala-mode "scala-mode" "Scala mode")))
-;; 
-;; (with-language 'coq
-;;   ;; TODO: Probably broken on non-linux
-;;   (load-file "/usr/share/emacs/site-lisp/ProofGeneral/generic/proof-site.el")
-;;   (autoload 'proof-general "proof-general" "Proof General")
-;;   (setq proof-splash-enable nil
-;;         proof-electric-terminator-enable t))
-;; 
-;; (with-language 'cmake
-;;   (with-package 'cmake-mode
-;;     (autoload 'cmake-mode "cmake-mode" "CMake mode")))
-;; 
-;; (with-language 'erlang
-;;   (with-package 'erlang
-;;     (add-to-list 'load-path "/usr/lib/erlang/lib/tools-2.6.10/emacs/")
-;;     (setq erlang-root-dir "/usr/lib/erlang")
-;;     ;; No autoload as it is erlang-start that contains the autoload
-;;     (require 'erlang-start)))
-;; 
-;; 
-;; (with-language 'agda
-;;   ;; First, run cabal install agda, and have ~/.cabal/bin in the PATH
-;;   (load-file (let ((coding-system-for-read 'utf-8))
-;;                (shell-command-to-string "agda-mode locate")))
-;;   (mapc
-;;          (lambda (x) (add-to-list 'face-remapping-alist x))
-;;          '((agda2-highlight-datatype-face              . font-lock-type-face)
-;;            (agda2-highlight-function-face              . font-lock-type-face)
-;;            (agda2-highlight-inductive-constructor-face . font-lock-function-name-face)
-;;            (agda2-highlight-keyword-face               . font-lock-keyword-face)
-;;            (agda2-highlight-module-face                . font-lock-constant-face)
-;;            (agda2-highlight-number-face                . nil)
-;;            (agda2-highlight-postulate-face             . font-lock-type-face)
-;;            (agda2-highlight-primitive-type-face        . font-lock-type-face)
-;;            (agda2-highlight-record-face . font-lock-type-face))))
-;; 
-;; (use-package rust-mode
-;;   :hook (rust-mode . lsp)
-;;   :bind
-;;   ("C-c g" . rust-run)
-;;   ("C-c t" . rust-test)
-;;   ("C-c b" . cargo-process-build)
-;;   :init
-;;   (which-function-mode 1)
-;;   (setq compilation-error-regexp-alist-alist
-;;       (cons '(cargo "^\\([^ \n]+\\):\\([0-9]+\\):\\([0-9]+\\): \\([0-9]+\\):\\([0-9]+\\) \\(?:[Ee]rror\\|\\([Ww]arning\\)\\):" 1 (2 . 4) (3 . 5) (6))
-;;         compilation-error-regexp-alist-alist))
+;; (use-package ocp-indent
 ;;   :config
-;;   (setq rust-format-on-save t))
+;;   (setq ocp-indent-path (find-executable "ocp-indent")))
+
+;;; Scala
+(use-package scala-mode
+  :interpreter
+  ("scala" . scala-mode))
+
+(use-package sbt-mode
+  :commands sbt-start sbt-command
+  :config
+  ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
+  ;; allows using SPACE when in the minibuffer
+  (substitute-key-definition
+   'minibuffer-complete-word
+   'self-insert-command
+   minibuffer-local-completion-map)
+   ;; sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152
+  (setq sbt:program-options '("-Dsbt.supershell=false")))
+
+(use-package lsp-mode
+  :ensure t
+  ;; Optional - enable lsp-mode automatically in scala files
+  :hook  (scala-mode . lsp)
+         (lsp-mode . lsp-lens-mode)
+  :config (setq lsp-prefer-flymake nil))
+
+(use-package lsp-metals
+  :config (setq lsp-metals-treeview-show-when-views-received t))
+
+;; Enable nice rendering of documentation on hover
+(use-package lsp-ui)
+(use-package company-lsp)
 
 ;;; Org mode
 (require 'org)
-(setq org-html-style-include-scripts nil)
+(unbind-key "C-'" org-mode-map)
+(unbind-key "C-," org-mode-map)
+;; (setq org-html-style-include-scripts nil)
+(setq org-html-htmlize-output-type 'css)
 (add-hook 'org-mode-hook (lambda () (auto-fill-mode t)))
 ; (add-hook 'org-mode-hook (lambda () (fci-mode 0)))
 (add-hook 'org-mode-hook (lambda () (linum-mode 0)))
 (global-set-key (kbd "<f12>") (lambda () (interactive)  (org-agenda nil "w")))
 
+;; Disable electric indent that became the default in org-mode 9.4
+(add-hook 'org-mode-hook (lambda () (electric-indent-mode -1)))
 
+(setq org-startup-folded 'overview)
 (setq org-agenda-files
       (append
        (file-expand-wildcards "~/notes/*.org")
@@ -481,15 +397,17 @@
 (setq org-agenda-start-on-weekday 0)
 
 (setq org-todo-keywords
-      '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
-        (sequence "WAITING(w@/!)" "INACTIVE(i)""|" "CANCELLED(c@/!) MEETING(m)")))
+      '((sequence "PROJECT(p)" "TODO(t)" "NEXT(n)" "MEETING(m)" "TOREAD(r)" "LATER(l)" "|" "DONE(d)")
+        (sequence "WAITING(w@/!)" "INACTIVE(i)" "|" "CANCELLED(c@/!)")))
 
 (setq org-todo-keyword-faces
       '(("TODO" :foreground "red" :weight bold)
         ("NEXT" :foreground "orange" :weight bold)
+        ("TOREAD" :foreground "lightblue" :weight bold)
+        ("PROJECT" :foreground "magenta " :weight bold)
         ("DONE" :foreground "forest green" :weight bold)
-        ("WAITING" :foreground "orange" :weight bold)
-        ("INACTIVE" :foreground "magenta" :weight bold)
+        ("WAITING" :foreground "yellow" :weight bold)
+        ("MEETING" :foreground "magenta" :weight bold)
         ("CANCELLED" :foreground "forest green" :weight bold)))
 
 (setq org-todo-state-tags-triggers
@@ -508,11 +426,11 @@
 
 (setq org-capture-templates
       (quote (("t" "todo" entry (file "~/notes/refile.org")
-               "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
+               "* TODO %?\n%U\n%a\n")
               ("r" "respond" entry (file "~/notes/refile.org")
-               "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+               "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :immediate-finish t)
               ("n" "next" entry (file "~/notes/refile.org")
-               "* NEXT %?" :clock-in t :clock-resume t)
+               "* NEXT %?"t)
               ("N" "note" entry (file "~/notes/refile.org")
                "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
               ("m" "Meeting" entry (file "~/notes/refile.org")
@@ -545,11 +463,13 @@
       (quote (("w" "Work tasks"
                ((agenda "" nil)
                 (todo "NEXT")
-                (todo "WAITING"))))))
+                (todo "WAITING")
+                (todo "PROJECT")
+                (todo "TOREAD")
+                (todo "LATER"))))))
 
 (setq org-clock-mode-line-total 'today)
 (setq org-refile-use-outline-path 'file)
-
 
 (use-package org-journal
     :custom
@@ -564,6 +484,8 @@
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
+(global-set-key (kbd "C-x g") 'magit-status)
+
 (defun my-electric-dot ()
   (interactive)
   (insert ".\n"))
@@ -572,27 +494,26 @@
 (add-hook 'latex-mode-hook 'my-tex-hook)
 
 
-(use-package projectile
-  :diminish projectile-mode
-  :config (progn
-            (projectile-mode)
-            (helm-projectile-on))
-  :custom ((projectile-completion-system 'ivy))
-  :bind
-  (("C-c p" . projectile-command-map))
-  :init
-  ;; NOTE: Set this to the folder where you keep your Git repos!
-  (setq projectile-project-search-path '("~/p" "~/f"))
-  (setq projectile-completion-system 'helm)
-  (setq projectile-switch-project-action #'projectile-dired)
-  (setq ffap-machine-p-known 'reject) ;; Don't ping websites when I try to autocomplete...
-  (global-set-key (kbd "C-c C-f") 'helm-projectile)
-  (global-set-key (kbd "C-c C-g") 'helm-projectile-grep))
+;; (use-package projectile
+;;   :diminish projectile-mode
+;;   :config (progn
+;;             (projectile-mode)
+;;             (counsel-projectile-on))
+;;   :custom ((projectile-completion-system 'ivy))
+;;   :bind
+;;   (("C-c p" . projectile-command-map))
+;;   :init
+;;   ;; NOTE: Set this to the folder where you keep your Git repos!
+;;   (setq projectile-project-search-path '("~/p" "~/f"))
+;;   (setq projectile-completion-system 'helm)
+;;   (setq projectile-switch-project-action #'projectile-dired)
+;;   (setq ffap-machine-p-known 'reject) ;; Don't ping websites when I try to autocomplete...
+;;   )
 
 (use-package flycheck
   :defer 2
   :diminish
-  :config (setq flycheck-global-modes '(not "tuareg-mode" "caml-mode" "ocaml-mode"))
+  :config (setq flycheck-global-modes '(not "typescript-mode"  "tuareg-mode" "caml-mode" "ocaml-mode"))
   :init (global-flycheck-mode)
   :bind (("C-," . flycheck-next-error))
   :custom
@@ -600,6 +521,34 @@
   (flycheck-stylelintrc "~/.stylelintrc.json"))
 
 (server-start)
+
+(use-package lsp-mode
+  :hook ((c-mode          ; clangd
+          c++-mode        ; clangd
+          c-or-c++-mode   ; clangd
+          java-mode       ; eclipse-jdtls
+          js-mode         ; ts-ls (tsserver wrapper)
+          js-jsx-mode     ; ts-ls (tsserver wrapper)
+          typescript-mode ; ts-ls (tsserver wrapper)
+          web-mode
+          ) . lsp)
+  :bind (("C-." . lsp-execute-code-action))
+  :commands lsp
+  :config
+  (setq lsp-auto-guess-root t)
+  (setq lsp-diagnostic-provider :none)             ; disable flycheck-lsp for most modes
+  (add-hook 'web-mode-hook #'lsp-flycheck-enable) ; enable flycheck-lsp for web-mode locally
+  (setq lsp-enable-symbol-highlighting nil)
+  (setq lsp-enable-on-type-formatting nil)
+  (setq lsp-signature-auto-activate nil)
+  (setq lsp-modeline-code-actions-enable nil)
+  (setq lsp-modeline-diagnostics-enable nil)
+  (setq lsp-enable-folding nil)
+  (setq lsp-enable-imenu nil)
+  (setq lsp-enable-snippet nil)
+  (setq lsp-completion-enable nil)
+  (setq read-process-output-max (* 1024 1024)) ;; 1mb
+  (setq lsp-idle-delay 0.5))
 
 ;; (defun setup-tide-mode ()
 ;;   (interactive)
@@ -624,24 +573,34 @@
   :mode (("\\.ts\\'" . typescript-mode)
          ("\\.tsx\\'" . typescript-mode)))
 
-(defun setup-tide-mode ()
-  "Setup tide mode for typescript development."
-  (interactive)
-  (defun tide-imenu-index () nil)
-  (tide-setup)
-  (flycheck-mode +1)
-  (setq flycheck-check-syntax-automatically '(save mode-enabled))
-  (tide-hl-identifier-mode +1))
+;; (defun setup-tide-mode ()
+;;   "Setup tide mode for typescript development."
+;;   (interactive)
+;;   (defun tide-imenu-index () nil)
+;;   (tide-setup)
+;;   (tide-hl-identifier-mode +1))
 
-(use-package tide
-  :config
-  (progn
-    (define-key tide-mode-map (kbd "C-,") 'flycheck-next-error)
-    (define-key tide-mode-map (kbd "C-.") 'tide-fix)
-    (add-hook 'typescript-mode-hook #'setup-tide-mode)
-    (add-hook 'js-mode-hook #'setup-tide-mode)
-    (add-hook 'js2-mode-hook #'setup-tide-mode)
-    (add-hook 'rjsx-mode-hook #'setup-tide-mode)))
+;; (use-package tide
+;;   :config
+;;   (progn
+;;     (define-key tide-mode-map (kbd "C-,") 'flycheck-next-error)
+;;     (define-key tide-mode-map (kbd "C-.") 'tide-fix)
+;;     (add-hook 'typescript-mode-hook #'setup-tide-mode)
+;;     (add-hook 'js-mode-hook #'setup-tide-mode)
+;;     (add-hook 'js2-mode-hook #'setup-tide-mode)
+;;     (add-hook 'rjsx-mode-hook #'setup-tide-mode)))
+
+;; (defun use-eslint-from-node-modules ()
+;;   (let* ((root (locate-dominating-file
+;;                 (or (buffer-file-name) default-directory)
+;;                 "node_modules"))
+;;          (eslint (and root
+;;                       (expand-file-name "node_modules/eslint/bin/eslint.js"
+;;                                         root))))
+;;     (when (and eslint (file-executable-p eslint))
+;;       (setq-local flycheck-javascript-eslint-executable eslint))))
+;; (add-hook 'flycheck-mode-hook #'use-eslint-from-node-modules)
+;; (add-hook 'flycheck-mode-hook (lambda () (flycheck-add-next-checker 'typescript-tide 'javascript-eslint 'append)))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -649,16 +608,18 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("2f1518e906a8b60fac943d02ad415f1d8b3933a5a7f75e307e6e9a26ef5bf570" "2cdc13ef8c76a22daa0f46370011f54e79bae00d5736340a5ddfe656a767fddf" "71e5acf6053215f553036482f3340a5445aee364fb2e292c70d9175fb0cc8af7" "9efb2d10bfb38fe7cd4586afb3e644d082cbcdb7435f3d1e8dd9413cbe5e61fc" "8e959d5a6771b4d1e2177263e1c1e62c62c0f848b265e9db46f18754ea1c1998" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "a3b6a3708c6692674196266aad1cb19188a6da7b4f961e1369a68f06577afa16" "c4bdbbd52c8e07112d1bfd00fee22bf0f25e727e95623ecb20c4fa098b74c1bd" "4bca89c1004e24981c840d3a32755bf859a6910c65b829d9441814000cf6c3d0" "6b80b5b0762a814c62ce858e9d72745a05dd5fc66f821a1c5023b4f2a76bc910" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" default))
+   '("c086fe46209696a2d01752c0216ed72fd6faeabaaaa40db9fc1518abebaf700d" "08a27c4cde8fcbb2869d71fdc9fa47ab7e4d31c27d40d59bf05729c4640ce834" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "2f1518e906a8b60fac943d02ad415f1d8b3933a5a7f75e307e6e9a26ef5bf570" "2cdc13ef8c76a22daa0f46370011f54e79bae00d5736340a5ddfe656a767fddf" "71e5acf6053215f553036482f3340a5445aee364fb2e292c70d9175fb0cc8af7" "9efb2d10bfb38fe7cd4586afb3e644d082cbcdb7435f3d1e8dd9413cbe5e61fc" "8e959d5a6771b4d1e2177263e1c1e62c62c0f848b265e9db46f18754ea1c1998" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "a3b6a3708c6692674196266aad1cb19188a6da7b4f961e1369a68f06577afa16" "c4bdbbd52c8e07112d1bfd00fee22bf0f25e727e95623ecb20c4fa098b74c1bd" "4bca89c1004e24981c840d3a32755bf859a6910c65b829d9441814000cf6c3d0" "6b80b5b0762a814c62ce858e9d72745a05dd5fc66f821a1c5023b4f2a76bc910" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" default))
  '(helm-completion-style 'emacs)
+ '(org-agenda-files
+   '("~/notes/academic.org" "~/notes/administration.org" "~/notes/agenda.org" "~/notes/cl.org" "~/notes/config.org" "~/notes/diary.org" "~/notes/meetings.org" "~/notes/personal.org" "~/notes/refile.org" "~/notes/soft.org" "~/notes/toread.org" "~/notes/research/maf.org" "~/notes/research/scrapingwasm.org" "~/notes/research/wassail.org" "~/notes/books/clean-code-2008.org" "~/notes/books/embedded-software-development-safety-critical-systems.org" "~/notes/books/getting-things-done.org" "~/notes/books/leprechauns-of-software-engineering-2015.org" "~/notes/books/scrum-and-xp-from-the-trenches-2015.org" "~/notes/books/small-teaching-2016.org" "~/notes/papers/binary-control-flow-trimming-2019.org" "~/notes/papers/modular-collaborative-program-analysis-in-opal-2020.org" "~/notes/papers/paclab-a-program-analysis-collaboratory-2020.org" "~/notes/papers/scaling-static-taint-analysis-to-industrial-soa-applications-a-case-studyt-at-alibaba-2020.org"))
  '(package-selected-packages
-   '(counsel-projectile dune helm-rg ripgrep go-mode mu4e zenburn-theme which-key vterm utop use-package tuareg tide spacemacs-theme solarized-theme slime scala-mode sbt-mode rust-mode proof-general powerline pdf-tools paredit org-journal openwith ocp-indent neotree merlin markdown-mode magit ivy-rich inf-clojure hydra htmlize helm-projectile gdscript-mode fixme-mode erlang doom-themes doom-modeline counsel company command-log-mode clj-mode auth-source-xoauth2)))
+   '(sr-speedbar origami wgrep ponylang-mode yaml graphviz-dot-mode z3-mode dockerfile-mode mu4e-alert ht company-lsp lsp-ui lsp-metals lsp-mode nov ereader flycheck-aspell flymake-proselint all-the-icons-ivy all-the-icons-ivy-rich counsel-projectile dune ripgrep go-mode mu4e which-key vterm use-package tuareg tide slime scala-mode sbt-mode rust-mode powerline pdf-tools paredit org-journal openwith ocp-indent neotree merlin markdown-mode magit ivy-rich htmlize fixme-mode doom-themes doom-modeline counsel company command-log-mode clj-mode auth-source-xoauth2)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(variable-pitch ((t (:slant normal :weight normal :height 1.0 :width normal :foundry "1ASC" :family "Cantarell")))))
 
 
 (add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
@@ -684,6 +645,8 @@
         ("/Exchange/INBOX"          . ?e)
         ("/Gmail/[Gmail].Sent Mail" . ?s)
         ("/Gmail/[Gmail].Trash"     . ?t)))
+(global-set-key (kbd "<XF86Mail>") 'mu4e)
+(setq mu4e-confirm-quit nil)
 
 (require 'org-mu4e)
 (setq org-mu4e-link-query-in-headers-mode nil)
@@ -699,4 +662,18 @@
     (when (eq major-mode 'compilation-mode)
       (ansi-color-apply-on-region compilation-filter-start (point-max))))
   (add-hook 'compilation-hook 'my-colorize-compilation-buffer))
+
+
+
+
+(add-hook 'html-mode-hook
+          (lambda ()
+            ;; Default indentation is usually 2 spaces, changing to 4.
+            (set (make-local-variable 'sgml-basic-offset) 4)))
+
+
+(defun check-paper-language ()
+  (interactive)
+  (ispell-change-dictionary "en_GB")
+  (flyspell-buffer))
 

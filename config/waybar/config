@@ -1,0 +1,133 @@
+// -*- mode: json -*-
+
+{
+    "layer": "top",
+    "position": "bottom",
+
+    "modules-left": [
+        "sway/workspaces",
+        "custom/right-arrow-dark"
+    ],
+    "modules-center": [
+    ],
+    "modules-right": [
+        "custom/left-arrow-dark",
+        "pulseaudio",
+        "custom/left-arrow-light",
+        "custom/left-arrow-dark",
+        "memory",
+        "custom/left-arrow-light",
+        "custom/left-arrow-dark",
+        "cpu",
+        "custom/left-arrow-light",
+        "custom/left-arrow-dark",
+        "battery",
+        "battery#bat2",
+        "custom/left-arrow-light",
+        "custom/left-arrow-dark",
+        "disk",
+        "custom/left-arrow-light",
+        "custom/left-arrow-dark",
+        "temperature",
+        "custom/left-arrow-light",
+        "custom/left-arrow-dark",
+        "network",
+        "custom/left-arrow-light",
+        "custom/left-arrow-dark",
+        "clock",
+        "tray"
+    ],
+
+    "custom/left-arrow-dark": {
+        "format": "",
+        "tooltip": false
+    },
+    "custom/left-arrow-light": {
+        "format": "",
+        "tooltip": false
+    },
+    "custom/right-arrow-dark": {
+        "format": "",
+        "tooltip": false
+    },
+    "custom/right-arrow-light": {
+        "format": "",
+        "tooltip": false
+    },
+
+    "sway/workspaces": {
+        "disable-scroll": true,
+        "format": "{name}",
+        "all-outputs": true
+    },
+
+    "pulseaudio": {
+        "format": "{icon} {volume:2}%",
+        "format-bluetooth": "{icon}  {volume}%",
+        "format-muted": "MUTE",
+        "format-icons": {
+            "headphones": "",
+            "default": [
+                "",
+                ""
+            ]
+        },
+        "scroll-step": 5,
+        "on-click": "pavucontrol",
+        "on-click-right": "pamixer -t"
+    },
+    "memory": {
+        "interval": 5,
+        "format": "Mem {}%"
+    },
+    "cpu": {
+        "interval": 5,
+        "format": "CPU {usage:2}%"
+    },
+    "battery": {
+        "states": {
+            "good": 95,
+            "warning": 15,
+            "critical": 5,
+        },
+        "format": "{icon} {capacity}%",
+        "format-icons": ["", "", "", "", ""],
+        "bat": "BAT0"
+    },
+    "battery#bat2": {
+        "states": {
+            "good": 95,
+            "warning": 15,
+            "critical": 5,
+        },
+        "bat": "BAT1",
+        "format-icons": ["", "", "", "", ""],
+        "format": "{icon} {capacity}%",
+    },
+    "disk": {
+        "interval": 5,
+        "format": "Disk {percentage_used:2}%",
+        "path": "/"
+    },
+    "tray": {
+        "icon-size": 20
+    },
+    "clock": {
+        // "timezone": "America/New_York",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "format": " {:%Y-%m-%d %a %H:%M}"
+    },
+
+    "temperature": {
+        "critical-threshold": 80,
+        "format": " {temperatureC}°C ",
+    },
+    "network": {
+        // "interface": "wlp2*", // (Optional) To force the use of this interface
+        "format-wifi": " {essid} ({signalStrength}%)",
+        "format-ethernet": " {ifname}: {ipaddr}/{cidr}",
+        "format-linked": " {ifname} (No IP)",
+        "format-disconnected": " Disconnected",
+        "format-alt": " {ifname}: {ipaddr}/{cidr}"
+    },
+}
