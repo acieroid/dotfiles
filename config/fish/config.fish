@@ -5,6 +5,11 @@ alias mv="mv -i"
 alias cp="cp -i"
 alias e="emacsclient -n"
 alias vim="nvim"
+alias cat='bat --style="header" --paging=never'
+alias catn='bat --pager "less -RF"'
+alias ls="exa --icons"
+alias la="exa -lagh --icons"
+alias lt="exa -a --tree --icons --level=2"
 
 # Exports
 set -x TERM xterm
@@ -55,4 +60,7 @@ eval (opam env)
 export WASMER_DIR="/home/quentin/.wasmer"
 [ -s "$WASMER_DIR/wasmer.sh" ] && source "$WASMER_DIR/wasmer.sh"
 
+export NETLIFY_AUTH_TOKEN="Y5srXz2pRBUoLzeq42pMkghXnI3szLmTuX7K-NN8gAc"
 
+
+# atuin init fish | source

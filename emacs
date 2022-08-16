@@ -49,10 +49,6 @@
 (defvar default-variable-font-size 150)
 (set-face-attribute 'default nil :font "Fira Code Retina" :height default-font-size)
 (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height default-font-size)
-; (set-face-attribute 'variable-pitch nil :font "Georgia" :height 180)
-;; (set-face-attribute 'diff-added nil :foreground "forestgreen")
-;; (set-face-attribute 'diff-context nil :foreground "grey20")
-;; (set-face-attribute 'diff-removed nil :foreground "IndianRed")
 
 ;; Show column number in the mode line
 (column-number-mode)
@@ -60,10 +56,8 @@
 ;; Show line numbers on the left (except in some modes)
 (global-display-line-numbers-mode t)
 (dolist (mode '(org-mode-hook
-                term-mode-hook
-                shell-mode-hook
+                vterm-mode-hook
                 treemacs-mode-hook
-                eshell-mode-hook
                 pdf-view-mode))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -74,7 +68,7 @@
 (set-language-environment 'utf-8)
 
 ;;; Disable toolbar/menubar/scrollbar
-(menu-bar-mode 1)
+(menu-bar-mode 0)
 (tool-bar-mode 0)
 (scroll-bar-mode 0)
 
@@ -85,8 +79,8 @@
 (blink-cursor-mode 0)
 (setq-default cursor-type 'box)
 
-;;; Don't show the region (C-SPC-SPC to see it)
-(transient-mark-mode 0)
+;;; Don't show the region (C-SPC-SPC to see it) -> show it now :)
+(transient-mark-mode 1)
 
 ;;; Replace "yes-or-no" by "y-or-n"
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -109,6 +103,7 @@
 
 ;;;; File-system related stuff
 ;;; Saves all backup files in one dir
+(setq temporary-file-directory "/home/quentin/.emacs.d/backups/")
 (setq backup-by-copying t
       backup-directory-alist `((".*" . ,temporary-file-directory))
       auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
@@ -123,19 +118,21 @@
 ;;; URLs
 (setq browse-url-browser-function 'browse-url-firefox
       browse-url-firefox-program "firefox"
-      browse-url-chromium-program "brave"
+      browse-url-chromium-program "chromium"
       browse-url-new-window-flag nil)
 
 ;;; Move between windows using shift and arrows or M-{c,t,s,r}
 (windmove-default-keybindings)
-(defvar win-minor-mode-map (make-keymap) "Keymap for win-minor-mode.")
-(define-key win-minor-mode-map (kbd "M-c") 'windmove-left)
-(define-key win-minor-mode-map (kbd "M-r") 'windmove-right)
-(define-key win-minor-mode-map (kbd "M-s") 'windmove-up)
-(define-key win-minor-mode-map (kbd "M-t") 'windmove-down)
 (define-minor-mode win-minor-mode
   "Minor mode to move between emacs' windows"
-  t " win-minor-mode" 'win-minor-mode-map)
+  :global t
+  :lighter " win-minor-mode"
+  :keymap (let ((keymap (make-keymap)))
+            (define-key keymap (kbd "M-c") 'windmove-left)
+            (define-key keymap (kbd "M-r") 'windmove-right)
+            (define-key keymap (kbd "M-s") 'windmove-up)
+            (define-key keymap (kbd "M-t") 'windmove-down)
+            keymap))
 (win-minor-mode 1)
 
 ;; Disable killing emacs by C-x C-c...
@@ -200,7 +197,6 @@
   :config
   (show-paren-mode +1)
   (setq blink-matching-paren nil))
-
 
 (defun goto-match-paren (arg)
   "Go to the matching parenthesis.  Ignore ARG."
@@ -372,6 +368,7 @@
 
 ;;; Org mode
 (require 'org)
+(setq org-reveal-root "file:///home/quentin/p/reveal.js/")
 (unbind-key "C-'" org-mode-map)
 (unbind-key "C-," org-mode-map)
 ;; (setq org-html-style-include-scripts nil)
@@ -387,21 +384,20 @@
 (setq org-startup-folded 'overview)
 (setq org-agenda-files
       (append
-       (file-expand-wildcards "~/notes/*.org")
-       (file-expand-wildcards "~/notes/research/*.org")
-       (file-expand-wildcards "~/notes/books/*.org")
-       (file-expand-wildcards "~/notes/papers/*.org")))
+       (file-expand-wildcards "~/notes/todo.org")))
 (setq org-fast-tag-selection-single-key 'expert)
 (setq org-fast-tag-selection-include-todo t)
 (setq org-use-fast-todo-selection t)
 (setq org-agenda-start-on-weekday 0)
 
 (setq org-todo-keywords
-      '((sequence "PROJECT(p)" "TODO(t)" "NEXT(n)" "MEETING(m)" "TOREAD(r)" "LATER(l)" "|" "DONE(d)")
-        (sequence "WAITING(w@/!)" "INACTIVE(i)" "|" "CANCELLED(c@/!)")))
+      '((sequence "PROJECT(p)" "TODO(t)" "NEXT(n)" "MEETING(m)" "TOREAD(r)" "LATER(l)" "COURSE(c)" "DEADLINE(e)" "|" "DONE(d)")
+        (sequence "WAITING(w)")))
 
 (setq org-todo-keyword-faces
       '(("TODO" :foreground "red" :weight bold)
+        ("DEADLINE" :foreground "orange" :weight bold)
+        ("COURSE" :foreground "blue")
         ("NEXT" :foreground "orange" :weight bold)
         ("TOREAD" :foreground "lightblue" :weight bold)
         ("PROJECT" :foreground "magenta " :weight bold)
@@ -610,10 +606,9 @@
  '(custom-safe-themes
    '("c086fe46209696a2d01752c0216ed72fd6faeabaaaa40db9fc1518abebaf700d" "08a27c4cde8fcbb2869d71fdc9fa47ab7e4d31c27d40d59bf05729c4640ce834" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "2f1518e906a8b60fac943d02ad415f1d8b3933a5a7f75e307e6e9a26ef5bf570" "2cdc13ef8c76a22daa0f46370011f54e79bae00d5736340a5ddfe656a767fddf" "71e5acf6053215f553036482f3340a5445aee364fb2e292c70d9175fb0cc8af7" "9efb2d10bfb38fe7cd4586afb3e644d082cbcdb7435f3d1e8dd9413cbe5e61fc" "8e959d5a6771b4d1e2177263e1c1e62c62c0f848b265e9db46f18754ea1c1998" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "a3b6a3708c6692674196266aad1cb19188a6da7b4f961e1369a68f06577afa16" "c4bdbbd52c8e07112d1bfd00fee22bf0f25e727e95623ecb20c4fa098b74c1bd" "4bca89c1004e24981c840d3a32755bf859a6910c65b829d9441814000cf6c3d0" "6b80b5b0762a814c62ce858e9d72745a05dd5fc66f821a1c5023b4f2a76bc910" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" default))
  '(helm-completion-style 'emacs)
- '(org-agenda-files
-   '("~/notes/academic.org" "~/notes/administration.org" "~/notes/agenda.org" "~/notes/cl.org" "~/notes/config.org" "~/notes/diary.org" "~/notes/meetings.org" "~/notes/personal.org" "~/notes/refile.org" "~/notes/soft.org" "~/notes/toread.org" "~/notes/research/maf.org" "~/notes/research/scrapingwasm.org" "~/notes/research/wassail.org" "~/notes/books/clean-code-2008.org" "~/notes/books/embedded-software-development-safety-critical-systems.org" "~/notes/books/getting-things-done.org" "~/notes/books/leprechauns-of-software-engineering-2015.org" "~/notes/books/scrum-and-xp-from-the-trenches-2015.org" "~/notes/books/small-teaching-2016.org" "~/notes/papers/binary-control-flow-trimming-2019.org" "~/notes/papers/modular-collaborative-program-analysis-in-opal-2020.org" "~/notes/papers/paclab-a-program-analysis-collaboratory-2020.org" "~/notes/papers/scaling-static-taint-analysis-to-industrial-soa-applications-a-case-studyt-at-alibaba-2020.org"))
+ '(org-agenda-files '("~/notes/todo.org"))
  '(package-selected-packages
-   '(sr-speedbar origami wgrep ponylang-mode yaml graphviz-dot-mode z3-mode dockerfile-mode mu4e-alert ht company-lsp lsp-ui lsp-metals lsp-mode nov ereader flycheck-aspell flymake-proselint all-the-icons-ivy all-the-icons-ivy-rich counsel-projectile dune ripgrep go-mode mu4e which-key vterm use-package tuareg tide slime scala-mode sbt-mode rust-mode powerline pdf-tools paredit org-journal openwith ocp-indent neotree merlin markdown-mode magit ivy-rich htmlize fixme-mode doom-themes doom-modeline counsel company command-log-mode clj-mode auth-source-xoauth2)))
+   '(geiser-guile quack geiser ox-reveal sr-speedbar origami wgrep ponylang-mode yaml graphviz-dot-mode z3-mode dockerfile-mode mu4e-alert ht company-lsp lsp-ui lsp-metals lsp-mode nov ereader flycheck-aspell flymake-proselint all-the-icons-ivy all-the-icons-ivy-rich counsel-projectile dune ripgrep go-mode mu4e which-key vterm use-package tuareg tide slime scala-mode sbt-mode rust-mode powerline pdf-tools paredit org-journal openwith ocp-indent neotree merlin markdown-mode magit ivy-rich htmlize fixme-mode doom-themes doom-modeline counsel company command-log-mode clj-mode auth-source-xoauth2)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -621,6 +616,9 @@
  ;; If there is more than one, they won't work right.
  '(variable-pitch ((t (:slant normal :weight normal :height 1.0 :width normal :foundry "1ASC" :family "Cantarell")))))
 
+
+(add-to-list 'load-path "/home/quentin/.emacs.d/wat-mode")
+(require 'wat-mode)
 
 (add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
 (require 'mu4e)

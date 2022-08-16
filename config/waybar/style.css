@@ -28,6 +28,9 @@ window#waybar {
 #disk,
 #temperature,
 #network,
+#backlight,
+#custom-spotify,
+#custom-pomodoro,
 #tray {
     background: #1a1a1a;
 }

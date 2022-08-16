@@ -12,7 +12,19 @@
     ],
     "modules-right": [
         "custom/left-arrow-dark",
+        "network",
+        "custom/left-arrow-light",
+        "custom/left-arrow-dark",
+        "custom/pomodoro",
+        "custom/left-arrow-light",
+        "custom/left-arrow-dark",
+        "custom/spotify",
+        "custom/left-arrow-light",
+        "custom/left-arrow-dark",
         "pulseaudio",
+        "custom/left-arrow-light",
+        "custom/left-arrow-dark",
+        "backlight",
         "custom/left-arrow-light",
         "custom/left-arrow-dark",
         "memory",
@@ -31,13 +43,9 @@
         "temperature",
         "custom/left-arrow-light",
         "custom/left-arrow-dark",
-        "network",
-        "custom/left-arrow-light",
-        "custom/left-arrow-dark",
         "clock",
         "tray"
     ],
-
     "custom/left-arrow-dark": {
         "format": "",
         "tooltip": false
@@ -54,7 +62,22 @@
         "format": "",
         "tooltip": false
     },
-
+    "custom/spotify": {
+        "exec": "/usr/bin/python3 /home/quentin/bin/mediaplayer.py --player spotify",
+        "format": " {}",
+        "return-type": "json",
+        "on-click": "playerctl play-pause",
+        "on-scroll-up": "playerctl next",
+        "on-scroll-down": "playerctl previous"
+    },
+    "custom/pomodoro": {
+        "exec": "/home/quentin/bin/pomodoro.sh check",
+        "return-type": "json",
+        "interval": 1,
+        "format": "🕑 {}",
+        "on-click": "/home/quentin/bin/pomodoro.sh start",
+        "on-click-right": "/home/quentin/bin/pomodoro.sh stop"
+    },
     "sway/workspaces": {
         "disable-scroll": true,
         "format": "{name}",
@@ -76,13 +99,18 @@
         "on-click": "pavucontrol",
         "on-click-right": "pamixer -t"
     },
+    "backlight": {
+        "device": "intel_backlight",
+        "format": "{icon} {percent}%",
+        "format-icons": ["", ""]
+    },
     "memory": {
-        "interval": 5,
+        "interval": 10,
         "format": "Mem {}%"
     },
     "cpu": {
-        "interval": 5,
-        "format": "CPU {usage:2}%"
+        "interval": 10,
+        "format": " {usage:2}%"
     },
     "battery": {
         "states": {

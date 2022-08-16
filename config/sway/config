@@ -12,6 +12,8 @@ set $right r
 
 set $menu wofi --show drun
 for_window [app_id="^termfloat$"] floating enable, border none, opacity 0.8
+for_window [title="Volume Control"] floating enable, opacity 0.8
+for_window [title="Bluetooth Devices"] floating enable, opacity 0.8
 # set $menu dmenu_path | dmenu | xargs swaymsg exec
 
 # exec wl-paste -t text --watch clipman store
@@ -79,7 +81,7 @@ exec gammastep -l 50.85045:4.34878 -m wayland -t 4500:5000 -b 1.0:0.6
     bindsym $mod+Shift+j reload
 
     # exit sway (logs you out of your Wayland session)
-    bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
+#    bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
 #
 # Moving around:
 #
@@ -129,8 +131,8 @@ exec gammastep -l 50.85045:4.34878 -m wayland -t 4500:5000 -b 1.0:0.6
     # You can "split" the current object of your focus with
     # $mod+b or $mod+v, for horizontal and vertical splits
     # respectively.
-    bindsym $mod+b splitv
-    # bindsym $mod+v splitv
+    bindsym $mod+o split
+    bindsym $mod+p splitv
 
     # Switch the current container between different layout styles
     bindsym $mod+z layout stacking
@@ -194,6 +196,8 @@ bindsym XF86Display exec swaymsg output eDP-1 toggle
 bindsym XF86Favorites exec screenshot.sh
 #bindsym XF86AudioPlay exec lollypop -t
 bindsym XF86AudioPlay exec dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause
+bindsym XF86AudioNext exec dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next
+bindsym XF86AudioPrev exec dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous
 #bindsym XF86AudioPlay exec /home/quentin/bin/mpvtoggle.sh
 bindsym XF86AudioPause exec dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause
 #bindsym XF86AudioPause exec lollypop -t # /home/quentin/bin/mpvtoggle.sh
