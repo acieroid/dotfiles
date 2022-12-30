@@ -45,13 +45,24 @@
 (setq-default initial-scratch-message nil)
 
 ;;; Fonts
-(defvar default-font-size 150)
-(defvar default-variable-font-size 150)
+(defvar default-font-size 130)
+(defvar default-variable-font-size 130)
 (set-face-attribute 'default nil :font "Fira Code Retina" :height default-font-size)
 (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height default-font-size)
 
 ;; Show column number in the mode line
 (column-number-mode)
+
+;; Load treemacs
+(use-package treemacs
+  :ensure t
+  :defer t
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window)))
+
+
+(require 'treemacs-treelib)
 
 ;; Show line numbers on the left (except in some modes)
 (global-display-line-numbers-mode t)
@@ -288,10 +299,6 @@
     (tabbar-mode 0))
   (set-face-attribute 'default nil :height 140))
 
-;;; Highlight some keywords
-(use-package fixme-mode
-  :config (fixme-mode t))
-
 ;;; Paredit
 (use-package paredit
   :hook ((emacs-lisp-mode
@@ -364,7 +371,6 @@
 
 ;; Enable nice rendering of documentation on hover
 (use-package lsp-ui)
-(use-package company-lsp)
 
 ;;; Org mode
 (require 'org)
@@ -565,9 +571,7 @@
 ;; 
 ;; (add-hook 'typescript-mode-hook #'setup-tide-mode)
 
-(use-package typescript-mode
-  :mode (("\\.ts\\'" . typescript-mode)
-         ("\\.tsx\\'" . typescript-mode)))
+(setq gc-cons-threshold 100000000) ;; Needed for LSP responsiveness
 
 ;; (defun setup-tide-mode ()
 ;;   "Setup tide mode for typescript development."
@@ -608,25 +612,29 @@
  '(helm-completion-style 'emacs)
  '(org-agenda-files '("~/notes/todo.org"))
  '(package-selected-packages
-   '(geiser-guile quack geiser ox-reveal sr-speedbar origami wgrep ponylang-mode yaml graphviz-dot-mode z3-mode dockerfile-mode mu4e-alert ht company-lsp lsp-ui lsp-metals lsp-mode nov ereader flycheck-aspell flymake-proselint all-the-icons-ivy all-the-icons-ivy-rich counsel-projectile dune ripgrep go-mode mu4e which-key vterm use-package tuareg tide slime scala-mode sbt-mode rust-mode powerline pdf-tools paredit org-journal openwith ocp-indent neotree merlin markdown-mode magit ivy-rich htmlize fixme-mode doom-themes doom-modeline counsel company command-log-mode clj-mode auth-source-xoauth2)))
+   '(lsp-mode treemacs-all-the-icons treemacs-extensions typescript-mode tree-sitter-langs tree-sitter geiser-guile quack geiser ox-reveal sr-speedbar origami wgrep ponylang-mode yaml graphviz-dot-mode z3-mode dockerfile-mode mu4e-alert ht company-lsp nov ereader flycheck-aspell flymake-proselint all-the-icons-ivy all-the-icons-ivy-rich counsel-projectile dune ripgrep go-mode mu4e which-key vterm use-package tuareg tide slime scala-mode sbt-mode rust-mode powerline pdf-tools paredit org-journal openwith ocp-indent neotree merlin markdown-mode magit ivy-rich htmlize fixme-mode doom-themes doom-modeline counsel company command-log-mode clj-mode auth-source-xoauth2)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(variable-pitch ((t (:slant normal :weight normal :height 1.0 :width normal :foundry "1ASC" :family "Cantarell")))))
+ '(variable-pitch ((t (:slant normal :weight normal :height 1.0 :width normal :foundry "1ASC" :family "Noto Sans")))))
 
 
 (add-to-list 'load-path "/home/quentin/.emacs.d/wat-mode")
 (require 'wat-mode)
 
-(add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
+
 (require 'mu4e)
-(setq mu4e-drafts-folder "/Gmail/[Gmail].Drafts"
-      mu4e-sent-folder "/Gmail/[Gmail].Sent Mail"
-      mu4e-trash-folder "/Gmail/[Gmail].Trash")
-(setq mu4e-sent-messages-behavior 'delete)
-(setq mu4e-get-mail-command "offlineimap")
+(add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
+(setq mu4e-maildir (expand-file-name "~/.mail"))
+(setq mu4e-get-mail-command "mbsync -V gmail")
+
+;; (setq mu4e-drafts-folder "/Gmail/[Gmail].Drafts"
+;;       mu4e-sent-folder "/Gmail/[Gmail].Sent Mail"
+;;       mu4e-trash-folder "/Gmail/[Gmail].Trash")
+;; (setq mu4e-sent-messages-behavior 'delete)
+;; (setq mu4e-get-mail-command "offlineimap")
 (setq user-mail-address "quentin.stievenart@gmail.com"
       user-full-name  "Quentin Stiévenart")
 (require 'smtpmail)
@@ -638,18 +646,18 @@
       smtpmail-smtp-server "smtp.gmail.com"
       smtpmail-smtp-service 587)
 (setq message-kill-buffer-on-exit t)
-(setq mu4e-maildir-shortcuts
-      '(("/Gmail/INBOX"             . ?g)
-        ("/Exchange/INBOX"          . ?e)
-        ("/Gmail/[Gmail].Sent Mail" . ?s)
-        ("/Gmail/[Gmail].Trash"     . ?t)))
-(global-set-key (kbd "<XF86Mail>") 'mu4e)
+;; (setq mu4e-maildir-shortcuts
+;;       '(("/Gmail/INBOX"             . ?g)
+;;         ("/Exchange/INBOX"          . ?e)
+;;         ("/Gmail/[Gmail].Sent Mail" . ?s)
+;;         ("/Gmail/[Gmail].Trash"     . ?t)))
+;; (global-set-key (kbd "<XF86Mail>") 'mu4e)
 (setq mu4e-confirm-quit nil)
 
-(require 'org-mu4e)
-(setq org-mu4e-link-query-in-headers-mode nil)
+;; (require 'org-mu4e)
+;; (setq org-mu4e-link-query-in-headers-mode nil)
 ;; ## added by OPAM user-setup for emacs / base ## 56ab50dc8996d2bb95e7856a6eddb17b ## you can edit, but keep this line
-(require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")
+; (require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")
 ;; ## end of OPAM user-setup addition for emacs / base ## keep this line
 
 
@@ -675,3 +683,96 @@
   (ispell-change-dictionary "en_GB")
   (flyspell-buffer))
 
+
+(use-package tree-sitter
+  :ensure t
+  :config
+  ;; activate tree-sitter on any buffer containing code for which it has a parser available
+  (global-tree-sitter-mode)
+  ;; you can easily see the difference tree-sitter-hl-mode makes for python, ts or tsx
+  ;; by switching on and off
+  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+
+(use-package tree-sitter-langs
+  :ensure t
+  :after tree-sitter)
+
+(use-package typescript-mode
+  :after tree-sitter
+  :mode (("\\.ts\\'" . typescript-mode)
+         ("\\.tsx\\'" . typescript-mode))
+
+  :config
+  ;; we choose this instead of tsx-mode so that eglot can automatically figure out language for server
+  ;; see https://github.com/joaotavora/eglot/issues/624 and https://github.com/joaotavora/eglot#handling-quirky-servers
+  (define-derived-mode typescriptreact-mode typescript-mode
+    "TypeScript TSX")
+
+  ;; use our derived mode for tsx files
+  (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))
+  ;; by default, typescript-mode is mapped to the treesitter typescript parser
+  ;; use our derived mode to map both .tsx AND .ts -> typescriptreact-mode -> treesitter tsx
+  (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)))
+
+
+(defun wassail-call-graph ()
+  (interactive)
+  (shell-command
+   (concat "/home/quentin/p/wassail/_build/default/main.exe callgraph "
+           (buffer-file-name)
+           " /tmp/cg.dot"))
+  (shell-command "xdot /tmp/cg.dot&"))
+
+(defun wassail-cfg ()
+  (interactive)
+  (shell-command
+   (concat "/home/quentin/p/wassail/_build/default/main.exe cfg "
+           (buffer-file-name)
+           " "
+           (read-string "Generate CFG for function: " (get-function))
+           " /tmp/cfg.dot"))
+  (shell-command "xdot /tmp/cfg.dot&"))
+
+(defun wassail-cdg ()
+  (interactive)
+  (shell-command
+   (concat "/home/quentin/p/wassail/_build/default/main.exe cdg "
+           (buffer-file-name)
+           " "
+           (read-string "Generate CDG for function: " (get-function))
+           " /tmp/cdg.dot"))
+  (shell-command "xdot /tmp/cdg.dot&"))
+
+(defun wassail-slice ()
+  (interactive)
+  (let ((func (read-string "Slice function: " (get-function))))
+    (shell-command
+     (concat "/home/quentin/p/wassail/_build/default/main.exe slice "
+             (buffer-file-name) " "
+             func " "
+             (number-to-string (line-number-at-pos)) " "
+             "/tmp/slice.wat")) t
+    (find-file-other-window "/tmp/slice.wat")))
+
+(defun get-function ()
+  (interactive)
+  (save-excursion
+    (search-backward "(func (;")
+    (search-forward ";")
+    (set-mark-command nil)
+    (search-forward ";")
+    (backward-char)
+    (buffer-substring (mark) (point))))
+
+(defun mark-inside-delimiters ()
+"Mark all chars inside the balanced expression point is in"
+  (interactive)
+  (let (p start pairs stop)
+    (skip-chars-backward "^<({[\"'")
+    (setq p (point))
+    (setq start (char-to-string (preceding-char)))
+    (setq pairs '(("<" . ">")("(" . ")")("{" . "}")
+                  ("[" . "]")("\"" . "\"")("'" . "'") (";" . ";")))
+    (setq stop (cdr (assoc start pairs)))
+    (skip-chars-forward (concat"^" stop))
+    (set-mark p)))

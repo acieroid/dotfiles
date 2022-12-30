@@ -4,6 +4,5 @@ if [ $(pgrep -c "$1") -eq 0 ]; then
     $1
 else
     echo Raising $2
-    swaymsg "[class=$2] focus"
-    wmctrl -a Emacs
+    i3-msg "[class=$2] focus"
 fi

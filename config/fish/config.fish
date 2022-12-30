@@ -4,12 +4,12 @@ alias rm="rm -i"
 alias mv="mv -i"
 alias cp="cp -i"
 alias e="emacsclient -n"
-alias vim="nvim"
+alias vim="vim"
 alias cat='bat --style="header" --paging=never'
 alias catn='bat --pager "less -RF"'
-alias ls="exa --icons"
-alias la="exa -lagh --icons"
-alias lt="exa -a --tree --icons --level=2"
+alias ls="exa"
+alias la="exa -lagh"
+alias lt="exa -a --tree --level=2"
 
 # Exports
 set -x TERM xterm
@@ -21,13 +21,10 @@ set -x PATH $PATH $HOME/bin $HOME/.cargo/bin $HOME/.npm-global/bin $HOME/.local/
 set -x XKB_DEFAULT_LAYOUT fr
 set -x XKB_DEFAULT_VARIANT bepo
 set -x XKB_DEFAULT_OPTIONS ctrl:nocaps,ctrl:swap_lshift_ctrl
-set -x GDK_DPI_SCALE 1
-set -x MOZ_ENABLE_WAYLAND 1
-set -x XDG_CURRENT_DESKTOP sway
+#set -x GDK_SCALE 2
+#set -x GDK_DPI_SCALE 0.5
+set -x XDG_CURRENT_DESKTOP i3
 set -x _JAVA_AWT_WM_NOREPARENTING 1
-set -x QT_QPA_PLATFORM wayland
-set -x QT_WAYLAND_DISABLE_WINDOWDECORATION 1
-set -x BEMENU_BACKEND wayland
 set -x JAVA_HOME /usr/lib/jvm/default/
 set -x CHROME_BIN chromium
 
@@ -49,7 +46,7 @@ case /dev/tty1
 case '*'
 end
 
-wmname LG3D
+# wmname LG3D
 
 # opam configuration
 #source /home/quentin/.opam/opam-init/init.fish > /dev/null 2> /dev/null; or true
