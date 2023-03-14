@@ -2,6 +2,7 @@ import XMonad
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.StatusBar
+import XMonad.Hooks.SetWMName
 import XMonad.Hooks.ManageHelpers (isFullscreen, doFullFloat, doCenterFloat)
 
 import XMonad.Util.Loggers
@@ -19,7 +20,6 @@ import XMonad.Util.Dzen ((>=>))
 import XMonad.Prompt
 import XMonad.Prompt.Shell (shellPrompt)
 import XMonad.Prompt.XMonad (xmonadPrompt)
-
 
 import qualified XMonad.StackSet as W
 
@@ -109,8 +109,6 @@ myWorkspaceKeys = [xK_quotedbl, xK_guillemotleft, xK_guillemotright,
                    xK_parenleft, xK_parenright, xK_at,
                    xK_plus, xK_minus, xK_slash, xK_asterisk]
 
-
-
 myKeys conf@(XConfig {modMask = m}) =
     M.fromList $
          [ -- Launch emacs, or just focus it
@@ -181,8 +179,9 @@ myStartupHook = do
   spawn "xset b off"
   spawn "setxkbmap -option ctrl:nocaps fr bepo"
   spawn "/usr/bin/emacs --daemon"
-  spawn "redshift -l 45:-73"
   spawn "XSECURELOCK_PASSWORD_PROMPT=time_hex XSECURELOCK_SHOW_HOSTNAME=0 XSECURELOCK_SHOW_USERNAME=0 XSECURELOCK_SHOW_KEYBOARD_LAYOUT=0 xss-lock -n /usr/lib/xsecurelock/dimmer -l -- xsecurelock"
+  spawn "pkill redshift ; redshift -l 45:-73"
+  setWMName "LG3D" -- necessary for Java WM reparenting
 
 myConfig = def
   { modMask = myModMask

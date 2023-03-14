@@ -86,8 +86,6 @@
 ;; Avoid annoying autocomplete on enter
 (after! company (setq company-idle-delay nil))
 
-
-
 ;; Disable parenthesis autocomplete
 (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
 
