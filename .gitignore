@@ -1,9 +1,11 @@
 xmonad/history
 xmonad/xmonad
+xmonad/xmonad-contrib
 xmonad/xmonad-i386-linux
 xmonad/xmonad.errors
 xmonad/xmonad.hi
 xmonad/xmonad.o
+xmonad/.stack-work
 /config/Clementine/
 /config/Code - OSS/
 /config/Code Industry/
