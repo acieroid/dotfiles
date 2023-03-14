@@ -2,6 +2,7 @@ import XMonad
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.StatusBar
+import XMonad.Hooks.SetWMName
 import XMonad.Hooks.ManageHelpers (isFullscreen, doFullFloat, doCenterFloat)
 
 import XMonad.Util.Loggers
@@ -181,7 +182,8 @@ myStartupHook = do
   spawn "xset b off"
   spawn "setxkbmap -option ctrl:nocaps fr bepo"
   spawn "/usr/bin/emacs --daemon"
-  spawn "redshift -l 45:-73"
+  spawn "pkill redshift ; redshift -l 45:-73"
+  setWMName "LG3D" -- necessary for Java WM reparenting
 
 myConfig = def
   { modMask = myModMask
