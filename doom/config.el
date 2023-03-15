@@ -119,3 +119,6 @@
     (smtpmail-smtp-server    . "smtp.office365.com")
     (smtpmail-smtp-service   . 587))
   t)
+
+;; Don't flycheck constantly, as it can be quite slow, e.g., on Haskell
+(after! flycheck (setq flycheck-check-syntax-automatically '(save mode-enable)))
