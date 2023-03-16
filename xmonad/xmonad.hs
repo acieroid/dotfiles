@@ -132,7 +132,9 @@ myKeys conf@(XConfig {modMask = m}) =
          -- Music
          , ((0, xF86XK_AudioPlay), playToggle)
          , ((m, xK_a), playToggle)
+         , ((0, xF86XK_AudioPrev), playPrev)
          , ((m, xK_u), playPrev)
+         , ((0, xF86XK_AudioNext), playNext)
          , ((m, xK_i), playNext)
          -- Close a window
          , ((m .|. s, xK_q ), kill)
