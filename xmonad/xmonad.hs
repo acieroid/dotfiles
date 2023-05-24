@@ -58,9 +58,9 @@ playToggle = shellCommand "playerctl" ["play-pause"] >> displayPlayerStatus
 playNext = shellCommand "playerctl" ["next"] >> displayPlayerStatus
 playPrev = shellCommand "playerctl" ["prev"] >> displayPlayerStatus
 
-displayBrightness = shellCommandFirstLine "xbacklight" [] >>= (\bl -> displayBig $ "BACKLIGHT: " ++ (take 2 bl) ++ "%")
-increaseBrightness = shellCommand "xbacklight" ["+5"] >> displayBrightness
-decreaseBrightness = shellCommand "xbacklight" ["-5"] >> displayBrightness
+displayBrightness = shellCommandFirstLine "light" [] >>= (\bl -> displayBig $ "BACKLIGHT: " ++ (take 2 bl) ++ "%")
+increaseBrightness = shellCommand "light" ["-A", "5"] >> displayBrightness
+decreaseBrightness = shellCommand "light" ["-U", "5"] >> displayBrightness
 
 runOrRaiseEmacs :: X ()
 runOrRaiseEmacs = (raiseMaybe . spawn) "emacsclient -c -a 'emacs'" (className =? "Emacs")

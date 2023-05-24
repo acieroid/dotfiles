@@ -10,6 +10,8 @@
       user-mail-address "quentin.stievenart@gmail.com")
 
 (setq doom-font (font-spec :family "Monospace" :size 14))
+;; (setq doom-font (font-spec :family "Hack Nerd Font" :size 13))
+
 
 ;(setq doom-font "Fira Code-14")
 ;; Doom exposes five (optional) variables for controlling fonts in Doom:
