@@ -21,6 +21,8 @@ import XMonad.Prompt
 import XMonad.Prompt.Shell (shellPrompt)
 import XMonad.Prompt.XMonad (xmonadPrompt)
 
+import XMonad.Actions.Navigation2D
+
 import qualified XMonad.StackSet as W
 
 import Graphics.X11.ExtraTypes.XF86
@@ -34,12 +36,12 @@ toggleOnlyTerm set = ifWindows (className =? "ONLY_TERM") (flipWindow . head) (s
           Nothing -> return ()
           Just tag -> windows $ W.shiftWin (flipWS tag set) w
         current = W.currentTag set
-        flipWS ws set = if ws == current then (last myWorkspaces) else current
+        flipWS ws set = if ws == current then last myWorkspaces else current
 
 displayBig :: String -> X ()
-displayBig text = Dzen.dzenConfig (Dzen.timeout 3 >=> Dzen.font myBigFont >=> Dzen.vCenter 0 0) text
+displayBig = Dzen.dzenConfig (Dzen.timeout 3 >=> Dzen.font myBigFont >=> Dzen.vCenter 0 0)
 
-shellCommand command args = runProcessWithInput command args "" >> (return ())
+shellCommand command args = runProcessWithInput command args "" >> void
 shellCommandFirstLine command args = do
   result <- runProcessWithInput command args ""
   return $ head $ lines result
@@ -58,9 +60,9 @@ playToggle = shellCommand "playerctl" ["play-pause"] >> displayPlayerStatus
 playNext = shellCommand "playerctl" ["next"] >> displayPlayerStatus
 playPrev = shellCommand "playerctl" ["prev"] >> displayPlayerStatus
 
-displayBrightness = shellCommandFirstLine "xbacklight" [] >>= (\bl -> displayBig $ "BACKLIGHT: " ++ (take 2 bl) ++ "%")
-increaseBrightness = shellCommand "xbacklight" ["+5"] >> displayBrightness
-decreaseBrightness = shellCommand "xbacklight" ["-5"] >> displayBrightness
+displayBrightness = shellCommandFirstLine "light" [] >>= (\bl -> displayBig $ "BACKLIGHT: " ++ (take 2 bl) ++ "%")
+increaseBrightness = shellCommand "light" ["-A", "5"] >> displayBrightness
+decreaseBrightness = shellCommand "light" ["-U", "5"] >> displayBrightness
 
 runOrRaiseEmacs :: X ()
 runOrRaiseEmacs = (raiseMaybe . spawn) "emacsclient -c -a 'emacs'" (className =? "Emacs")
@@ -91,6 +93,35 @@ myXmobarPP = def
     red      = xmobarColor "#ff5555" ""
     lowWhite = xmobarColor "#444444" ""
 
+
+centreRect = W.RationalRect 0.25 0.25 0.5 0.5
+
+-- If the window is floating then (f), if tiled then (n)
+floatOrNot f n = withFocused $ \windowId -> do
+    floats <- gets (W.floating . windowset)
+    if windowId `M.member` floats -- if the current window is floating...
+       then f
+       else n
+
+-- Centre and float a window (retain size)
+centreFloat win = do
+    (_, W.RationalRect x y w h) <- floatLocation win
+    windows $ W.float win (W.RationalRect ((1 - w) / 2) ((1 - h) / 2) w h)
+    return ()
+
+-- Float a window in the centre
+centreFloat' w = windows $ W.float w centreRect
+
+-- Make a window my 'standard size' (half of the screen) keeping the centre of the window fixed
+standardSize win = do
+    (_, W.RationalRect x y w h) <- floatLocation win
+    windows $ W.float win (W.RationalRect x y 0.5 0.5)
+    return ()
+
+
+-- Float and centre a tiled window, sink a floating window
+toggleFloat = floatOrNot (withFocused $ windows . W.sink) (withFocused centreFloat')
+
 myFont = "xft:Roboto:bold:size=14:antialias=true:hinting=true"
 myBigFont = "xft:Liberation Mono:bold:size=20:antialias=true:hinting=true"
 myModMask = mod4Mask
@@ -112,50 +143,46 @@ myWorkspaceKeys = [xK_quotedbl, xK_guillemotleft, xK_guillemotright,
 myKeys conf@(XConfig {modMask = m}) =
     M.fromList $
          [ -- Launch emacs, or just focus it
-           ((m, xK_e),               runOrRaiseEmacs)
+           ((m, xK_e),                     runOrRaiseEmacs)
          -- Launch firefox, or just focus it
-         , ((m, xK_f),               runOrRaise "firefox" (className =? "firefox"))
+         , ((m, xK_f),                     runOrRaise "firefox" (className =? "firefox"))
          -- Invoke/hides the only terminal
-         , ((m, xK_Return),     withWindowSet $ toggleOnlyTerm)
+         , ((m, xK_Return),                withWindowSet toggleOnlyTerm)
          -- Launch terminal
-         , ((m .|. s, xK_Return),    spawn (XMonad.terminal conf))
+         , ((m .|. s, xK_Return),          spawn (XMonad.terminal conf))
          -- Launch command prompt
-         , ((m, xK_comma),           shellPrompt def { font = myFont  })
+         , ((m, xK_comma),                 shellPrompt def { font = myFont  })
          -- Launch XMonad prompt
-         , ((m .|. s , xK_comma),    xmonadPrompt amberXPConfig)
+         , ((m .|. s , xK_comma),          xmonadPrompt amberXPConfig)
          -- Volume management
-         , ((0, xF86XK_AudioRaiseVolume), volumeUp)
-         , ((0, xF86XK_AudioLowerVolume), volumeDown)
-         , ((0, xF86XK_AudioMute),   volumeToggle)
+         , ((0, xF86XK_AudioRaiseVolume),  volumeUp)
+         , ((0, xF86XK_AudioLowerVolume),  volumeDown)
+         , ((0, xF86XK_AudioMute),         volumeToggle)
          , ((0, xF86XK_MonBrightnessDown), decreaseBrightness)
-         , ((0, xF86XK_MonBrightnessUp), increaseBrightness)
+         , ((0, xF86XK_MonBrightnessUp),   increaseBrightness)
          -- Music
-         , ((0, xF86XK_AudioPlay), playToggle)
-         , ((m, xK_a), playToggle)
-         , ((0, xF86XK_AudioPrev), playPrev)
-         , ((m, xK_u), playPrev)
-         , ((0, xF86XK_AudioNext), playNext)
-         , ((m, xK_i), playNext)
+         , ((0, xF86XK_AudioPlay),         playToggle)
+         , ((m, xK_a),                     playToggle)
+         , ((0, xF86XK_AudioPrev),         playPrev)
+         , ((m, xK_u),                     playPrev)
+         , ((0, xF86XK_AudioNext),         playNext)
+         , ((m, xK_i),                     playNext)
          -- Close a window
-         , ((m .|. s, xK_q ), kill)
+         , ((m .|. s, xK_q ),              kill)
          -- Restart xmonad
-         , ((m, xK_q), spawn "xmonad --recompile; xmonad --restart")
+         , ((m, xK_q),                     spawn "xmonad --recompile; xmonad --restart")
          -- Dynamic layout conf
-         , ((m, xK_n),               windows W.focusDown)
-         , ((m .|. s, xK_n),         windows W.swapDown)
-         , ((m, xK_p),               windows W.focusUp)
-         , ((m .|. s, xK_p),         windows W.swapUp)
-         , ((m, xK_m),               windows W.focusMaster)
-         , ((m .|. s, xK_m),         windows W.swapMaster)
-         , ((m, xK_c),               sendMessage Shrink)
-         , ((m, xK_t),               sendMessage Shrink)
-         , ((m, xK_r),               sendMessage Expand)
-         , ((m, xK_s),               sendMessage Expand)
-         , ((m, xK_g),               withFocused $ windows . W.sink)
-         , ((m, xK_v),               sendMessage (IncMasterN 1))
-         , ((m, xK_d),               sendMessage (IncMasterN (-1)))
-         , ((m, xK_space),           sendMessage NextLayout)
-         , ((m .|. s, xK_space),     setLayout $ XMonad.layoutHook conf)
+         , ((m, xK_n),                     windows W.focusDown)
+         , ((m .|. s, xK_n),               windows W.swapDown)
+         , ((m, xK_p),                     windows W.focusUp)
+         , ((m .|. s, xK_p),               windows W.swapUp)
+         , ((m, xK_m),                     sendMessage Shrink)
+         , ((m .|. s, xK_m),               sendMessage Expand)
+         , ((m, xK_g),                     toggleFloat)
+         , ((m, xK_v),                     sendMessage (IncMasterN 1))
+         , ((m, xK_d),                     sendMessage (IncMasterN (-1)))
+         , ((m, xK_space),                 sendMessage NextLayout)
+         , ((m .|. s, xK_space),           setLayout $ XMonad.layoutHook conf)
          ]
          ++
          -- Move between workspaces (bepo layout :])
@@ -204,4 +231,9 @@ main :: IO ()
 main = xmonad
      . ewmh
      . withEasySB (statusBarGeneric "polybar -config /home/quentin/.dotfiles/polybar/config.ini" mempty) defToggleStrutsKey
+     $ navigation2D def
+                    (xK_s, xK_c, xK_t, xK_r)
+                    [(myModMask, windowGo)
+                    ,(myModMask .|. shiftMask, windowSwap)]
+                    False
      $ myConfig
