@@ -1,0 +1,6 @@
+#!/bin/sh
+if [ $(pgrep -c "$1") -eq 0 ]; then
+    "$1"
+else
+    wmctrl -a "$2"
+fi
