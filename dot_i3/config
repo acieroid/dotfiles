@@ -145,16 +145,18 @@ mode "resize" {
 bindsym $mod+z mode "resize"
 bindsym $mod+m resize grow width 10 px or 10 ppt
 
-bindsym $mod+f exec ~/.local/bin/run-or-raise firefox Firefox
-bindsym $mod+e exec ~/.local/bin/run-or-raise "emacsclient -c" Emacs
+bindsym $mod+f exec ~/.local/bin/run-or-raise Firefox firefox Firefox
+bindsym $mod+e exec ~/.local/bin/run-or-raise Emacs "emacsclient -c" Emacs
+
 
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
         status_command i3status -c ~/.i3/i3status.conf
         tray_output primary
+        output primary
         position top
-        font pango:monospace 12
+        font pango:monospace 10
 }
 
 exec_always --no-startup-id xsetroot -solid black

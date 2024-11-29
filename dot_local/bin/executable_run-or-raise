@@ -1,6 +1,8 @@
-#!/bin/sh
-if [ $(pgrep -c "$1") -eq 0 ]; then
-    $1
+#!/bin/sh -x
+if wmctrl -l | grep -q "$1"; then
+    i3-msg "[class=\"$3\"] focus"
+    # this could also work, but is not ideal with i3 as it only brings the pane containing the window to the front
+    # wmctrl -a "$3"
 else
-    wmctrl -a "$2"
+    $2
 fi
