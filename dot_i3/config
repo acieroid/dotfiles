@@ -79,8 +79,8 @@ bindsym XF86AudioMute exec pamixer --toggle-mute && notify-send "VOL: $(pamixer 
 bindsym XF86MonBrightnessUp exec light -T 1.5 && notify-send "BACKLIGHT: $(light)%"
 bindsym XF86MonBrightnessDown exec light -T 0.5 && notify-send "BACKLIGHT: $(light)%"
 bindsym $mod+a exec playerctl play-pause && sleep 0.1 && notify-send "$(playerctl status): $(playerctl metadata artist) - $(playerctl metadata title)"
-bindsym $mod+u exec playerctl next && sleep 0.1 && notify-send "$(playerctl status): $(playerctl metadata artist) - $(playerctl metadata title)"
-bindsym $mod+i exec playerctl previous && sleep 0.1 && notify-send "$(playerctl status): $(playerctl metadata artist) - $(playerctl metadata title)"
+bindsym $mod+u exec playerctl previous && sleep 0.1 && notify-send "$(playerctl status): $(playerctl metadata artist) - $(playerctl metadata title)"
+bindsym $mod+i exec playerctl next && sleep 0.1 && notify-send "$(playerctl status): $(playerctl metadata artist) - $(playerctl metadata title)"
 
 
 # Define names for default workspaces for which we configure key bindings later on.

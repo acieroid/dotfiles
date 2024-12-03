@@ -57,3 +57,4 @@
   (add-hook 'markdown-mode-hook (lambda () (guess-language-mode 1))))
 
 (package! htmlfontify)
+(package! ocamlformat)

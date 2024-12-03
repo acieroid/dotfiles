@@ -3,6 +3,11 @@
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
 
+;; Fish as a default shell can break some packages. Use bash as shell, unless it is interactive
+(setq shell-file-name (executable-find "bash"))
+(setq-default vterm-shell (executable-find "fish"))
+(setq-default explicit-shell-file-name (executable-find "fish"))
+
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
@@ -195,3 +200,70 @@
    (tab-mark     ?\t   [187 9]   [92 9]) ; tab       see here <	>
    (newline-mark ?\n   [?\xB6 ?\n] [?$ ?\n]); end-of-line <no demo>
    ))
+
+;;; Move between windows using alt and arrows or M-{c,t,s,r}.
+(map! :n "M-c" 'evil-window-left)
+(map! :n "M-r" 'evil-window-right)
+(map! :n "M-s" 'evil-window-up)
+(map! :n "M-t" 'evil-window-down)
+;; evil-markdown-mode needs to be overwritten too
+(add-hook 'evil-markdown-mode-hook
+          (lambda ()
+            (map! :map evil-markdown-mode-map
+                  :n "M-c" nil
+                  :n "M-r" nil
+                  :n "M-s" nil
+                  :n "M-t" nil
+            )))
+
+
+;; (windmove-default-keybindings)
+;; (define-minor-mode win-minor-mode
+;;   "Minor mode to move between emacs' windows"
+;;   :global t
+;;   :lighter " win-minor-mode"
+;;   :keymap (let ((keymap (make-keymap)))
+;;             (define-key keymap (kbd "M-c") 'windmove-left)
+;;             (define-key keymap (kbd "M-r") 'windmove-right)
+;;             (define-key keymap (kbd "M-s") 'windmove-up)
+;;             (define-key keymap (kbd "M-t") 'windmove-down)
+;;             keymap))
+;; (win-minor-mode 1)
+
+;; I like to see my recent files when switching buffers
+; (map! :leader "b b" 'counsel-buffer-or-recentf)
+
+;; Folding
+(map! :leader "c f" 'ts-fold-toggle)
+
+;; Use ocp-indent on tab
+(after! tuareg-mode
+  (map! :map tuareg-mode-map "TAB" 'ocp-indent-line)
+  (map! :map reason-mode-map "TAB" 'ocp-indent-line))
+(after! ocp-indent
+  (add-hook 'tuareg-mode-hook
+            (lambda ()
+              (local-set-key (kbd "M-q") 'tuareg-indent-phrase)
+              )))
+
+(use-package! ocamlformat
+  :custom (ocamlformat-enable 'enable-outside-detected-project)
+  ;:hook (before-save . ocamlformat-before-save)
+  )
+
+;; To avoid LSP incorrectly trying to load stuff from /tmp
+(after! lsp-mode
+  (setq lsp-auto-guess-root nil))
+
+;; font-lock-mode is slow on large typescript files
+(add-hook 'typescript-mode-hook
+          (lambda ()
+            (when (or (string-equal (file-name-extension buffer-file-name) "ts")
+                      (string-equal (file-name-extension buffer-file-name) "tsx"))
+              (setq font-lock-support-mode 'jit-lock-mode))))
+
+(use-package! rfc2047
+  :custom
+  ;; needed so that mu4e doesn't produce broken address lines
+  ;; when replying to addresses with accents in name portion
+  (rfc2047-quote-decoded-words-containing-tspecials t))
