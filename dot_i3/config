@@ -91,6 +91,21 @@ set $ws3 "3"
 set $ws4 "4"
 set $ws5 "5"
 set $ws6 "6"
+set $ws7 "7"
+set $ws8 "8"
+set $ws9 "9"
+set $ws10 "0"
+
+workspace "1" output primary
+workspace "2" output primary
+workspace "3" output primary
+workspace "4" output primary
+workspace "5" output primary
+workspace "6" output secondary
+workspace "7" output secondary
+workspace "8" output secondary
+workspace "9" output secondary
+workspace "0" output secondary
 
 # switch to workspace
 bindsym $mod+quotedbl workspace $ws1
@@ -99,6 +114,10 @@ bindsym $mod+guillemotright workspace $ws3
 bindsym $mod+parenleft workspace $ws4
 bindsym $mod+parenright workspace $ws5
 bindsym $mod+at workspace $ws6
+bindsym $mod+plus workspace $ws7
+bindsym $mod+minus workspace $ws8
+bindsym $mod+slash workspace $ws9
+bindsym $mod+asterisk workspace $ws0
 
 # move focused container to workspace
 bindsym $mod+Shift+1 move container to workspace $ws1
@@ -145,7 +164,7 @@ mode "resize" {
 bindsym $mod+z mode "resize"
 bindsym $mod+m resize grow width 10 px or 10 ppt
 
-bindsym $mod+f exec ~/.local/bin/run-or-raise Firefox firefox Firefox
+bindsym $mod+f exec ~/.local/bin/run-or-raise Navigator firefox Firefox
 bindsym $mod+e exec ~/.local/bin/run-or-raise Emacs "emacsclient -c" Emacs
 
 
