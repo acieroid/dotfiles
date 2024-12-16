@@ -178,14 +178,8 @@ bar {
         font pango:monospace 10
 }
 
-exec_always --no-startup-id xsetroot -solid black
-exec_always --no-startup-id xset b off
-exec_always --no-startup-id setxkbmap -option ctrl:nocaps fr bepo
-exec_always --no-startup-id /usr/bin/emacs --daemon
-exec_always --no-startup-id XSECURELOCK_PASSWORD_PROMPT=time_hex XSECURELOCK_SHOW_HOSTNAME=0 XSECURELOCK_SHOW_USERNAME=0 XSECURELOCK_SHOW_KEYBOARD_LAYOUT=0 xss-lock -n /usr/lib/xsecurelock/dimmer -l -- xsecurelock
-exec_always --no-startup-id pkill redshift ; redshift -l 45:-73
-
 # tabbing by default
 workspace_layout tabbed
 
-default_border pixel 3
+default_border pixel 4
+for_window [class=".*"] border pixel 4

@@ -1,0 +1,10 @@
+#!/bin/sh
+xset -s
+xset -b
+setxkbmap fr bepo -option ctrl:nocaps
+xsetroot -solid '#000000'
+dunst &
+emacs --daemon
+XSECURELOCK_PASSWORD_PROMPT=time_hex XSECURELOCK_SHOW_HOSTNAME=0 XSECURELOCK_SHOW_USERNAME=0 XSECURELOCK_SHOW_KEYBOARD_LAYOUT=0 xss-lock -n /usr/lib/xsecurelock/dimmer -l -- xsecurelock
+redshift -l 45:-73
+exec i3
