@@ -163,6 +163,7 @@ mode "resize" {
 
 bindsym $mod+z mode "resize"
 bindsym $mod+m resize grow width 10 px or 10 ppt
+bindsym $mod+Shift+m resize shrink width 10 px or 10 ppt
 
 bindsym $mod+f exec ~/.local/bin/run-or-raise Navigator firefox Firefox
 bindsym $mod+e exec ~/.local/bin/run-or-raise Emacs "emacsclient -c" Emacs
