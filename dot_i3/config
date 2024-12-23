@@ -117,7 +117,7 @@ bindsym $mod+at workspace $ws6
 bindsym $mod+plus workspace $ws7
 bindsym $mod+minus workspace $ws8
 bindsym $mod+slash workspace $ws9
-bindsym $mod+asterisk workspace $ws0
+bindsym $mod+asterisk workspace $ws10
 
 # move focused container to workspace
 bindsym $mod+Shift+1 move container to workspace $ws1

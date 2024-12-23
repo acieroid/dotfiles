@@ -50,11 +50,6 @@
 ;(unpin! t)
 
 (package! mu4e-alert :disable t)
-(when (package! guess-language)
-  (setq guess-language-languages '(en fr))
-  (setq guess-language-min-paragraph-length 35)
-  (add-hook 'text-mode-hook (lambda () (guess-language-mode 1)))
-  (add-hook 'markdown-mode-hook (lambda () (guess-language-mode 1))))
-
+(package! guess-language)
 (package! htmlfontify)
 (package! ocamlformat)

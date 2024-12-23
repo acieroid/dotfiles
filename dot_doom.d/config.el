@@ -97,8 +97,8 @@
 ;; Disable parenthesis autocomplete
 (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
 
-;; Each path is relative to the path of the maildir you passed to mu
-;; https://lambdaland.org/posts/2023-05-03_email_with_outlook/
+;; Setup mu4e
+;; Inspired from https://lambdaland.org/posts/2023-05-03_email_with_outlook/
 (setq smtpmail-smtp-server "localhost")
 (setq smtpmail-smtp-user "stievenart.quentin@uqam.ca")
 (setq smtpmail-stream-type 'plain)
@@ -113,12 +113,13 @@
    (mu4e-get-mail-command . "mbsync uqam")
 
    (mu4e-bookmarks .
-                   ((:name "Inbox" :query "maildir:/UQAM/INBOX" :key 105)
-                    (:name "Flagged" :query "flag:flagged AND NOT flag:trashed" :key 102)
-                    (:name "Unread messages" :query "flag:unread AND NOT flag:trashed" :key 117)
-                    (:name "Today's messages" :query "date:today..now" :key 116)
-                    (:name "Last 7 days" :query "date:7d..now" :key 119)
-                    (:name "Drafts" :query "maildir:/UQAM/Drafts" :key 100)))
+                   ((:name "Inbox" :query "maildir:/UQAM/INBOX" :key ?i)
+                    (:name "TODO" :query "maildir:/UQAM/Archives/TODO" :key ?t)
+                    (:name "Office Hours" :query "maildir:/UQAM/Archives/Office Hours" :key ?o)
+                    (:name "Flagged" :query "flag:flagged AND NOT flag:trashed" :key ?f)
+                    (:name "Unread messages" :query "flag:unread AND NOT flag:trashed" :key ?u)))
+   (mu4e-maildir-shortcuts '((:maildir "/inbox"     :key  ?i)
+                             (:maildir "/Archives/TODO"   :key  ?t)))
 
    ;;(sendmail-program . "/usr/bin/msmtp")
    ;;(message-sendmail-f-is-evil . t)
@@ -133,65 +134,24 @@
    (mu4e-drafts-folder .  "/UQAM/Drafts")
    (mu4e-sent-folder . "/UQAM/Sent")
    (mu4e-trash-folder . "/UQAM/Trash")
-   (mu4e-refile-folder . "/UQAM/Archive")))
-;(after! mu4e
-;  (setq sendmail-program (executable-find "msmtp")
-;        send-mail-function #'smtpmail-send-it
-;        message-sendmail-f-is-evil t
-;        message-sendmail-extra-arguments '("--read-envelope-from")
-;        message-send-mail-function #'message-send-mail-with-sendmail))
+   (mu4e-refile-folder . "/UQAM/TODO")
+   ;; No info about mail in my modeline
+   (mu4e-modeline-support . nil)
+   ))
 
-;;(setq message-send-mail-function 'smtpmail-send-it
-;;      starttls-use-gnutls t
-;;      smtpmail-stream-type 'starttls)
-;;
-;;(set-email-account! "gmail"
-;;  '((mu4e-sent-folder       . "/gmail/Sent Mail")
-;;    (mu4e-drafts-folder     . "/gmail/Drafts")
-;;    (smtpmail-smtp-user     . "quentin.stievenart@gmail.com")
-;;    (user-mail-address      . "quentin.stievenart@gmail.com")
-;;    (smtpmail-starttls-credentials . '(("smt.gmail.com" 587 nil nil)))
-;;    (smtpmail-default-smtp-server . "smtp.gmail.com")
-;;    (smtpmail-smtp-server    . "smtp.gmail.com")
-;;    (smtpmail-smtp-service   . 587))
-;;  t)
-;;(set-email-account! "office365"
-;;  '((mu4e-sent-folder       . "/office365/Sent Mail")
-;;    (mu4e-drafts-folder     . "/office365/Drafts")
-;;    (smtpmail-smtp-user     . "stievenart.quentin@uqam.ca")
-;;    (user-mail-address      . "stievenart.quentin@uqam.ca")
-;;    (smtpmail-smtp-user     . "stievenart.quentin@uqam.ca")
-;;    (user-mail-address      . "stievenart.quentin@uqam.ca")
-;;    (smtpmail-starttls-credentials . '(("smtp.office365.com" 587 nil nil)))
-;;    (smtpmail-default-smtp-server . "smtp.office365.com")
-;;    (smtpmail-smtp-server    . "smtp.office365.com")
-;;    (smtpmail-smtp-service   . 587))
-;;  t)
+(add-hook 'mu4e-thread-mode-hook #'mu4e-thread-fold-apply-all)
+
+
+(use-package! rfc2047
+  :custom
+  ;; needed so that mu4e doesn't produce broken address lines
+  ;; when replying to addresses with accents in name portion
+  (rfc2047-quote-decoded-words-containing-tspecials t))
 
 ;; Don't flycheck constantly, as it can be quite slow, e.g., on Haskell
 (after! flycheck (setq flycheck-check-syntax-automatically '(save mode-enable)))
 
 (setq org-clock-mode-line-total 'today)
-
-;; Use ocp-indent on tab for OCaml
-;(map! :map tuareg-mode-map "TAB" 'ocp-indent-line)
-;(after! ocp-indent
-;  (add-hook 'tuareg-mode-hook
-;            (lambda ()
-;              (local-set-key (kbd "M-q") 'tuareg-indent-phrase))))
-;; Move between windows
-; (windmove-default-keybindings)
-; (define-minor-mode win-minor-mode
-;   "Minor mode to move between emacs' windows"
-;   :global t
-;   :lighter " win-minor-mode"
-;   :keymap (let ((keymap (make-keymap)))
-;             (define-key keymap (kbd "M-c") 'windmove-left)
-;             (define-key keymap (kbd "M-r") 'windmove-right)
-;             (define-key keymap (kbd "M-s") 'windmove-up)
-;             (define-key keymap (kbd "M-t") 'windmove-down)))
-; (win-minor-mode 1)
-
 
  (setq whitespace-style '(face tabs spaces trailing space-before-tab indentation empty space-after-tab tab-mark space-mark))
  (setq whitespace-display-mappings
@@ -216,19 +176,6 @@
                   :n "M-t" nil
             )))
 
-
-;; (windmove-default-keybindings)
-;; (define-minor-mode win-minor-mode
-;;   "Minor mode to move between emacs' windows"
-;;   :global t
-;;   :lighter " win-minor-mode"
-;;   :keymap (let ((keymap (make-keymap)))
-;;             (define-key keymap (kbd "M-c") 'windmove-left)
-;;             (define-key keymap (kbd "M-r") 'windmove-right)
-;;             (define-key keymap (kbd "M-s") 'windmove-up)
-;;             (define-key keymap (kbd "M-t") 'windmove-down)
-;;             keymap))
-;; (win-minor-mode 1)
 
 ;; I like to see my recent files when switching buffers
 ; (map! :leader "b b" 'counsel-buffer-or-recentf)
@@ -262,8 +209,26 @@
                       (string-equal (file-name-extension buffer-file-name) "tsx"))
               (setq font-lock-support-mode 'jit-lock-mode))))
 
-(use-package! rfc2047
-  :custom
-  ;; needed so that mu4e doesn't produce broken address lines
-  ;; when replying to addresses with accents in name portion
-  (rfc2047-quote-decoded-words-containing-tspecials t))
+;; (setq guess-language-languages '(en_US francais))
+;; (setq guess-language-min-paragraph-length 35)
+;; (add-hook 'text-mode-hook (lambda () (guess-language-mode 1)))
+;; (add-hook 'markdown-mode-hook (lambda () (guess-language-mode 1)))
+;; (add-hook 'org-mode-hook (lambda () (guess-language-mode 1)))
+;; (add-hook 'mu4e-compose-mode-hook (lambda () (guess-language-mode 1)))
+(use-package! openwith
+  :after-call pre-command-hook
+  :config
+  (openwith-mode t)
+  (add-to-list 'openwith-associations '("\\.pdf\\'" "evince" (file))))
+
+(require 'url-parse)
+(defun my-decode-safelink (url)
+  ;; (print url)
+  "Given a url string this function returns the corresponding decoded url"
+  (if (string-match-p (regexp-quote "safelinks.protection") url)
+      (let* ((query (url-filename (url-generic-parse-url url)))
+             (url (cadr (assoc ".*/?url" (url-parse-query-string query) (lambda (pat x) (string-match-p x pat)))))
+             (path (replace-regexp-in-string "3Dhttps" "https" (url-unhex-string url))))
+        (url-encode-url (replace-regexp-in-string (rx "/" (>= 20 (any "#$%&*^@"))) "" path)))
+    url))
+
