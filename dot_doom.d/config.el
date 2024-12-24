@@ -244,6 +244,8 @@
   (add-hook 'tuareg-mode-hook
             (lambda ()
               (local-set-key (kbd "M-q") 'tuareg-indent-phrase)
+              ;; Avoid newline to break comments in two
+              (setq-local comment-line-break-function nil)
               )))
 
 (use-package! ocamlformat
@@ -267,3 +269,4 @@
   ;; needed so that mu4e doesn't produce broken address lines
   ;; when replying to addresses with accents in name portion
   (rfc2047-quote-decoded-words-containing-tspecials t))
+
