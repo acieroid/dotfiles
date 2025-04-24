@@ -49,7 +49,8 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
 
-(package! mu4e-alert :disable t)
+;(package! mu4e-alert :disable t)
 (package! guess-language)
 (package! htmlfontify)
-(package! ocamlformat)
+;(package! ocamlformat)
+(package! csv-mode)
