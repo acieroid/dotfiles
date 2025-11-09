@@ -195,10 +195,10 @@
               (setq-local comment-line-break-function nil)
               )))
 
-(use-package! ocamlformat
-  :custom (ocamlformat-enable 'enable-outside-detected-project)
-  ;:hook (before-save . ocamlformat-before-save)
-  )
+; (use-package! ocamlformat
+;   :custom (ocamlformat-enable 'enable-outside-detected-project)
+;   ;:hook (before-save . ocamlformat-before-save)
+;   )
 
 ;; To avoid LSP incorrectly trying to load stuff from /tmp
 (after! lsp-mode
@@ -216,4 +216,5 @@
   ;; needed so that mu4e doesn't produce broken address lines
   ;; when replying to addresses with accents in name portion
   (rfc2047-quote-decoded-words-containing-tspecials t))
+
 
