@@ -191,8 +191,6 @@
   (add-hook 'tuareg-mode-hook
             (lambda ()
               (local-set-key (kbd "M-q") 'tuareg-indent-phrase)
-              ;; Avoid newline to break comments in two
-              (setq-local comment-line-break-function nil)
               )))
 
 ; (use-package! ocamlformat
@@ -211,10 +209,14 @@
                       (string-equal (file-name-extension buffer-file-name) "tsx"))
               (setq font-lock-support-mode 'jit-lock-mode))))
 
-(use-package! rfc2047
-  :custom
-  ;; needed so that mu4e doesn't produce broken address lines
-  ;; when replying to addresses with accents in name portion
-  (rfc2047-quote-decoded-words-containing-tspecials t))
-
-
+;; (setq guess-language-languages '(en_US francais))
+;; (setq guess-language-min-paragraph-length 35)
+;; (add-hook 'text-mode-hook (lambda () (guess-language-mode 1)))
+;; (add-hook 'markdown-mode-hook (lambda () (guess-language-mode 1)))
+;; (add-hook 'org-mode-hook (lambda () (guess-language-mode 1)))
+;; (add-hook 'mu4e-compose-mode-hook (lambda () (guess-language-mode 1)))
+(use-package! openwith
+  :after-call pre-command-hook
+  :config
+  (openwith-mode t)
+  (add-to-list 'openwith-associations '("\\.pdf\\'" "evince" (file))))
