@@ -1,8 +1,0 @@
-clear Control
-clear Shift
-keycode 37 = Control_L
-keycode 50 = Shift_L
-keycode 62 = Shift_R
-keycode 105 = Control_R
-add Control = Control_L Shift_R
-add Shift = Shift_L

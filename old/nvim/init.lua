@@ -1,6 +1,0 @@
-require('plugins')
-require("bepo").setup()
-local lsp = require('lsp-zero')
-lsp.preset('recommended')
-lsp.setup_servers({'tsserver', 'eslint'})
-lsp.setup()
