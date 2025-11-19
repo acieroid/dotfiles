@@ -97,57 +97,6 @@
 ;; Disable parenthesis autocomplete
 (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
 
-;; Setup mu4e
-;; Inspired from https://lambdaland.org/posts/2023-05-03_email_with_outlook/
-(setq smtpmail-smtp-server "localhost")
-(setq smtpmail-smtp-user "stievenart.quentin@uqam.ca")
-(setq smtpmail-stream-type 'plain)
-(setq smtpmail-smtp-service 5003)
-(setq mu4e-get-mail-command "mbsync uqam")
-(setq mu4e-maildir "/home/quentin/Mail")
-(fset 'epg-wait-for-status 'ignore) ; TODO: disable when saving .gpg files work again without it
-(set-email-account! "UQAM"
- '((user-mail-address . "stievenart.quentin@uqam.ca")
-   (user-full-name . "Quentin Stiévenart")
-
-   (mu4e-get-mail-command . "mbsync uqam")
-
-   (mu4e-bookmarks .
-                   ((:name "Inbox" :query "maildir:/UQAM/INBOX" :key ?i)
-                    (:name "TODO" :query "maildir:/UQAM/Archives/TODO" :key ?t)
-                    (:name "Office Hours" :query "maildir:/UQAM/Archives/Office Hours" :key ?o)
-                    (:name "Flagged" :query "flag:flagged AND NOT flag:trashed" :key ?f)
-                    (:name "Unread messages" :query "flag:unread AND NOT flag:trashed" :key ?u)))
-   (mu4e-maildir-shortcuts '((:maildir "/inbox"     :key  ?i)
-                             (:maildir "/Archives/TODO"   :key  ?t)))
-
-   ;;(sendmail-program . "/usr/bin/msmtp")
-   ;;(message-sendmail-f-is-evil . t)
-   ;;(message-sendmail-extra-arguments . '("--read-envelope-from"))
-   ;;(message-send-mail-function . 'message-send-mail-with-sendmail)
-   (message-send-mail-function . smtpmail-send-it)
-   (smtpmail-smtp-server . "localhost")
-   (smtpmail-smtp-user . "stievenart.quentin@uqam.ca")
-   (smtpmail-stream-type . plain)
-   (smtpmail-smtp-service . 5003)
-
-   (mu4e-drafts-folder .  "/UQAM/Drafts")
-   (mu4e-sent-folder . "/UQAM/Sent")
-   (mu4e-trash-folder . "/UQAM/Trash")
-   (mu4e-refile-folder . "/UQAM/TODO")
-   ;; No info about mail in my modeline
-   (mu4e-modeline-support . nil)
-   ))
-
-(add-hook 'mu4e-thread-mode-hook #'mu4e-thread-fold-apply-all)
-
-
-(use-package! rfc2047
-  :custom
-  ;; needed so that mu4e doesn't produce broken address lines
-  ;; when replying to addresses with accents in name portion
-  (rfc2047-quote-decoded-words-containing-tspecials t))
-
 ;; Don't flycheck constantly, as it can be quite slow, e.g., on Haskell
 (after! flycheck (setq flycheck-check-syntax-automatically '(save mode-enable)))
 
@@ -191,6 +140,8 @@
   (add-hook 'tuareg-mode-hook
             (lambda ()
               (local-set-key (kbd "M-q") 'tuareg-indent-phrase)
+              ;; Avoid newline to break comments in two
+              (setq-local comment-line-break-function nil)
               )))
 
 ; (use-package! ocamlformat
@@ -202,21 +153,19 @@
 (after! lsp-mode
   (setq lsp-auto-guess-root nil))
 
-;; font-lock-mode is slow on large typescript files
-(add-hook 'typescript-mode-hook
-          (lambda ()
-            (when (or (string-equal (file-name-extension buffer-file-name) "ts")
-                      (string-equal (file-name-extension buffer-file-name) "tsx"))
-              (setq font-lock-support-mode 'jit-lock-mode))))
+;; ;; font-lock-mode is slow on large typescript files
+;; (add-hook 'typescript-mode-hook
+;;           (lambda ()
+;;             (when (or (string-equal (file-name-extension buffer-file-name) "ts")
+;;                       (string-equal (file-name-extension buffer-file-name) "tsx"))
+;;               (setq font-lock-support-mode 'jit-lock-mode))))
 
-;; (setq guess-language-languages '(en_US francais))
-;; (setq guess-language-min-paragraph-length 35)
-;; (add-hook 'text-mode-hook (lambda () (guess-language-mode 1)))
-;; (add-hook 'markdown-mode-hook (lambda () (guess-language-mode 1)))
-;; (add-hook 'org-mode-hook (lambda () (guess-language-mode 1)))
-;; (add-hook 'mu4e-compose-mode-hook (lambda () (guess-language-mode 1)))
-(use-package! openwith
-  :after-call pre-command-hook
+
+(use-package! tree-sitter-langs
+  :after tree-sitter
   :config
-  (openwith-mode t)
-  (add-to-list 'openwith-associations '("\\.pdf\\'" "evince" (file))))
+  (tree-sitter-require 'typescript))
+(add-hook 'typescript-mode-hook #'tree-sitter-mode)
+(add-hook 'typescript-mode-hook #'tree-sitter-hl-mode)
+
+(map! :leader "c f" #'ts-fold-toggle)
