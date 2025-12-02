@@ -22,7 +22,7 @@ font pango:DejaVu Sans Mono 8
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Shift+Return exec kitty
+bindsym $mod+Shift+Return exec alacritty
 
 bindsym $mod+Return scratchpad show
 bindsym $mod+Shift+b move scratchpad
@@ -82,6 +82,7 @@ bindsym $mod+a exec playerctl play-pause && sleep 0.1 && notify-send "$(playerct
 bindsym $mod+u exec playerctl previous && sleep 0.1 && notify-send "$(playerctl status): $(playerctl metadata artist) - $(playerctl metadata title)"
 bindsym $mod+i exec playerctl next && sleep 0.1 && notify-send "$(playerctl status): $(playerctl metadata artist) - $(playerctl metadata title)"
 bindsym $mod+b exec clipboard.sh
+bindsym $mod+eacute exec emacsclient --eval "(emacs-everywhere)" 
 
 
 # Define names for default workspaces for which we configure key bindings later on.

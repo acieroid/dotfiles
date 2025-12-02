@@ -3,7 +3,8 @@ alias mv='mv -i'
 alias cp='cp -i'
 alias e='emacsclient -n'
 
-set -x TERM xterm-256color
+set -x TERMINAL kitty
+set -x TERM xterm
 set -x LANG en_US.UTF-8
 set -x PAGER less
 set -x EDITOR vim
