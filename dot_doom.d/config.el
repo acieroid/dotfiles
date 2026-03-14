@@ -29,8 +29,7 @@
 (after! company (setq company-idle-delay nil))
 
 ;; Disable parenthesis autocomplete
-(after! smartparens
-  (smartparens-global-mode -1))
+(remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
 
 ;; Don't flycheck constantly, as it can be quite slow, e.g., on Haskell
 (after! flycheck (setq flycheck-check-syntax-automatically '(save mode-enable)))
@@ -53,8 +52,12 @@
 (map! :n "M-s" 'evil-window-up)
 (map! :n "M-t" 'evil-window-down)
 ;; Some modes already had these bindings, so we need to remove them
-(dolist (m '(evil-markdown-mode-map evil-org-mode-map))
-  (map! :map m :n "M-c" nil :n "M-r" nil :n "M-s" nil :n "M-t" nil))
+(after! org
+  (dolist (m '(evil-org-mode-map org-mode-map))
+    (map! :map (eval m) :n "M-c" nil :n "M-r" nil :n "M-s" nil :n "M-t" nil)))
+(after! markdown
+  (dolist (m '(evil-markdown-mode-map))
+    (map! :map (eval m) :n "M-c" nil :n "M-r" nil :n "M-s" nil :n "M-t" nil)))
 
 ;; Folding
 (map! :leader "c f" 'ts-fold-toggle)
